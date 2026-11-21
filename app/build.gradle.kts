@@ -20,8 +20,9 @@ android {
         applicationId = "com.axzy.taqueria"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
-        versionCode = 1
-        versionName = "1.0.0"
+        // Una sola fuente de versión: gradle.properties (la sube release.sh).
+        versionCode = providers.gradleProperty("taqueria.versionCode").get().toInt()
+        versionName = providers.gradleProperty("taqueria.versionName").get()
     }
 
     // API de Axzy Central (licencia de la taquería): -Ptaqueria.apiUrl=https://…/api/v1
@@ -32,7 +33,7 @@ android {
             buildConfigField("String", "LICENSE_API_URL", "\"${apiUrl ?: "http://10.0.2.2:4100/api/v1"}\"")
         }
         release {
-            // Sin -Ptaqueria.apiUrl la cocina no se puede activar (lo dice en pantalla).
+            // Sin -Ptaqueria.apiUrl solo se puede activar escaneando el QR de la Central (el QR trae el servidor).
             buildConfigField("String", "LICENSE_API_URL", "\"${apiUrl.orEmpty()}\"")
             isMinifyEnabled = false
             // Firma de depuración para poder instalar el APK directo en los teléfonos del local.
@@ -60,5 +61,11 @@ dependencies {
     implementation(libs.compose.material3)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.coroutines.android)
+    // Escáner del QR de activación (CameraX + ZXing core, sin Google Play Services).
+    implementation(libs.androidx.camera.core)
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.view)
+    implementation(libs.zxing.core)
     testImplementation(libs.junit)
 }
