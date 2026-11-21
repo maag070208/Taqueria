@@ -21,11 +21,30 @@ Al abrir la app por primera vez se elige el rol de ese teléfono. Se puede cambi
 
 ## Activar la cocina (una sola vez, con internet)
 
-Las taquerías se administran en **Axzy Central** (repo `AxzyCentral`): alta, plan, cobros y activar/suspender. En el detalle de la taquería, **Tablet de cocina → Generar código**; mándalo al encargado (WhatsApp) y que lo pegue en el teléfono de cocina la primera vez que elige el rol **Cocina**. Los meseros no se activan.
+Las taquerías se administran en **Axzy Central** (repo `AxzyCentral`): alta, plan, cobros y activar/suspender. Los meseros no se activan.
+
+1. En la Central, abre el detalle de la taquería → **Licencias** → **Generar QR de activación**. El código solo se muestra una vez y el QR lo lleva dentro, junto con la dirección del servidor.
+2. En el teléfono de cocina elige el rol **Cocina** y toca **Escanear QR de la Central**. Acepta el permiso de cámara (solo se usa para leer el QR). La app hace `POST /activate`, da de alta la tablet y queda activa.
+3. Si no hay cámara, se niega el permiso o el QR no se lee, queda el **respaldo manual**: escribe el código `axc_…` en la misma pantalla.
+
+El escáner usa **CameraX + ZXing core**, sin Google Play Services.
 
 Servidor de licencias:
-- Debug: `http://10.0.2.2:4100/api/v1` (API local visto desde el emulador; en debug se permite http). En un teléfono real: `-Ptaqueria.apiUrl=http://<ip-de-la-mac>:4100/api/v1`.
-- Release: obligatorio `./gradlew :app:assembleRelease -Ptaqueria.apiUrl=https://<api-de-axzy-central>/api/v1`; sin eso la cocina avisa que no tiene servidor.
+- **El QR trae la dirección del API**: la app la guarda y la usa también en las consultas de `GET /license`. Por eso, activando con QR, el build release **ya no depende** de `-Ptaqueria.apiUrl`.
+- Sin QR (código escrito a mano) se usa la URL compilada en la app:
+  - Debug: `http://10.0.2.2:4100/api/v1` (API local visto desde el emulador; en debug se permite http). En un teléfono real: `-Ptaqueria.apiUrl=http://<ip-de-la-mac>:4100/api/v1`.
+  - Release: `./gradlew :app:assembleRelease -Ptaqueria.apiUrl=https://<api-de-axzy-central>/api/v1`; si no se pasa y se activa a mano, la cocina avisa que no tiene servidor.
+- Un QR de otro producto (`p` distinto de `TAQUERIA`), de otra versión o con una URL inválida se rechaza con un mensaje claro y no se activa.
+
+## Publicar una versión en Drive
+
+```bash
+./release.sh
+```
+
+Incrementa la versión (en `gradle.properties`), corre las pruebas, compila el APK release y lo sube a la carpeta de APKs de clientes en Drive como `PerroOrejonAzteca/TAQUERIA_<versión>.apk`, verificando tamaño y md5. Otro cliente: `./release.sh --client NombreCliente`. Solo compilar: `./release.sh --no-upload`. Requiere `rclone` con el remote `gdrive`.
+
+El APK se firma con la llave debug de la Mac que lo compila: publica siempre desde la misma Mac para que cada versión se instale encima de la anterior sin borrar datos.
 
 ## Conectar los teléfonos (sin internet)
 
@@ -44,6 +63,6 @@ Notas:
 - `OrderStore`: datos en el teléfono de cocina (`taqueria.json`, guardado atómico) y todas las reglas: grupos de preparación, cuentas, pagos, deshacer (30 s). Las cuentas cerradas se guardan en `historial.jsonl` (cancelaciones y pagos incluidos).
 - `KitchenServer`: servidor TCP puerto 7777 + anuncio mDNS `_taqueria._tcp`. Manda el estado completo a cada mesera en cada cambio.
 - `WaiterClient`: busca la cocina por mDNS (o IP fija), reconecta sola; órdenes y pagos llevan llave única para no duplicarse al reintentar.
-- `LicenseManager` (`License.kt`): solo en cocina. Consulta `GET /license` de Axzy Central al abrir, cuando Android detecta una red con internet validado y cada 6 h. Guarda la última respuesta: **suspendida** bloquea aunque se pierda la conexión; **activa** vale hasta su `validUntil` (vencimiento del siguiente pago + gracia, entre 3 y 45 días). Usa la hora del servidor y nunca retrocede, así que atrasar el reloj del teléfono no alarga la licencia. Faltando 3 días avisa en la pantalla de cocina.
+- `LicenseManager` (`License.kt`): solo en cocina. Al activar llama `POST /activate` (la Central da de alta el modelo de la tablet) y después consulta `GET /license` de Axzy Central al abrir, cuando Android detecta una red con internet validado y cada 6 h. La URL base es la que trajo el QR (guardada en prefs) o la compilada. Guarda la última respuesta: **suspendida** bloquea aunque se pierda la conexión; **activa** vale hasta su `validUntil` (vencimiento del siguiente pago + gracia, entre 3 y 45 días). Usa la hora del servidor y nunca retrocede, así que atrasar el reloj del teléfono no alarga la licencia. Faltando 3 días avisa en la pantalla de cocina.
 - Bloqueada (suspendida, código revocado o vencida sin conexión): cocina muestra el aviso con **Reintentar** y `KitchenServer` rechaza lo que mandan las meseras. Las órdenes y el menú no se borran.
 - Pruebas: `./gradlew :app:testDebugUnitTest` (reglas de órdenes, cuentas, pagos y licencia).

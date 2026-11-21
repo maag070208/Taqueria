@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
+import android.os.Build
 import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -38,6 +39,19 @@ data class LicenseResponse(
 
 @Serializable
 data class NameRef(val name: String)
+
+// ---------------- Alta del dispositivo (POST /activate) ----------------
+
+/**
+ * Cuerpo de `POST /activate` (contrato §5.2): la Central da de alta el
+ * dispositivo y devuelve lo mismo que `GET /license` (el `device` extra se
+ * ignora al leer la respuesta).
+ */
+@Serializable
+private data class ActivateRequest(val code: String, val device: ActivateDevice)
+
+@Serializable
+private data class ActivateDevice(val name: String, val model: String)
 
 // ---------------- Lógica pura (probada en LicenseTest) ----------------
 
@@ -107,8 +121,11 @@ fun evaluateLicense(cache: LicenseCache?, phoneNowMs: Long): LicenseState {
  * (el WiFi del local o el hotspot muchas veces no la tienen) y cada pocas horas.
  * Sin conexión se queda con la última respuesta: "suspendida" sigue bloqueando y
  * "activa" vale hasta su `validUntil`.
+ *
+ * La dirección del servidor puede venir dentro del QR de activación; cuando
+ * viene, se guarda en prefs y manda sobre [buildApiUrl] en `activate()` y `refresh()`.
  */
-class LicenseManager(context: Context, private val baseUrl: String) {
+class LicenseManager(context: Context, private val buildApiUrl: String) {
     private val tag = "License"
     private val appContext = context.applicationContext
     private val prefs = appContext.getSharedPreferences("license", Context.MODE_PRIVATE)
@@ -161,12 +178,27 @@ class LicenseManager(context: Context, private val baseUrl: String) {
         callback = null
     }
 
-    /** Guarda el código si el servidor lo acepta. Devuelve el error para mostrar o null. */
-    suspend fun activate(code: String): String? {
+    /**
+     * Activa con el código que llegó en el QR o se escribió a mano.
+     *
+     * Si el QR trae [apiUrl], ese servidor manda y se guarda en prefs (`apiBase`)
+     * para que [refresh] siga consultando ahí. Si no, se usa el compilado.
+     * Devuelve el error para mostrar o null.
+     */
+    suspend fun activate(code: String, apiUrl: String? = null): String? {
         val token = code.trim()
         if (token.isEmpty()) return "Pega el código de activación"
-        return when (val r = fetch(token)) {
-            is Fetch.Ok -> { save(LicenseCache(token).withResponse(r.body, System.currentTimeMillis())); null }
+        val qrUrl = apiUrl?.trim()?.trimEnd('/')?.takeIf { it.isNotBlank() }
+        // La URL del QR se guarda antes de llamar: si la activación falla (código
+        // vencido, sin internet), el respaldo manual reintenta contra el mismo servidor.
+        if (qrUrl != null && qrUrl != resolveApiUrl()) prefs.edit().putString(KEY_API, qrUrl).apply()
+        val base = qrUrl ?: resolveApiUrl()
+        if (base.isBlank()) return NO_SERVER
+        return when (val r = postActivate(base, token)) {
+            is Fetch.Ok -> {
+                save(LicenseCache(token).withResponse(r.body, System.currentTimeMillis()))
+                null
+            }
             Fetch.Unauthorized -> "Código inválido o revocado. Pide uno nuevo a tu proveedor."
             is Fetch.Failed -> r.message
         }
@@ -182,7 +214,7 @@ class LicenseManager(context: Context, private val baseUrl: String) {
         }
     }
 
-    /** Quita el código guardado para escribir otro. */
+    /** Quita el código guardado para escribir otro. Conserva el servidor que trajo el QR. */
     fun forget() {
         cache = null
         prefs.edit().remove(KEY).apply()
@@ -201,12 +233,19 @@ class LicenseManager(context: Context, private val baseUrl: String) {
         data class Failed(val message: String) : Fetch
     }
 
+    /** URL base del API: la que trajo el QR (guardada) manda sobre la compilada. */
+    private fun resolveApiUrl(): String =
+        prefs.getString(KEY_API, null)?.trim()?.trimEnd('/')?.takeIf { it.isNotBlank() }
+            ?: buildApiUrl.trim().trimEnd('/')
+
+    /** `GET /license` con el código guardado. */
     private suspend fun fetch(token: String): Fetch = mutex.withLock {
-        if (baseUrl.isBlank()) return@withLock Fetch.Failed("Esta versión de la app no tiene servidor configurado. Pide la versión correcta a tu proveedor.")
+        val base = resolveApiUrl()
+        if (base.isBlank()) return@withLock Fetch.Failed(NO_SERVER)
         withContext(Dispatchers.Main) { checking = true }
         try {
             withContext(Dispatchers.IO) {
-                val conn = URL("${baseUrl.trimEnd('/')}/license").openConnection() as HttpURLConnection
+                val conn = URL("$base/license").openConnection() as HttpURLConnection
                 try {
                     conn.connectTimeout = TIMEOUT_MS
                     conn.readTimeout = TIMEOUT_MS
@@ -216,6 +255,48 @@ class LicenseManager(context: Context, private val baseUrl: String) {
                         200 -> Fetch.Ok(AppJson.decodeFromString<LicenseResponse>(conn.inputStream.bufferedReader().use { it.readText() }))
                         401 -> Fetch.Unauthorized
                         else -> Fetch.Failed("El servidor respondió $code. Intenta más tarde.")
+                    }
+                } finally {
+                    conn.disconnect()
+                }
+            }
+        } catch (e: IOException) {
+            Log.i(tag, "Sin conexión al servidor: ${e.message}")
+            Fetch.Failed("Sin internet. Conecta este teléfono a internet e intenta otra vez.")
+        } catch (e: Exception) {
+            Log.e(tag, "Respuesta inválida", e)
+            Fetch.Failed("No se pudo leer la respuesta del servidor.")
+        } finally {
+            withContext(Dispatchers.Main) { checking = false }
+        }
+    }
+
+    /**
+     * `POST /activate`: activa y da de alta el dispositivo en la Central.
+     * La respuesta es la misma de `GET /license` (el `device` que agrega se
+     * ignora porque [AppJson] usa `ignoreUnknownKeys`).
+     */
+    private suspend fun postActivate(base: String, token: String): Fetch = mutex.withLock {
+        withContext(Dispatchers.Main) { checking = true }
+        try {
+            withContext(Dispatchers.IO) {
+                val body = AppJson.encodeToString(
+                    ActivateRequest(token, ActivateDevice(DEVICE_NAME, Build.MODEL.orEmpty())),
+                )
+                val conn = URL("${base.trimEnd('/')}/activate").openConnection() as HttpURLConnection
+                try {
+                    conn.requestMethod = "POST"
+                    conn.doOutput = true
+                    conn.connectTimeout = TIMEOUT_MS
+                    conn.readTimeout = TIMEOUT_MS
+                    conn.setRequestProperty("Content-Type", "application/json; charset=utf-8")
+                    conn.setRequestProperty("Accept", "application/json")
+                    conn.outputStream.use { it.write(body.toByteArray(Charsets.UTF_8)) }
+                    when (val status = conn.responseCode) {
+                        // El contrato responde 200; se acepta cualquier 2xx por si la Central responde 201.
+                        in 200..299 -> Fetch.Ok(AppJson.decodeFromString<LicenseResponse>(conn.inputStream.bufferedReader().use { it.readText() }))
+                        401 -> Fetch.Unauthorized
+                        else -> Fetch.Failed("El servidor respondió $status. Intenta más tarde.")
                     }
                 } finally {
                     conn.disconnect()
@@ -251,6 +332,12 @@ class LicenseManager(context: Context, private val baseUrl: String) {
 
     private companion object {
         const val KEY = "cache"
+
+        /** URL base del API que vino dentro del QR de activación. */
+        const val KEY_API = "apiBase"
+        const val DEVICE_NAME = "Tablet de cocina"
+        const val NO_SERVER =
+            "Esta versión de la app no tiene servidor configurado. Escanea el QR de la Central o pide la versión correcta a tu proveedor."
         const val TIMEOUT_MS = 10_000
         const val TICK_MS = 60_000L
         const val PERIODIC_CHECK_MS = 6 * 60 * 60_000L

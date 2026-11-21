@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -29,6 +30,8 @@ import androidx.compose.ui.unit.sp
 import com.axzy.taqueria.LicenseManager
 import com.axzy.taqueria.LicenseState
 import com.axzy.taqueria.LockReason
+import com.axzy.taqueria.QrPayload
+import com.axzy.taqueria.QrResult
 import kotlinx.coroutines.launch
 
 /**
@@ -52,13 +55,42 @@ private fun ActivationScreen(license: LicenseManager, onExit: () -> Unit) {
     val scope = rememberCoroutineScope()
     var code by remember { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }
+    var scanning by remember { mutableStateOf(false) }
+
+    if (scanning) {
+        QrScannerScreen(
+            onDetected = { raw ->
+                scanning = false
+                when (val result = QrPayload.parse(raw)) {
+                    is QrResult.Valid -> {
+                        code = result.payload.code
+                        error = null
+                        scope.launch { error = license.activate(result.payload.code, result.payload.apiUrl) }
+                    }
+                    is QrResult.Invalid -> error = result.message
+                }
+            },
+            onCancel = { scanning = false },
+        )
+        return
+    }
+
     Centered {
         Text("🔑", fontSize = 56.sp)
         Text("Activa esta cocina", fontSize = 28.sp, fontWeight = FontWeight.Black, modifier = Modifier.padding(top = 8.dp))
         Text(
-            "Pega el código de activación que te mandó tu proveedor. Solo esta vez necesitas internet; después la app funciona sin él.",
+            "En Axzy Central abre el detalle de la taquería y toca «Generar QR de activación». Escanéalo con este teléfono: el QR ya trae el servidor. Solo esta vez necesitas internet; después la app funciona sin él.",
             color = Palette.muted, fontSize = 15.sp, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 4.dp),
         )
+        ActionButton(
+            "Escanear QR de la Central", Palette.primary, Color.White, Modifier.fillMaxWidth(),
+            enabled = !license.checking,
+        ) { error = null; scanning = true }
+        if (license.checking) {
+            Text("Conectando con la Central…", color = Palette.muted, fontSize = 14.sp, textAlign = TextAlign.Center)
+        }
+        HorizontalDivider(color = Palette.line, modifier = Modifier.padding(vertical = 4.dp))
+        Text("o escribe el código a mano", color = Palette.muted, fontSize = 13.sp, textAlign = TextAlign.Center)
         OutlinedTextField(
             code, { code = it.trim(); error = null },
             label = { Text("Código de activación") }, singleLine = true, shape = Ui.smallShape,

@@ -9,6 +9,11 @@
     <!-- Descubrir el teléfono de cocina en la red (mDNS). -->
     <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
     <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- Escanear el QR de activación que muestra Axzy Central. -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <!-- La cámara no es obligatoria: sin ella queda el código manual. -->
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
     <!-- Android 17+: permiso explícito para hablar con otros equipos de la red local. -->
     <uses-permission android:name="android.permission.ACCESS_LOCAL_NETWORK" />
 
