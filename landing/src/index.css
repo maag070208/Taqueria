@@ -1,0 +1,86 @@
+@layer theme, base, axzy-ui-system, components, utilities;
+
+@import "tailwindcss";
+@import "@axzydev/axzy_ui_system/dist/index.css" layer(axzy-ui-system);
+
+@source "../node_modules/@axzydev/axzy_ui_system/src/**/*.{ts,tsx}";
+
+@theme {
+  --color-brand-green: #3e8e6c;
+  --color-brand-green-deep: #2a5f48;
+  --color-brand-orange: #e4572e;
+  --color-brand-cream: #fff8e7;
+  --color-brand-paper: #fbf6ec;
+  --color-brand-ink: #1f2a24;
+  --color-brand-muted: #5b6b62;
+  --color-brand-gold: #d4a955;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+:root {
+  color-scheme: light;
+}
+
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
+body {
+  background: var(--color-brand-paper);
+  color: var(--color-brand-ink);
+  font-family: var(--font-sans);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .anim-rise,
+  .anim-float {
+    animation: none !important;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes pulse-red {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgb(228 87 46 / 0.55);
+  }
+  50% {
+    box-shadow: 0 0 0 7px rgb(228 87 46 / 0);
+  }
+}
+
+.anim-rise {
+  animation: rise 0.7s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+
+.anim-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.anim-pulse-red {
+  animation: pulse-red 1.6s ease-in-out infinite;
+}

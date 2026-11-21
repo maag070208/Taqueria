@@ -1,0 +1,49 @@
+name: Deploy landing (FTP)
+
+# Compila la landing de Tacomanda (carpeta landing/) y la sube por FTPS a
+# Hostinger al llegar a main, o a mano desde Actions. Requiere en el repo:
+#   Secretos:  FTP_SERVER, FTP_USERNAME, FTP_PASSWORD
+#   Variables: FTP_SERVER_DIR (opcional, carpeta destino; default public_html/)
+
+on:
+  push:
+    branches: [main]
+    paths: ["landing/**", ".github/workflows/deploy-landing.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-landing
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: landing
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+          cache-dependency-path: landing/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+
+      - name: Compilar landing
+        run: pnpm run build
+
+      - name: Subir por FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: landing/dist/
+          server-dir: ${{ vars.FTP_SERVER_DIR || 'public_html/' }}
