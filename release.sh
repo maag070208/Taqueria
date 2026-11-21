@@ -11,8 +11,8 @@ set -euo pipefail
 # La versión SIEMPRE se incrementa sola (versionCode 1 -> 2, versionName 1.0.0 -> 1.0.1)
 # y se guarda en gradle.properties solo si el build salió bien.
 #
-# Salida local:  app/build/outputs/apk/release/TAQUERIA_<versión>.apk
-# Destino Drive: <carpeta compartida>/<cliente>/TAQUERIA_<versión>.apk
+# Salida local:  app/build/outputs/apk/release/TACOMANDA_<versión>.apk
+# Destino Drive: <carpeta compartida>/<cliente>/TACOMANDA_<versión>.apk
 #
 # Requisitos: Java 17, Android SDK y rclone con el remote "gdrive" configurado.
 # Nota: se firma con la llave debug de esta Mac (instalable directo, no para Play Store).
@@ -24,6 +24,9 @@ REMOTE="${DRIVE_REMOTE:-gdrive}"
 # Carpeta compartida "APKs de clientes" en Drive (su id viene del enlace).
 FOLDER_ID="${DRIVE_FOLDER_ID:-1fl61fCVRcqCWBDe52Wzy3cNeFa-_sIwt}"
 CLIENT="${DRIVE_CLIENT:-PerroOrejonAzteca}"
+# Servidor de licencias por defecto del APK release (el QR de la Central puede
+# traer otro y manda sobre este). Sirve para activar escribiendo el código a mano.
+API_URL="${TAQUERIA_API_URL:-https://axzycentralapi-production.up.railway.app/api/v1}"
 UPLOAD=1
 
 while [[ $# -gt 0 ]]; do
@@ -52,7 +55,8 @@ echo "Versión: $CURRENT_VERSION ($CURRENT_CODE) -> $VERSION ($NEW_CODE)"
 echo "Pruebas y compilación..."
 # La versión nueva se pasa por línea de comandos; el archivo no cambia si algo falla.
 ./gradlew :app:testDebugUnitTest :app:assembleRelease \
-  -Ptaqueria.versionCode="$NEW_CODE" -Ptaqueria.versionName="$VERSION" --console=plain
+  -Ptaqueria.versionCode="$NEW_CODE" -Ptaqueria.versionName="$VERSION" \
+  -Ptaqueria.apiUrl="$API_URL" --console=plain
 
 OUT_DIR="app/build/outputs/apk/release"
 APK="$OUT_DIR/app-release.apk"
@@ -60,7 +64,7 @@ APK="$OUT_DIR/app-release.apk"
 
 perl -pi -e "s/^taqueria\.versionCode=.*/taqueria.versionCode=$NEW_CODE/; s/^taqueria\.versionName=.*/taqueria.versionName=$VERSION/" "$PROPS"
 
-NAME="TAQUERIA_${VERSION}.apk"
+NAME="TACOMANDA_${VERSION}.apk"
 LOCAL_FILE="$OUT_DIR/$NAME"
 mv -f "$APK" "$LOCAL_FILE"
 echo "APK: $LOCAL_FILE"

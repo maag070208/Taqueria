@@ -1,6 +1,6 @@
-# Taquería
+# Tacomanda
 
-App Android para tomar órdenes y verlas en cocina **sin internet**. Los dos teléfonos se hablan por la red WiFi local. Internet solo se usa para confirmar que la cuenta de la taquería está activa.
+App Android (comandas para taquerías; repo `Taqueria`) para tomar órdenes y verlas en cocina **sin internet**. Los dos teléfonos se hablan por la red WiFi local. Internet solo se usa para confirmar que la cuenta de la taquería está activa.
 
 - **Mesera**: ve las cuentas abiertas por mesa. **+ Nueva orden** → mesa → cuenta (o cuenta nueva) → toca productos (cada toque = +1) → **Revisar** → **Enviar a cocina**.
   - Para preparar distinto, en *Revisar* toca el producto y usa **✂ Dividir preparación** (4 → 2 + 2); cada grupo lleva sus propias modificaciones y nota. También sirve mantener presionado un producto.
@@ -44,7 +44,7 @@ Servidor de licencias:
 
 Incrementa la versión (en `gradle.properties`), corre las pruebas, compila el APK release y lo sube a la carpeta de APKs de clientes en Drive como `PerroOrejonAzteca/TAQUERIA_<versión>.apk`, verificando tamaño y md5. Otro cliente: `./release.sh --client NombreCliente`. Solo compilar: `./release.sh --no-upload`. Requiere `rclone` con el remote `gdrive`.
 
-El APK se firma con la llave debug de la Mac que lo compila: publica siempre desde la misma Mac para que cada versión se instale encima de la anterior sin borrar datos.
+El APK se firma con la llave debug de la Mac que lo compila: publica siempre desde la misma Mac para que cada versión se instale encima de la anterior sin borrar datos. El APK release incluye por defecto el API de producción (`https://axzycentralapi-production.up.railway.app/api/v1`) como respaldo para activar escribiendo el código a mano; el QR de la Central puede traer otro servidor y manda sobre ese.
 
 ## Conectar los teléfonos (sin internet)
 

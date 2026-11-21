@@ -175,7 +175,7 @@ fun RoleScreen(onPick: (Role) -> Unit) {
         verticalArrangement = Arrangement.Center,
     ) {
         Text("🌮", fontSize = 56.sp)
-        Text("Taquería", fontSize = 34.sp, fontWeight = FontWeight.Black, modifier = Modifier.padding(top = 8.dp))
+        Text("Tacomanda", fontSize = 34.sp, fontWeight = FontWeight.Black, modifier = Modifier.padding(top = 8.dp))
         Text("¿Qué hará este teléfono?", color = Palette.muted, fontSize = 17.sp, modifier = Modifier.padding(top = 4.dp, bottom = 24.dp))
         GridRow(listOf(Role.KITCHEN, Role.WAITER), 2) { role ->
             val (icon, title, body) = when (role) {
