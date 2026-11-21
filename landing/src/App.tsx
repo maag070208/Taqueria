@@ -43,7 +43,7 @@ const STEPS: Step[] = [
     title: "La mesera toma el pedido",
     text: "Toca el taco y se suma. ¿Dos de asada y uno de pastor? Tres toquecitos y listo. Va viendo el total mientras anota.",
     tip: "¿Sin cebolla? Deja presionado el taco y escoge.",
-    img: "/app/captura.png",
+    img: "/capturas/captura.png",
     alt: "Pantalla de la mesera con los tacos del menú y sus precios",
   },
   {
@@ -51,7 +51,7 @@ const STEPS: Step[] = [
     title: "La cocina lo ve al momento",
     text: "El pedido aparece en el teléfono de cocina con todo y sus indicaciones. Cada mesa muestra cuánto lleva esperando, así el taquero sabe qué sale primero.",
     tip: "El taquero no tiene que tocar nada, solo mirar.",
-    img: "/app/cocina.png",
+    img: "/capturas/cocina.png",
     alt: "Pantalla de cocina con las órdenes de cada mesa y su tiempo de espera",
     extra: (
       <ul className="mt-6 grid gap-2 sm:grid-cols-3">
@@ -72,7 +72,7 @@ const STEPS: Step[] = [
     title: "Cobras sin broncas",
     text: "Efectivo o transferencia, todo junto o en partes. Siempre sabes cuánto falta por pagar en cada mesa.",
     tip: "La transferencia se anota hasta que confirmas que llegó.",
-    img: "/app/cobro.png",
+    img: "/capturas/cobro.png",
     alt: "Pantalla de cobro con efectivo o transferencia y el saldo pendiente",
   },
 ];
@@ -81,19 +81,19 @@ const EXTRAS = [
   {
     title: "Mitad y mitad",
     text: "¿Cuatro de asada pero dos sin cebolla? Se divide la orden y cada parte lleva su propia nota.",
-    img: "/app/dividir.png",
+    img: "/capturas/dividir.png",
     alt: "Pantalla para dividir una orden en dos grupos con distintas indicaciones",
   },
   {
     title: "Cada quien paga lo suyo",
     text: "Una mesa puede tener varias cuentas. Cada quien paga lo suyo y no se revuelve nada.",
-    img: "/app/cuentas.png",
+    img: "/capturas/cuentas.png",
     alt: "Lista de cuentas abiertas por mesa con lo que debe cada una",
   },
   {
     title: "¿Te equivocaste? Se deshace",
     text: "Si cancelas o cobras por error, tienes unos segundos para deshacerlo. Sin pleitos con la caja.",
-    img: "/app/detalle.png",
+    img: "/capturas/detalle.png",
     alt: "Detalle de una cuenta con sus órdenes, pagos y botones para cancelar, editar o entregar",
   },
 ];
@@ -378,10 +378,10 @@ export default function App() {
             <div className="absolute inset-x-6 bottom-0 top-16 rounded-[3rem] bg-maiz/35" aria-hidden="true" />
             <div className="relative flex items-start justify-center">
               <div className="relative z-10 w-[47%] -rotate-6">
-                <Phone src="/app/captura.png" alt="La mesera toma el pedido tocando cada taco" eager />
+                <Phone src="/capturas/captura.png" alt="La mesera toma el pedido tocando cada taco" eager />
               </div>
               <div className="relative -ml-6 mt-14 w-[47%] rotate-[5deg]">
-                <Phone src="/app/cocina.png" alt="La cocina ve cada mesa con su tiempo de espera" eager />
+                <Phone src="/capturas/cocina.png" alt="La cocina ve cada mesa con su tiempo de espera" eager />
               </div>
             </div>
 
@@ -566,7 +566,20 @@ export default function App() {
       <footer className="border-t border-raya">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-4 py-8 text-[15px] text-carbon-soft sm:flex-row sm:px-6">
           <Logo size={32} />
-          <p>Comandas para taquerías · © {new Date().getFullYear()} Tacomanda</p>
+          <div className="flex flex-col items-center gap-1 sm:items-end">
+            <p>Comandas para taquerías · © {new Date().getFullYear()} Tacomanda</p>
+            <p>
+              Powered by{" "}
+              <a
+                href="https://axzy.dev"
+                target="_blank"
+                rel="noopener"
+                className="font-extrabold text-carbon underline decoration-maiz decoration-2 underline-offset-4 transition hover:text-cilantro-deep"
+              >
+                axzy.dev
+              </a>
+            </p>
+          </div>
         </div>
       </footer>
     </div>
