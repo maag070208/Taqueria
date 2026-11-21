@@ -566,7 +566,20 @@ export default function App() {
       <footer className="border-t border-raya">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-4 py-8 text-[15px] text-carbon-soft sm:flex-row sm:px-6">
           <Logo size={32} />
-          <p>Comandas para taquerías · © {new Date().getFullYear()} Tacomanda</p>
+          <div className="flex flex-col items-center gap-1 sm:items-end">
+            <p>Comandas para taquerías · © {new Date().getFullYear()} Tacomanda</p>
+            <p>
+              Powered by{" "}
+              <a
+                href="https://axzy.dev"
+                target="_blank"
+                rel="noopener"
+                className="font-extrabold text-carbon underline decoration-maiz decoration-2 underline-offset-4 transition hover:text-cilantro-deep"
+              >
+                axzy.dev
+              </a>
+            </p>
+          </div>
         </div>
       </footer>
     </div>
