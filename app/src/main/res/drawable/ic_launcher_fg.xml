@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Taco: media luna de tortilla con relleno. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <path android:fillColor="#FF7CB342" android:pathData="M30,62 C34,46 44,40 54,40 C64,40 74,46 78,62 Z" />
+    <path android:fillColor="#FFE53935" android:pathData="M40,52 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0 M58,49 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0" />
+    <path android:fillColor="#FFFFD180" android:pathData="M26,66 C26,48 39,36 54,36 C69,36 82,48 82,66 L76,66 C76,52 66,42 54,42 C42,42 32,52 32,66 Z" />
+    <path android:fillColor="#FFFFD180" android:pathData="M26,66 L82,66 C82,70 79,72 75,72 L33,72 C29,72 26,70 26,66 Z" />
+</vector>
