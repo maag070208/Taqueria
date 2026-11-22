@@ -1,0 +1,12 @@
+# Cabeza vuelve a estar disponible.
+appId: com.axzy.taqueria
+name: Cocina · reactivar producto
+tags: [cocina, menu]
+---
+- launchApp
+- runFlow: ../comun/cerrar_avisos.yaml
+- tapOn: "Abrir menú"
+- tapOn: "Disponibilidad"
+- assertVisible: "1 agotado"
+- tapOn: "Disponible Tacos Cabeza"
+- assertVisible: "Todo disponible"

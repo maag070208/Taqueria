@@ -6,6 +6,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
@@ -68,7 +70,7 @@ fun AppDrawer(control: DrawerControl, staff: Staff, subtitle: String, groups: Li
         gesturesEnabled = state.isOpen,
         drawerContent = {
             ModalDrawerSheet(drawerContainerColor = Palette.bg) {
-                Column(Modifier.safeDrawingPadding().padding(vertical = Ui.pad)) {
+                Column(Modifier.fillMaxHeight().safeDrawingPadding().padding(vertical = Ui.pad)) {
                     Row(Modifier.padding(horizontal = Ui.pad), verticalAlignment = Alignment.CenterVertically) {
                         Illustration(staff.art, 52.dp)
                         Column(Modifier.padding(start = 12.dp)) {
@@ -89,6 +91,8 @@ fun AppDrawer(control: DrawerControl, staff: Staff, subtitle: String, groups: Li
                             )
                         }
                     }
+                    Spacer(Modifier.weight(1f))
+                    VersionText(Modifier.padding(horizontal = Ui.pad + 12.dp))
                 }
             }
         },

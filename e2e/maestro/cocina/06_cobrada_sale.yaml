@@ -1,0 +1,12 @@
+# Cobrar con "marcar como entregada" saca la orden de cocina.
+appId: com.axzy.taqueria
+name: Cocina · cuenta cobrada sale
+tags: [cocina, cobro]
+---
+- launchApp
+- runFlow: ../comun/cerrar_avisos.yaml
+- extendedWaitUntil:
+    visible: "Cocina · 0 órdenes"
+    timeout: 15000
+- assertVisible: "Sin órdenes pendientes"
+- assertNotVisible: "Mesa 3"

@@ -1,0 +1,39 @@
+# La Mesa 3 ya tiene cuenta: sale marcada. Se agrega a esa cuenta y se prueba quitar
+# un renglón deslizando a la izquierda y deshacerlo.
+appId: com.axzy.taqueria
+name: Mesero · mesa ocupada, quitar y deshacer
+tags: [mesero, orden]
+---
+- launchApp
+- runFlow: ../comun/cerrar_avisos.yaml
+- extendedWaitUntil:
+    visible: ".*Conectado a cocina"
+    timeout: 20000
+- tapOn: "\\+ Nueva orden"
+- assertVisible: "1 cuenta"
+- tapOn: "1 cuenta"
+- assertVisible: "Paso 2 · ¿A qué cuenta?"
+- tapOn: "Cuenta 1.*"
+- tapOn: "Tacos.*"
+- tapOn: "Suadero.*"
+- tapOn: "Suadero.*"
+- tapOn: "Asada.*"
+- assertVisible: "3 tacos"
+# Deslizar el renglón de suadero a la izquierda lo quita. Se arrastra desde su importe
+# ($70.00, a la derecha) para pasar del tercio del ancho que pide la tarjeta.
+- swipe:
+    from:
+      text: "\\$70.00"
+    direction: LEFT
+    duration: 600
+- assertVisible: "Se quitó 2 Suadero"
+- assertVisible: "1 tacos"
+# …y Deshacer lo regresa.
+- tapOn: "Deshacer"
+- assertVisible: "3 tacos"
+- tapOn: "Listo · 3 · \\$105.00"
+- tapOn: "Revisar · 3 · \\$105.00"
+- tapOn: "Enviar a cocina · \\$105.00"
+- extendedWaitUntil:
+    visible: ".*Debe \\$270.00.*"
+    timeout: 10000

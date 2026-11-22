@@ -1,0 +1,24 @@
+# Cocina nueva: elegir el rol, activar contra la Central falsa y quedar como taquero.
+appId: com.axzy.taqueria
+name: Cocina · activar
+tags: [cocina, setup]
+---
+- launchApp:
+    clearState: true
+    permissions:
+      all: allow
+- runFlow: ../comun/cerrar_avisos.yaml
+- tapOn: "Cocina"
+- assertVisible: "Activa esta cocina"
+# Un código revocado muestra el motivo y no deja pasar.
+- tapOn: "Código de activación"
+- inputText: "revocado-e2e"
+- hideKeyboard
+- tapOn: "Activar"
+- assertVisible: "Código inválido o revocado.*"
+- eraseText: 40
+- inputText: "e2e-cocina"
+- hideKeyboard
+- tapOn: "Activar"
+- assertVisible: "Cocina · 0 órdenes"
+- assertVisible: "Sin órdenes pendientes"

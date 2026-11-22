@@ -125,7 +125,7 @@ fun evaluateLicense(cache: LicenseCache?, phoneNowMs: Long): LicenseState {
  * La dirección del servidor puede venir dentro del QR de activación; cuando
  * viene, se guarda en prefs y manda sobre [buildApiUrl] en `activate()` y `refresh()`.
  */
-class LicenseManager(context: Context, private val buildApiUrl: String) {
+class LicenseManager(context: Context, private val buildApiUrl: String, private val appVersion: String = "") {
     private val tag = "License"
     private val appContext = context.applicationContext
     private val prefs = appContext.getSharedPreferences("license", Context.MODE_PRIVATE)
@@ -223,6 +223,12 @@ class LicenseManager(context: Context, private val buildApiUrl: String) {
         }
     }
 
+    /** Servidor y código para reportar a la Central (ventas). Null sin activar, revocada o sin servidor. */
+    fun credentials(): CentralCredentials? {
+        val c = cache?.takeIf { !it.revoked } ?: return null
+        return resolveApiUrl().takeIf { it.isNotBlank() }?.let { CentralCredentials(it, c.token) }
+    }
+
     /** Quita el código guardado para escribir otro. Conserva el servidor que trajo el QR. */
     fun forget() {
         cache = null
@@ -260,6 +266,7 @@ class LicenseManager(context: Context, private val buildApiUrl: String) {
                     conn.readTimeout = TIMEOUT_MS
                     conn.setRequestProperty("Authorization", "Bearer $token")
                     conn.setRequestProperty("Accept", "application/json")
+                    if (appVersion.isNotEmpty()) conn.setRequestProperty("X-App-Version", appVersion)
                     when (val code = conn.responseCode) {
                         200 -> Fetch.Ok(AppJson.decodeFromString<LicenseResponse>(conn.inputStream.bufferedReader().use { it.readText() }))
                         401 -> Fetch.Unauthorized

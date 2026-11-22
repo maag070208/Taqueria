@@ -238,9 +238,14 @@ class OrderStore(
      */
     fun salesEntries(): List<HistoryEntry> = synchronized(lock) {
         val s = _state.value
-        val history = historyCache ?: readHistory().also { historyCache = it }
+        val history = archived()
         val live = s.accounts.map { HistoryEntry(it, s.ordersOf(it.id)) }
         (history + live).associateBy { it.account.id }.values.toList()
+    }
+
+    /** Cuentas archivadas en el orden en que se archivaron (el historial solo crece). */
+    fun archived(): List<HistoryEntry> = synchronized(lock) {
+        historyCache ?: readHistory().also { historyCache = it }
     }
 
     /** Una línea dañada no tumba el reporte: se omite y se registra. */

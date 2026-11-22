@@ -35,6 +35,8 @@ class KitchenServer(
     private val store: OrderStore,
     /** Licencia bloqueada (suspendida, revocada o vencida): no se acepta nada de los meseros. */
     private val isLocked: () -> Boolean = { false },
+    /** 0 = el sistema elige uno libre (pruebas e2e); ver [localPort]. */
+    private val port: Int = DEFAULT_PORT,
 ) {
     private val tag = "KitchenServer"
     private var scope: CoroutineScope? = null
@@ -46,6 +48,9 @@ class KitchenServer(
     val clientCount = _clientCount.asStateFlow()
     private val _error = MutableStateFlow<String?>(null)
     val error = _error.asStateFlow()
+    /** Puerto en que quedó escuchando; nulo mientras no abre. */
+    private val _localPort = MutableStateFlow<Int?>(null)
+    val localPort = _localPort.asStateFlow()
 
     fun start() {
         if (scope != null) return
@@ -67,6 +72,7 @@ class KitchenServer(
         scope = null
         runCatching { serverSocket?.close() }
         serverSocket = null
+        _localPort.value = null
         clients.forEach { it.close() }
         unregisterNsd()
     }
@@ -75,13 +81,14 @@ class KitchenServer(
         val socket = try {
             ServerSocket().apply {
                 reuseAddress = true
-                bind(InetSocketAddress(DEFAULT_PORT))
+                bind(InetSocketAddress(port))
             }
         } catch (e: IOException) {
-            _error.value = "No se pudo abrir el puerto $DEFAULT_PORT: ${e.message}"
+            _error.value = "No se pudo abrir el puerto $port: ${e.message}"
             return
         }
         serverSocket = socket
+        _localPort.value = socket.localPort
         _error.value = null
         registerNsd(socket.localPort)
         while (scope?.isActive == true) {

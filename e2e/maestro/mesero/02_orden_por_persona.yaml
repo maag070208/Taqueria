@@ -1,0 +1,35 @@
+# Orden de la Mesa 3 con dos personas usando el stepper: 3 de asada y 2 de adobada.
+appId: com.axzy.taqueria
+name: Mesero · orden por persona
+tags: [mesero, orden]
+---
+- launchApp
+- runFlow: ../comun/cerrar_avisos.yaml
+- extendedWaitUntil:
+    visible: ".*Conectado a cocina"
+    timeout: 20000
+- tapOn: "\\+ Nueva orden"
+- assertVisible: "Paso 1 · ¿Dónde?"
+- tapOn: "3"
+- tapOn: "Tacos.*"
+# Persona 1: tres toques en Asada = 3 tacos en un solo renglón.
+- tapOn: "Asada.*"
+- tapOn: "Asada.*"
+- tapOn: "Asada.*"
+- assertVisible: "Persona 1"
+- assertVisible: "3 tacos"
+# Stepper: + agrega a la Persona 2 y la deja seleccionada.
+- tapOn: "Agregar"
+- assertVisible: "Persona 2"
+- tapOn: "Adobada.*"
+- tapOn: "Adobada.*"
+- assertVisible: "2 tacos"
+- tapOn: "Listo · 5 · \\$165.00"
+- assertVisible: "5 tacos"
+- tapOn: "Revisar · 5 · \\$165.00"
+- assertVisible: "Revisa antes de enviar"
+- tapOn: "Enviar a cocina · \\$165.00"
+- extendedWaitUntil:
+    visible: "Mesa 3"
+    timeout: 10000
+- assertVisible: ".*Debe \\$165.00.*"

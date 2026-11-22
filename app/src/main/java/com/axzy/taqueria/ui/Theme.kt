@@ -38,16 +38,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.axzy.taqueria.App
 import com.axzy.taqueria.Role
 import kotlinx.coroutines.delay
 
@@ -171,7 +175,8 @@ fun UiIcon(@DrawableRes icon: Int, size: Dp = 22.dp, tint: Color = Palette.text,
 fun SquareButton(@DrawableRes icon: Int, onClick: () -> Unit, modifier: Modifier = Modifier, description: String? = null) {
     Box(
         modifier.size(44.dp).background(Palette.card, Ui.smallShape).border(1.dp, Palette.line, Ui.smallShape)
-            .clickable(onClick = onClick, onClickLabel = description),
+            .clickable(onClick = onClick, onClickLabel = description)
+            .then(if (description != null) Modifier.semantics { contentDescription = description } else Modifier),
         contentAlignment = Alignment.Center,
     ) { UiIcon(icon) }
 }
@@ -233,5 +238,13 @@ fun RoleScreen(onPick: (Role) -> Unit) {
             color = Palette.muted, fontSize = 13.sp, textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth().padding(top = 24.dp),
         )
+        VersionText(Modifier.fillMaxWidth().padding(top = 12.dp), TextAlign.Center)
     }
+}
+
+/** "Tacomanda v1.1.0 (4)", para saber qué versión tiene cada teléfono. */
+@Composable
+fun VersionText(modifier: Modifier = Modifier, align: TextAlign? = null) {
+    val app = LocalContext.current.applicationContext as? App ?: return
+    Text("Tacomanda v${app.versionLabel}", color = Palette.muted, fontSize = 12.sp, textAlign = align, modifier = modifier)
 }

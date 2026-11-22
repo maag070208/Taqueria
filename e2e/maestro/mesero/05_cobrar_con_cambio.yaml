@@ -1,0 +1,19 @@
+# Cobrar la cuenta de la Mesa 3 con un billete de $500 y ver el cambio.
+appId: com.axzy.taqueria
+name: Mesero · cobrar con cambio
+tags: [mesero, cobro]
+---
+- launchApp
+- runFlow: ../comun/cerrar_avisos.yaml
+- extendedWaitUntil:
+    visible: ".*Conectado a cocina"
+    timeout: 20000
+- tapOn: "Cuenta 1.*"
+- assertVisible: "Mesa 3 · Cuenta 1"
+- tapOn: "Cobrar \\$270.00"
+- assertVisible: "Cobrar · Cuenta 1"
+- tapOn: "\\$500"
+- assertVisible: "Cambio"
+- assertVisible: "\\$230.00"
+- tapOn: "Registrar \\$270.00"
+- assertVisible: "Cambio \\$230.00 · cobrado \\$270.00"

@@ -1,0 +1,19 @@
+# La cocina muestra el ticket de la Mesa 3 separado por persona y sin repetir la tortilla de siempre.
+appId: com.axzy.taqueria
+name: Cocina · ticket por persona
+tags: [cocina, orden]
+---
+- launchApp
+- runFlow: ../comun/cerrar_avisos.yaml
+- extendedWaitUntil:
+    visible: "Cocina · 1 orden"
+    timeout: 15000
+- assertVisible: "Mesa 3"
+- assertVisible: "Espera .*"
+- assertVisible: "Cuenta 1 · Ticket #1 · .*"
+- assertVisible: "Persona 1"
+- assertVisible: "Persona 2"
+- assertVisible: "Taco Asada"
+- assertVisible: "Taco Adobada"
+- assertNotVisible: ".*Maíz.*"
+- assertVisible: "Con todo"

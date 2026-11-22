@@ -43,6 +43,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -87,7 +89,7 @@ fun AdminScreen(store: OrderStore, canEdit: Boolean, onMenu: () -> Unit) {
             Segmented(listOf("Productos", "Preparación", "Ajustes"), tab, { tab = it }, Modifier.padding(horizontal = Ui.pad))
         } else {
             val off = state.products.count { !it.active }
-            TopBar(title = "Disponibilidad", subtitle = if (off == 0) "Todo disponible" else "$off agotados", onMenu = onMenu)
+            TopBar(title = "Disponibilidad", subtitle = if (off == 0) "Todo disponible" else if (off == 1) "1 agotado" else "$off agotados", onMenu = onMenu)
         }
         LazyColumn(
             modifier = Modifier.weight(1f),
@@ -225,7 +227,7 @@ private fun ProductRow(
         Switch(
             checked = p.active, onCheckedChange = onToggle,
             colors = SwitchDefaults.colors(checkedTrackColor = Palette.primary, checkedThumbColor = Color.White),
-            modifier = Modifier.padding(start = 4.dp),
+            modifier = Modifier.padding(start = 4.dp).semantics { contentDescription = "Disponible ${category.name} ${p.name}" },
         )
     }
 }

@@ -25,7 +25,20 @@ class App : Application() {
     private val prefs by lazy { getSharedPreferences("taqueria", MODE_PRIVATE) }
 
     val store by lazy { OrderStore(File(filesDir, "taqueria.json")) }
-    val license by lazy { LicenseManager(this, BuildConfig.LICENSE_API_URL) }
+    /** "1.1.0 (4)": nombre y número de la versión instalada. */
+    val versionLabel by lazy {
+        val info = packageManager.getPackageInfo(packageName, 0)
+        "${info.versionName} (${info.longVersionCode})"
+    }
+    val license by lazy { LicenseManager(this, getString(R.string.license_api_url), versionLabel) }
+    private val salesPrefs by lazy { getSharedPreferences("sales_sync", MODE_PRIVATE) }
+    val salesSync by lazy {
+        SalesSync(
+            store, license::credentials, versionLabel,
+            getSent = { salesPrefs.getInt("sent", 0) },
+            putSent = { salesPrefs.edit().putInt("sent", it).apply() },
+        )
+    }
     val server by lazy { KitchenServer(this, store, isLocked = { license.locked }) }
     val client by lazy { WaiterClient(this) }
     val draft = WaiterDraft()
@@ -65,9 +78,10 @@ class App : Application() {
             license.start()
             server.start()
             serverStarted = true
+            salesSync.start()
         } else {
             // En mesera no se instancia el servidor (ni su OrderStore): no se guardan datos de negocio.
-            if (serverStarted) { server.stop(); serverStarted = false }
+            if (serverStarted) { server.stop(); serverStarted = false; salesSync.stop() }
             license.stop()
         }
         if (next == Role.WAITER) client.start(manualHost) else client.stop()
