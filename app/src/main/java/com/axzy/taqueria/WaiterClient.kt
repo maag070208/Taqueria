@@ -48,6 +48,8 @@ class WaiterClient(
     private val waiterId: String = java.util.UUID.randomUUID().toString(),
     /** Fallas de esta app que se le pasan a la cocina al conectar. */
     private val crashes: CrashReporter? = null,
+    /** Este teléfono es una pantalla de cocina extra (solo muestra), no una mesera. */
+    private val isScreen: () -> Boolean = { false },
 ) {
     private val tag = "WaiterClient"
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -192,7 +194,7 @@ class WaiterClient(
     /** Se presenta con cocina y le pasa las fallas guardadas de este teléfono. */
     private suspend fun introduce(host: String, session: Socket) {
         try {
-            request(direct = true) { ClientMsg.Hello(it, waiterId, "${android.os.Build.MANUFACTURER} ${android.os.Build.MODEL}") }
+            request(direct = true) { ClientMsg.Hello(it, waiterId, "${android.os.Build.MANUFACTURER} ${android.os.Build.MODEL}", screen = isScreen()) }
         } catch (e: ValidationException) {
             _link.value = Link.Rejected(e.message ?: "Cocina no aceptó la conexión")
             if (socket === session) closeSocket()

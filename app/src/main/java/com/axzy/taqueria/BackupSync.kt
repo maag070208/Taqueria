@@ -23,7 +23,12 @@ import java.time.ZoneId
 data class BackupUpload(val appVersion: String, val savedAt: String, val state: AppState)
 
 @Serializable
+data class BackupList(val backups: List<BackupDownload>)
+
+/** Respaldo de una cocina principal (con varias cocinas independientes hay uno por teléfono). */
+@Serializable
 data class BackupDownload(
+    val deviceId: String = "",
     val savedAt: String,
     val deviceName: String,
     val fromThisDevice: Boolean = false,
@@ -56,7 +61,8 @@ class BackupSync(
     val lastBackupAt = _lastBackupAt.asStateFlow()
 
     sealed interface Restore {
-        data class Found(val backup: BackupDownload) : Restore
+        /** Del más reciente al más viejo. */
+        data class Found(val backups: List<BackupDownload>) : Restore
         data object None : Restore
         data object NotActivated : Restore
         data class Failed(val message: String) : Restore
@@ -108,7 +114,8 @@ class BackupSync(
         try {
             val r = centralCall(creds, "GET", "backup")
             when (r.code) {
-                in 200..299 -> Restore.Found(AppJson.decodeFromString<BackupDownload>(r.body))
+                in 200..299 -> AppJson.decodeFromString<BackupList>(r.body).backups
+                    .let { if (it.isEmpty()) Restore.None else Restore.Found(it) }
                 404 -> Restore.None
                 else -> Restore.Failed("La Central respondió ${r.code}")
             }

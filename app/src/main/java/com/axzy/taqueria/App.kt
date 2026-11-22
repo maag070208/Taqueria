@@ -27,7 +27,8 @@ import kotlinx.coroutines.launch
 import java.io.File
 import java.util.UUID
 
-enum class Role { KITCHEN, WAITER }
+/** [SCREEN]: pantalla de cocina extra conectada a la cocina principal (solo muestra órdenes). */
+enum class Role { KITCHEN, WAITER, SCREEN }
 
 class App : Application() {
     private val prefs by lazy { getSharedPreferences("taqueria", MODE_PRIVATE) }
@@ -56,11 +57,13 @@ class App : Application() {
             this, store,
             isLocked = { license.locked },
             waiterLimit = { license.waiterLimit },
+            screenLimit = { license.screenLimit },
             latestApp = { license.update },
             onWaiterErrors = crashes::add,
         )
     }
-    val client by lazy { WaiterClient(this, waiterId, crashes) }
+    /** Conexión con la cocina principal: la usan la mesera y la pantalla de cocina extra. */
+    val client by lazy { WaiterClient(this, waiterId, crashes, isScreen = { role == Role.SCREEN }) }
     /** Id fijo de este teléfono para la cocina (cuenta contra las meseras del plan). */
     private val waiterId by lazy {
         prefs.getString("waiterId", null) ?: UUID.randomUUID().toString().also { prefs.edit().putString("waiterId", it).apply() }
@@ -71,7 +74,7 @@ class App : Application() {
     val waiterWifi by lazy {
         WaiterWifi(
             this,
-            onNetworkChanged = { if (role == Role.WAITER) client.start(manualHost) },
+            onNetworkChanged = { if (role == Role.WAITER || role == Role.SCREEN) client.start(manualHost) },
             onGaveUp = { savedWifi = null; prefs.edit().remove("kitchenSsid").remove("kitchenPass").apply() },
         )
     }
@@ -97,11 +100,20 @@ class App : Application() {
         private set
     val staff get() = when (role) {
         Role.KITCHEN -> if (admin) Staff.ADMIN else Staff.TAQUERO
+        Role.SCREEN -> Staff.TAQUERO
         Role.WAITER -> Staff.MESERO
         null -> null
     }
     var manualHost by mutableStateOf("")
         private set
+    /** Qué muestra la pantalla de cocina de este teléfono: null = todas las órdenes; si no, el id de su estación. */
+    var stationView by mutableStateOf<String?>(null)
+        private set
+
+    fun updateStationView(id: String?) {
+        stationView = id
+        prefs.edit().putString("stationView", id).apply()
+    }
     /** Evita tocar `server`/`store` en el teléfono de mesera: solo la cocina guarda datos. */
     private var serverStarted = false
 
@@ -109,6 +121,7 @@ class App : Application() {
         super.onCreate()
         crashes.install()
         manualHost = prefs.getString("manualHost", "").orEmpty()
+        stationView = prefs.getString("stationView", null)
         savedWifi = prefs.getString("kitchenSsid", null)?.let { ssid -> prefs.getString("kitchenPass", null)?.let { KitchenWifi(ssid, it) } }
         applyRole(prefs.getString("role", null)?.let { runCatching { Role.valueOf(it) }.getOrNull() })
     }
@@ -140,9 +153,9 @@ class App : Application() {
         if (next != Role.KITCHEN) zone.stop()
         outboxJob?.cancel()
         outboxJob = null
-        if (next == Role.WAITER) {
+        if (next == Role.WAITER || next == Role.SCREEN) {
             client.start(manualHost)
-            outboxJob = appScope.launch { sendQueuedOrders() }
+            if (next == Role.WAITER) outboxJob = appScope.launch { sendQueuedOrders() }
             // Si la mesera ya se había unido a la zona, Android la reconecta sin preguntar.
             savedWifi?.let(waiterWifi::join)
         } else {
@@ -175,7 +188,7 @@ class App : Application() {
     fun updateManualHost(host: String) {
         manualHost = host.trim()
         prefs.edit().putString("manualHost", manualHost).apply()
-        if (role == Role.WAITER) client.start(manualHost)
+        if (role == Role.WAITER || role == Role.SCREEN) client.start(manualHost)
     }
 
     /** Red de la zona de cocina que trajo el QR (null = la cocina está en la red del local). */

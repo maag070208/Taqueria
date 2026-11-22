@@ -48,12 +48,13 @@ class KitchenWaiterE2ETest {
     // ---------------- Arranque ----------------
 
     private var waiterLimit: Int? = null
+    private var screenLimit: Int? = null
     private val waiterErrors = mutableListOf<AppErrorReport>()
 
     private fun startKitchen(store: OrderStore, port: Int = 0) =
         KitchenServer(
             context, store, isLocked = { locked }, port = port,
-            waiterLimit = { waiterLimit }, latestApp = { LatestApp(9, "9.0.0", "https://example.com/apk") },
+            waiterLimit = { waiterLimit }, screenLimit = { screenLimit }, latestApp = { LatestApp(9, "9.0.0", "https://example.com/apk") },
             onWaiterErrors = { synchronized(waiterErrors) { waiterErrors += it } },
         ).also { it.start() }
 
@@ -105,6 +106,28 @@ class KitchenWaiterE2ETest {
         val again = waiter(id = "mesera-a")
         assertTrue(again.link.value is Link.Connected)
         stale.close()
+    }
+
+    @Test fun `las pantallas de cocina extra reciben las ordenes, solo muestran y tienen su propio limite`() {
+        waiterLimit = 1
+        screenLimit = 1
+        val w = waiter(id = "mesera")
+        val screen = WaiterClient(context, "pantalla-1", isScreen = { true }).also { waiters += it; it.start("127.0.0.1:${port()}") }
+        awaitLink(screen) { it is Link.Connected }
+        // La pantalla no ocupa el lugar de la mesera ni ella el de la pantalla.
+        assertEquals(1, kitchen.clientCount.value)
+        assertEquals(1, kitchen.screenCount.value)
+
+        val asada = w.state.value.product("Asada")
+        runBlocking { w.createOrder(key(), "4", null, listOf(LineRequest(asada.id, 2))) }
+        await(screen) { s -> s.orders.any { it.table == "4" } }
+        // Solo muestra: no puede cambiar nada.
+        val order = screen.state.value.orders.first { it.table == "4" }
+        assertThrows(ValidationException::class.java) { runBlocking { screen.setOrderStatus(order.id, OrderStatus.DELIVERED) } }
+
+        val second = WaiterClient(context, "pantalla-2", isScreen = { true }).also { waiters += it; it.start("127.0.0.1:${port()}") }
+        val rejected = awaitLink(second) { it is Link.Rejected } as Link.Rejected
+        assertTrue(rejected.message, rejected.message.contains("pantalla"))
     }
 
     @Test fun `la mesera le pasa sus fallas a cocina y ve el aviso de version nueva`() {

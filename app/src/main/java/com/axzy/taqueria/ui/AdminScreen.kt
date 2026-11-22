@@ -135,12 +135,24 @@ fun AdminScreen(store: OrderStore, canEdit: Boolean, onMenu: () -> Unit) {
                         }
                     }
                 }
-                else -> item(key = "settings") {
+                else -> {
+                    item(key = "settings") {
                     SettingsPanel(
                         state,
                         onTables = { n -> scope.runStore(context) { store.setTableCount(n) } },
                         onExtras = { list -> scope.runStore(context) { store.saveFreeExtras(list) } },
                     )
+                }
+                    item(key = "stations") {
+                    Column(verticalArrangement = Arrangement.spacedBy(Ui.gap), modifier = Modifier.padding(top = Ui.gap)) {
+                        StationsPanel(
+                            state,
+                            onName = { n -> scope.runStore(context) { store.setKitchenName(n) } },
+                            onSave = { st -> scope.runStore(context) { store.saveStation(st) } },
+                            onDelete = { id -> scope.runStore(context) { store.deleteStation(id) } },
+                        )
+                    }
+                    }
                 }
             }
         }

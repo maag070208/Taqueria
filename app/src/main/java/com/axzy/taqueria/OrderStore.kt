@@ -310,6 +310,31 @@ class OrderStore(
         commit(_state.value.copy(tableCount = count))
     }
 
+    /** Alta (id vacío) o edición de una estación de cocina. */
+    fun saveStation(st: Station) = synchronized(lock) {
+        val s = _state.value
+        val name = text(st.name, "Estación", 30)
+        if (st.categories.isEmpty() && st.products.isEmpty()) throw ValidationException("Elige qué prepara la estación")
+        if (s.stations.any { it.name.equals(name, ignoreCase = true) && it.id != st.id }) throw ValidationException("Ya hay una estación «$name»")
+        val clean = st.copy(name = name, categories = st.categories.distinct().take(50), products = st.products.distinct().take(200))
+        val isNew = st.id.isBlank() || s.stations.none { it.id == st.id }
+        if (isNew && s.stations.size >= 10) throw ValidationException("Máximo 10 estaciones")
+        commit(
+            s.copy(
+                stations = if (isNew) s.stations + clean.copy(id = UUID.randomUUID().toString())
+                else s.stations.map { if (it.id == st.id) clean else it },
+            ),
+        )
+    }
+
+    fun deleteStation(id: String) = synchronized(lock) {
+        commit(_state.value.copy(stations = _state.value.stations.filterNot { it.id == id }))
+    }
+
+    fun setKitchenName(name: String) = synchronized(lock) {
+        commit(_state.value.copy(kitchenName = text(name, "Nombre de la cocina", 30, required = false)))
+    }
+
     fun saveFreeExtras(items: List<String>) = synchronized(lock) {
         val clean = items.map { it.trim() }.filter { it.isNotEmpty() }.distinct()
         if (clean.any { it.length > 30 }) throw ValidationException("Extra: máximo 30 caracteres")

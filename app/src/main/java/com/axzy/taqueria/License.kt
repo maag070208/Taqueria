@@ -85,6 +85,8 @@ data class LicenseCache(
     val lastCheckMs: Long = 0,
     /** Meseras a la vez que incluye el plan (null = ilimitadas). */
     val waiterLimit: Int? = null,
+    /** Teléfonos de cocina que incluye el plan, contando la principal (null = ilimitados). */
+    val kitchenLimit: Int? = null,
     val latestApp: LatestApp? = null,
 ) {
     fun effectiveNow(phoneNowMs: Long) = maxOf(phoneNowMs + clockOffsetMs, maxSeenMs)
@@ -101,6 +103,7 @@ data class LicenseCache(
             maxSeenMs = maxOf(maxSeenMs, server),
             lastCheckMs = phoneNowMs,
             waiterLimit = r.limits.waiters,
+            kitchenLimit = r.limits.kitchens,
             latestApp = r.latestApp,
         )
     }
@@ -158,6 +161,8 @@ class LicenseManager(context: Context, private val buildApiUrl: String, private 
 
     /** Meseras a la vez que permite el plan; lo lee el servidor de cocina (null = ilimitadas). */
     val waiterLimit: Int? get() = cache?.takeIf { !it.revoked }?.waiterLimit
+    /** Pantallas de cocina extra que acepta la principal: las cocinas del plan menos ella (null = ilimitadas). */
+    val screenLimit: Int? get() = cache?.takeIf { !it.revoked }?.kitchenLimit?.let { maxOf(0, it - 1) }
 
     /** Versión nueva publicada en la Central, si es mayor que la instalada. */
     var update by mutableStateOf(cache?.latestApp?.takeIf { it.versionCode > installedVersionCode })

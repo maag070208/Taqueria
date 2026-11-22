@@ -13,6 +13,7 @@ import com.axzy.taqueria.ui.LicenseGate
 import com.axzy.taqueria.ui.RoleScreen
 import com.axzy.taqueria.ui.TaqueriaTheme
 import com.axzy.taqueria.ui.WaiterScreen
+import com.axzy.taqueria.ui.ScreenScreen
 
 class MainActivity : ComponentActivity() {
     private val localNetworkRequest = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
@@ -51,6 +52,7 @@ class MainActivity : ComponentActivity() {
                         KitchenScreen(app, notice)
                     }
                     Role.WAITER -> WaiterScreen(app, onExit = { app.applyRole(null) })
+                    Role.SCREEN -> ScreenScreen(app, onExit = { app.applyRole(null) })
                 }
             }
         }

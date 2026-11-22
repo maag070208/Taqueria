@@ -84,7 +84,7 @@ class Handler(BaseHTTPRequestHandler):
         if self.path.rstrip("/").endswith("/backup"):
             if not BACKUP:
                 return self._reply(404, b'{"code":"NO_BACKUP"}')
-            return self._reply(200, json.dumps(BACKUP).encode())
+            return self._reply(200, json.dumps({"backups": [{"deviceId": "prueba", **BACKUP}]}).encode())
         if not self.path.rstrip("/").endswith("/license"):
             return self._reply(404, b"{}")
         if self.headers.get("Authorization", "").startswith("Bearer revocado"):

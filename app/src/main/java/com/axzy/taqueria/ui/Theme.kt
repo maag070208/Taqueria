@@ -218,23 +218,29 @@ fun RoleScreen(onPick: (Role) -> Unit) {
         Image(painterResource(R.drawable.ico_taco_generico), contentDescription = null, modifier = Modifier.size(72.dp))
         Text("Tacomanda", fontSize = 34.sp, fontWeight = FontWeight.Black, modifier = Modifier.padding(top = 8.dp))
         Text("¿Qué hará este teléfono?", color = Palette.muted, fontSize = 17.sp, modifier = Modifier.padding(top = 4.dp, bottom = 24.dp))
-        GridRow(listOf(Role.KITCHEN, Role.WAITER), 2) { role ->
-            val (icon, title, body) = when (role) {
-                Role.KITCHEN -> Triple(R.drawable.ico_rol_taquero, "Cocina", "El taquero ve las órdenes. El admin entra con PIN a ventas y menú.")
-                Role.WAITER -> Triple(R.drawable.ico_rol_mesero, "Mesero", "Toma las órdenes de las mesas.")
-            }
-            Column(
-                Modifier.fillMaxWidth().aspectRatio(0.8f).background(Palette.card, Ui.shape)
-                    .border(1.dp, Palette.line, Ui.shape).clickable { onPick(role) }.padding(Ui.pad),
-            ) {
-                Illustration(icon, 64.dp)
-                Spacer(Modifier.weight(1f))
-                Text(title, fontSize = 22.sp, fontWeight = FontWeight.Bold)
-                Text(body, color = Palette.muted, fontSize = 14.sp, minLines = 3, maxLines = 3, modifier = Modifier.padding(top = 4.dp))
+        // Una tarjeta por renglón: con tres roles, la cuadrícula cortaba el texto en teléfonos.
+        Column(verticalArrangement = Arrangement.spacedBy(Ui.gap)) {
+            listOf(Role.KITCHEN, Role.WAITER, Role.SCREEN).forEach { role ->
+                val (icon, title, body) = when (role) {
+                    Role.KITCHEN -> Triple(R.drawable.ico_rol_taquero, "Cocina", "La cocina principal: recibe las órdenes. El admin entra con PIN a ventas y menú.")
+                    Role.WAITER -> Triple(R.drawable.ico_rol_mesero, "Mesero", "Toma las órdenes de las mesas.")
+                    Role.SCREEN -> Triple(R.drawable.ico_rol_taquero, "Pantalla de cocina", "Otra pantalla conectada a la cocina: ve todas las órdenes o solo su estación.")
+                }
+                Row(
+                    Modifier.fillMaxWidth().background(Palette.card, Ui.shape)
+                        .border(1.dp, Palette.line, Ui.shape).clickable { onPick(role) }.padding(Ui.pad),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Illustration(icon, 56.dp)
+                    Column(Modifier.padding(start = Ui.pad)) {
+                        Text(title, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                        Text(body, color = Palette.muted, fontSize = 14.sp, modifier = Modifier.padding(top = 2.dp))
+                    }
+                }
             }
         }
         Text(
-            "Cocina y mesero deben estar en el mismo WiFi o en el hotspot del teléfono de cocina. No se necesita internet.",
+            "Todos deben estar en el mismo WiFi o en la zona del teléfono de cocina. No se necesita internet.",
             color = Palette.muted, fontSize = 13.sp, textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth().padding(top = 24.dp),
         )

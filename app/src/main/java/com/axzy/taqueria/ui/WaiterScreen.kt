@@ -204,12 +204,12 @@ private fun Home(
     val connected = link is Link.Connected
     val update by ctx.client.latestApp.collectAsState()
     val (linkColor, linkText) = when {
-        link is Link.Connected -> Palette.ok to "● Conectado a cocina"
+        link is Link.Connected -> Palette.ok to "● Conectado a ${state.kitchenName.ifBlank { "cocina" }}"
         link is Link.Rejected -> Palette.late to "● ${(link as Link.Rejected).message}"
         zone is WaiterWifi.State.Joining -> Palette.warn to "● Entrando a la red de cocina «${(zone as WaiterWifi.State.Joining).ssid}»…"
         zone is WaiterWifi.State.Failed -> Palette.late to "● ${(zone as WaiterWifi.State.Failed).message}"
         else -> when (link) {
-        is Link.Connected -> Palette.ok to "● Conectado a cocina"
+        is Link.Connected -> Palette.ok to "● Conectado a ${state.kitchenName.ifBlank { "cocina" }}"
         is Link.Connecting -> Palette.warn to "● Conectando…"
         Link.Searching -> Palette.late to "● Buscando cocina en la red…"
         is Link.Rejected -> Palette.late to "● ${(link as Link.Rejected).message}"
@@ -404,7 +404,7 @@ fun payColor(p: PayStatus) = when (p) {
 }
 
 @Composable
-private fun SettingsDialog(current: String, onDismiss: () -> Unit, onSave: (String) -> Unit, onScanQr: () -> Unit) {
+internal fun SettingsDialog(current: String, onDismiss: () -> Unit, onSave: (String) -> Unit, onScanQr: () -> Unit) {
     var host by remember { mutableStateOf(current) }
     AlertDialog(
         onDismissRequest = onDismiss,

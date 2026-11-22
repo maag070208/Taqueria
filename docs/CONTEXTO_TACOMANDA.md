@@ -112,6 +112,27 @@ App Android (Kotlin + Jetpack Compose) para taquerías, con dos roles en la mism
   - La mesera las pasa a la cocina al conectar, y la cocina las sube a `POST /app-errors` cada 5 minutos.
 - El contrato de todo esto está en `AxzyCentral/docs/CONTRATO-VENTAS.md` §6–8.
 
+### Varias cocinas
+
+Tres formas de trabajar, configurables:
+1. **Misma orden en todas (espejo):** cada pantalla en "Ver: todas las órdenes" muestra el ticket completo.
+2. **Por estación (en paralelo):**
+   - El admin crea estaciones en Menú → Ajustes (`AppState.stations`). Cada una toma categorías completas o productos por nombre: "Asada" agarra el taco, el quesataco y el burrito de asada.
+   - Un mixto sale en cada estación de las carnes que lleva.
+   - Cada pantalla elige su estación (prefs `stationView`) y ve solo sus renglones, con "+N en otras estaciones".
+   - Lo que no es de ninguna estación solo sale en "todas".
+   - El filtro es `AppState.ordersForStation`.
+3. **Independientes:** otra cocina principal con su propia licencia y su nombre (`kitchenName`, Ajustes). Lleva sus propias mesas, cuentas, menú y meseras; la mesera se conecta a la que escanee.
+
+Detalles:
+- **Rol "Pantalla de cocina" (`Role.SCREEN`, `ui/ScreenScreen.kt`):**
+  - Se conecta a la principal con el mismo QR que las meseras y manda `Hello(screen = true)`.
+  - Solo muestra: la principal rechaza cualquier cambio que intente.
+  - No guarda datos ni respalda.
+  - La principal la limita a `limits.kitchens - 1` pantallas.
+- **Respaldo:** es uno por teléfono de cocina. Al recuperar se elige de qué cocina (`GET /backup` devuelve la lista).
+- Con dos cocinas independientes en la misma red conviene conectar a las meseras por QR: la búsqueda automática toma la primera que encuentre.
+
 ## Estado de entornos
 
 - **AxzyCentral (Railway):**
@@ -125,7 +146,7 @@ App Android (Kotlin + Jetpack Compose) para taquerías, con dos roles en la mism
 
 ## Pruebas
 
-- `./gradlew :app:testDebugUnitTest`: 87 pruebas. `SalesSyncTest` y `BackupSyncTest` cubren ventas y respaldo contra una Central de mentira, y `OrderOutboxTest` cubre la cola de órdenes. `KitchenWaiterE2ETest` también cubre el límite de meseras y las fallas que pasa la mesera. Las unitarias cubren tortilla y precio, mixto, órdenes por monto, personas y extras, atajos de "Va", Admin, edición, cobros, archivo, reinicio y el PIN de admin.
+- `./gradlew :app:testDebugUnitTest`: 94 pruebas. `SalesSyncTest` y `BackupSyncTest` cubren ventas y respaldo contra una Central de mentira, y `OrderOutboxTest` cubre la cola de órdenes. `KitchenWaiterE2ETest` también cubre el límite de meseras, las pantallas extra y las fallas que pasa la mesera. `StationTest` cubre las estaciones. Las unitarias cubren tortilla y precio, mixto, órdenes por monto, personas y extras, atajos de "Va", Admin, edición, cobros, archivo, reinicio y el PIN de admin.
 - `KitchenWaiterE2ETest` es de punta a punta: levanta el `KitchenServer` real con su `OrderStore` en disco y meseros `WaiterClient` reales por TCP en localhost (puerto libre, sin mDNS). Cubre:
   - menú al conectar;
   - orden por persona con broadcast a dos meseros;
@@ -153,7 +174,7 @@ App Android (Kotlin + Jetpack Compose) para taquerías, con dos roles en la mism
    - Quesatacos de Suadero, Cabeza y Mixto a $45.
    - Burritos, Vampiros y Quesadillas por carne.
 4. Hacer commit y generar el APK release (`release.sh`) cuando se apruebe. La versión ya es 1.2.0 (5).
-5. Desplegar la Central con las migraciones `20261122010000_sales`, `20261122020000_backups` y `20261122030000_app_updates_errors`. Railway la aplica al arrancar (`prisma migrate deploy`), junto con la de usuarios y roles que sigue pendiente. Hasta entonces la cocina reintenta y no pierde nada.
+5. Desplegar la Central con las migraciones `20261122010000_sales`, `20261122020000_backups`, `20261122030000_app_updates_errors` y `20261122040000_backups_per_device`. Railway la aplica al arrancar (`prisma migrate deploy`), junto con la de usuarios y roles que sigue pendiente. Hasta entonces la cocina reintenta y no pierde nada.
 6. Probar la zona con dos teléfonos físicos.
    - Impresora térmica: descartada por ahora (22/nov).
 7. Pendientes opcionales:

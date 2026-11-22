@@ -76,6 +76,22 @@ data class Product(
         if (variants.isEmpty()) priceCents.takeIf { variant.isEmpty() } else variants.firstOrNull { it.name == variant }?.priceCents
 }
 
+/**
+ * Estación de cocina: lo que prepara una persona. Toma categorías completas
+ * ("Bebidas") o productos por nombre ("Asada" = taco, quesataco y burrito de asada).
+ */
+@Serializable
+data class Station(
+    val id: String,
+    val name: String,
+    val categories: List<String> = emptyList(),
+    /** Nombres de producto; un mixto entra si lleva alguna de estas carnes. */
+    val products: List<String> = emptyList(),
+)
+
+/** Orden como la ve una estación: solo sus renglones y cuántos van a otras. */
+data class StationOrder(val order: Order, val elsewhere: Int)
+
 // ---------------- Órdenes, cuentas y pagos ----------------
 
 /** Grupo de preparación: N piezas de un producto con las mismas modificaciones. */
@@ -185,6 +201,10 @@ data class AppState(
     val tableCount: Int = 12,
     /** Extras sin costo que se pueden pedir por persona. */
     val freeExtras: List<String> = emptyList(),
+    /** Estaciones de cocina (p. ej. el taquero de asada y el de adobada); vacío = una sola cocina. */
+    val stations: List<Station> = emptyList(),
+    /** Nombre de esta cocina; lo ven las meseras y las pantallas (útil con varias cocinas independientes). */
+    val kitchenName: String = "",
 ) {
     /** Categorías configuradas más las que solo existan en productos, en orden. */
     fun menuCategories(): List<Category> =
@@ -212,6 +232,28 @@ data class AppState(
         !hasPending(account.id) && balanceOf(account) == 0L && (account.cancelledAt != null || ordersOf(account.id).isNotEmpty())
 
     fun openAccounts() = accounts.filter { it.closedAt == null }
+
+    /** ¿Este renglón lo prepara la estación? Por categoría, por producto o, en un mixto, por cualquiera de sus carnes. */
+    fun Station.prepares(l: OrderLine): Boolean {
+        val p = this@AppState.products.firstOrNull { it.id == l.productId }
+        val name = p?.name ?: l.name
+        return (p != null && p.category in categories) || name in this.products || l.mix.any { it in this.products }
+    }
+
+    /**
+     * Lo que ve una pantalla de cocina: con [stationId] nulo, todo (espejo); con una
+     * estación, solo sus renglones, y las órdenes sin nada para ella no aparecen.
+     * Lo que no es de ninguna estación solo se ve en las pantallas de "todo".
+     */
+    fun ordersForStation(stationId: String?, orders: List<Order>): List<StationOrder> {
+        val station = stations.firstOrNull { it.id == stationId }
+            ?: return orders.map { StationOrder(it, 0) }
+        return orders.mapNotNull { o ->
+            val mine = o.lines.filter { station.prepares(it) }
+            if (mine.isEmpty()) null
+            else StationOrder(o.copy(lines = mine, revisions = o.revisions.map { r -> r.filter { station.prepares(it) } }), o.lines.size - mine.size)
+        }
+    }
 
     /** Nombre del renglón para mostrar: la presentación de siempre (Maíz) no se repite, solo se marca la otra (Harina). */
     fun labelOf(l: OrderLine): String {
@@ -344,7 +386,11 @@ sealed interface ClientMsg {
      * cuántas meseras hay (el plan puede limitarlas) y suelta una conexión vieja del mismo teléfono.
      */
     @Serializable @SerialName("hello")
-    data class Hello(override val reqId: Long, val waiterId: String, val model: String = "") : ClientMsg
+    data class Hello(
+        override val reqId: Long, val waiterId: String, val model: String = "",
+        /** Pantalla de cocina extra (solo muestra órdenes); si no, es una mesera. */
+        val screen: Boolean = false,
+    ) : ClientMsg
 
     /** Fallas de la app de mesera; la cocina las sube a la Central. */
     @Serializable @SerialName("appErrors")

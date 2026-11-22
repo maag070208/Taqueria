@@ -29,7 +29,7 @@ class BackupSyncTest {
                 "PUT" -> {
                     puts++
                     val up = AppJson.decodeFromString<BackupUpload>(ex.requestBody.readBytes().toString(Charsets.UTF_8))
-                    stored = AppJson.encodeToString(BackupDownload(up.savedAt, "Tablet cocina", false, up.appVersion, up.state))
+                    stored = AppJson.encodeToString(BackupList(listOf(BackupDownload("d1", up.savedAt, "Tablet cocina", false, up.appVersion, up.state))))
                     200 to """{"saved":true}"""
                 }
                 else -> stored?.let { 200 to it } ?: (404 to """{"code":"NO_BACKUP"}""")
@@ -74,9 +74,9 @@ class BackupSyncTest {
         BackupSync(kitchen, { creds }, "1.2.0 (5)").backup()
 
         val sync = BackupSync(newPhone, { creds }, "1.2.0 (5)")
-        val found = sync.fetch() as BackupSync.Restore.Found
-        assertEquals("Tablet cocina", found.backup.deviceName)
-        sync.restore(found.backup)
+        val found = (sync.fetch() as BackupSync.Restore.Found).backups.single()
+        assertEquals("Tablet cocina", found.deviceName)
+        sync.restore(found)
 
         val s = newPhone.state.value
         assertEquals(listOf("4"), s.openAccounts().map { it.table })

@@ -64,6 +64,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.compose.rememberLauncherForActivityResult
 import android.content.pm.PackageManager
 import com.axzy.taqueria.Order
+import com.axzy.taqueria.StationOrder
 import com.axzy.taqueria.OrderStatus
 import com.axzy.taqueria.OrderStore
 import com.axzy.taqueria.DEFAULT_PORT
@@ -99,6 +100,8 @@ fun KitchenScreen(app: App, notice: String?) {
     var pinMode by remember { mutableStateOf<PinMode?>(null) }
     var confirmExit by remember { mutableStateOf(false) }
     var showBackup by remember { mutableStateOf(false) }
+    var pickStation by remember { mutableStateOf(false) }
+    val boardState by store.state.collectAsState()
     val drawer = rememberDrawerControl()
     val context = LocalContext.current
     // La pantalla de cocina nunca se apaga.
@@ -118,11 +121,12 @@ fun KitchenScreen(app: App, notice: String?) {
         val missing = KitchenZone.permissions.filter { context.checkSelfPermission(it) != PackageManager.PERMISSION_GRANTED }
         if (missing.isEmpty()) app.zone.start() else zonePermissions.launch(missing.toTypedArray())
     }
-    val qr = DrawerItem(R.drawable.ic_qr, "Conectar meseras (QR)") { showQr = true }
+    val qr = DrawerItem(R.drawable.ic_qr, "Conectar meseras y pantallas (QR)") { showQr = true }
+    val viewItem = stationViewItem(boardState, app.stationView) { pickStation = true }
     val zoneItem = if (zone is KitchenZone.State.On) DrawerItem(R.drawable.ic_wifi, "Zona activa") { showQr = true }
         else DrawerItem(R.drawable.ic_wifi, "Activar zona", onClick = ::startZone)
     val groups = if (app.admin) listOf(
-        listOf(item(R.drawable.ic_chart, "Ventas", KitchenPage.SALES), item(R.drawable.ic_tag, "Menú y precios", KitchenPage.MENU), qr, zoneItem),
+        listOf(item(R.drawable.ic_chart, "Ventas", KitchenPage.SALES), item(R.drawable.ic_tag, "Menú y precios", KitchenPage.MENU), qr, zoneItem, viewItem),
         listOf(
             DrawerItem(R.drawable.ic_download, "Respaldo en la Central") { showBackup = true },
             DrawerItem(R.drawable.ic_keypad, "Cambiar PIN") { pinMode = PinMode.CHANGE },
@@ -130,14 +134,14 @@ fun KitchenScreen(app: App, notice: String?) {
             DrawerItem(R.drawable.ic_lock, "Salir de admin", onClick = ::toOrders),
         ),
     ) else listOf(
-        listOf(item(R.drawable.ic_orders, "Órdenes", KitchenPage.ORDERS), item(R.drawable.ic_toggle, "Disponibilidad", KitchenPage.AVAILABILITY), qr, zoneItem),
+        listOf(item(R.drawable.ic_orders, "Órdenes", KitchenPage.ORDERS), item(R.drawable.ic_toggle, "Disponibilidad", KitchenPage.AVAILABILITY), qr, zoneItem, viewItem),
         listOf(DrawerItem(R.drawable.ic_key, "Entrar como admin") { pinMode = if (app.adminPin.isSet) PinMode.ENTER else PinMode.CREATE }),
     )
 
     AppDrawer(drawer, staff, "Teléfono de cocina", groups) {
         if (page != KitchenPage.ORDERS) BackHandler(onBack = ::toOrders)
         when (page) {
-            KitchenPage.ORDERS -> OrdersBoard(store, server, notice, (zone as? KitchenZone.State.On)?.wifi?.ssid, app.license.update, onMenu = drawer::open)
+            KitchenPage.ORDERS -> OrdersBoard(store, server, notice, (zone as? KitchenZone.State.On)?.wifi?.ssid, app.license.update, app.stationView, onMenu = drawer::open)
             KitchenPage.AVAILABILITY -> AdminScreen(store, canEdit = false, onMenu = drawer::open)
             KitchenPage.MENU -> AdminScreen(store, canEdit = true, onMenu = drawer::open)
             KitchenPage.SALES -> SalesScreen(store, onMenu = drawer::open)
@@ -162,6 +166,9 @@ fun KitchenScreen(app: App, notice: String?) {
             onDismiss = { pinMode = null },
         )
     }
+    if (pickStation) {
+        StationPickerDialog(boardState, app.stationView, onPick = { app.updateStationView(it); pickStation = false }, onDismiss = { pickStation = false })
+    }
     if (showBackup && app.admin) {
         val current by store.state.collectAsState()
         BackupDialog(app.backupSync, current, onDismiss = { showBackup = false })
@@ -183,23 +190,52 @@ fun KitchenScreen(app: App, notice: String?) {
  */
 @Composable
 private fun OrdersBoard(
-    store: OrderStore, server: KitchenServer, notice: String?, zoneSsid: String?, update: com.axzy.taqueria.LatestApp?, onMenu: () -> Unit,
+    store: OrderStore, server: KitchenServer, notice: String?, zoneSsid: String?, update: com.axzy.taqueria.LatestApp?,
+    stationId: String?, onMenu: () -> Unit,
 ) {
-    val context = LocalContext.current
     val state by store.state.collectAsState()
     val waiters by server.clientCount.collectAsState()
+    val screens by server.screenCount.collectAsState()
     val serverError by server.error.collectAsState()
-    val now = rememberNow()
-    val pending = state.orders.filter { it.status == OrderStatus.PENDING }
+    val ips = remember(waiters) { KitchenServer.localIps().joinToString("  ") }
+    val who = (if (waiters == 1) "1 mesera" else "$waiters meseras") + if (screens > 0) " · ${if (screens == 1) "1 pantalla" else "$screens pantallas"}" else ""
+    OrdersView(
+        state = state,
+        stationId = stationId,
+        subtitle = serverError ?: "${if (waiters > 0) "●" else "○"} $who · ${zoneSsid?.let { "Zona «$it»" } ?: "IP $ips"}",
+        subtitleColor = when {
+            serverError != null -> Palette.late
+            waiters > 0 -> Palette.ok
+            else -> Palette.muted
+        },
+        notice = notice,
+        update = update,
+        onMenu = onMenu,
+    )
+}
+
+/**
+ * Tablero de tickets: lo usan la cocina principal y las pantallas de cocina extra.
+ * Con [stationId] solo se ven los renglones de esa estación.
+ */
+@Composable
+fun OrdersView(
+    state: AppState, stationId: String?, subtitle: String, subtitleColor: Color, notice: String?,
+    update: com.axzy.taqueria.LatestApp?, onMenu: () -> Unit, offset: Long = 0,
+) {
+    val context = LocalContext.current
+    val now = rememberNow() + offset
+    val station = state.stations.firstOrNull { it.id == stationId }
+    val pending = state.ordersForStation(station?.id, state.orders.filter { it.status == OrderStatus.PENDING })
     // Un ticket por mesa; para llevar, uno por cliente (cuenta), en su propia sección.
-    val tickets = pending.groupBy { if (isTakeout(it.table)) "${it.table}#${it.accountId}" else it.table }.values
-        .map { orders -> orders.sortedBy { it.createdAt } }
-        .sortedBy { it.first().createdAt }
-    val (takeout, byTable) = tickets.partition { isTakeout(it.first().table) }
+    val tickets = pending.groupBy { if (isTakeout(it.order.table)) "${it.order.table}#${it.order.accountId}" else it.order.table }.values
+        .map { orders -> orders.sortedBy { it.order.createdAt } }
+        .sortedBy { it.first().order.createdAt }
+    val (takeout, byTable) = tickets.partition { isTakeout(it.first().order.table) }
 
     // Suena y vibra cuando entra una orden nueva o cambia una existente.
     var known by remember { mutableStateOf<Map<String, Long?>?>(null) }
-    val current = pending.associate { it.id to it.editedAt }
+    val current = pending.associate { it.order.id to it.order.editedAt }
     LaunchedEffect(current) {
         val before = known
         if (before != null && current.any { (id, edited) -> id !in before || before[id] != edited }) {
@@ -209,16 +245,11 @@ private fun OrdersBoard(
         known = current
     }
 
-    val ips = remember(waiters) { KitchenServer.localIps().joinToString("  ") }
     Column(Modifier.fillMaxSize().safeDrawingPadding()) {
         TopBar(
-            title = "Cocina · ${pending.size} ${if (pending.size == 1) "orden" else "órdenes"}",
-            subtitle = serverError ?: "${if (waiters > 0) "●" else "○"} ${if (waiters == 1) "1 mesera conectada" else "$waiters meseras conectadas"} · ${zoneSsid?.let { "Zona «$it»" } ?: "IP $ips"}",
-            subtitleColor = when {
-                serverError != null -> Palette.late
-                waiters > 0 -> Palette.ok
-                else -> Palette.muted
-            },
+            title = "${station?.name ?: state.kitchenName.ifBlank { "Cocina" }} · ${pending.size} ${if (pending.size == 1) "orden" else "órdenes"}",
+            subtitle = subtitle,
+            subtitleColor = subtitleColor,
             onMenu = onMenu,
         )
         if (notice != null) {
@@ -244,11 +275,11 @@ private fun OrdersBoard(
                 ) {
                     if (takeout.isNotEmpty()) {
                         item(key = "h-llevar") { SectionTitle("Para llevar · ${takeout.size}") }
-                        gridRows(takeout, cols, key = { "l-" + it.first().accountId }) { orders -> TableTicket(state, orders, now) }
+                        gridRows(takeout, cols, key = { "l-" + it.first().order.accountId }) { orders -> TableTicket(state, orders, now) }
                     }
                     if (byTable.isNotEmpty()) {
                         if (takeout.isNotEmpty()) item(key = "h-mesas") { SectionTitle("Mesas · ${byTable.size}", Modifier.padding(top = 8.dp)) }
-                        gridRows(byTable, cols, key = { "m-" + it.first().table }) { orders -> TableTicket(state, orders, now) }
+                        gridRows(byTable, cols, key = { "m-" + it.first().order.table }) { orders -> TableTicket(state, orders, now) }
                     }
                 }
             }
@@ -257,7 +288,9 @@ private fun OrdersBoard(
 }
 
 @Composable
-private fun TableTicket(state: AppState, orders: List<Order>, now: Long) {
+private fun TableTicket(state: AppState, parts: List<StationOrder>, now: Long) {
+    val orders = parts.map { it.order }
+    val elsewhere = parts.sumOf { it.elsewhere }
     val first = orders.first()
     val elapsed = now - first.createdAt
     val color = waitColor(elapsed)
@@ -311,6 +344,12 @@ private fun TableTicket(state: AppState, orders: List<Order>, now: Long) {
                         textDecoration = TextDecoration.LineThrough,
                     )
                 }
+            }
+            if (elsewhere > 0) {
+                Text(
+                    "+ $elsewhere ${if (elsewhere == 1) "renglón" else "renglones"} en otras estaciones",
+                    color = Palette.muted, fontSize = 14.sp, fontWeight = FontWeight.Bold,
+                )
             }
         }
     }

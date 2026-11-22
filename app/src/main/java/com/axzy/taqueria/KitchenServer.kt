@@ -39,6 +39,8 @@ class KitchenServer(
     private val port: Int = DEFAULT_PORT,
     /** Meseras a la vez que incluye el plan (null = ilimitadas). */
     private val waiterLimit: () -> Int? = { null },
+    /** Pantallas de cocina extra a la vez (null = ilimitadas). */
+    private val screenLimit: () -> Int? = { null },
     /** Versión nueva publicada en la Central, para avisarle también a las meseras. */
     private val latestApp: () -> LatestApp? = { null },
     /** Fallas que reporta una mesera; la cocina las sube a la Central. */
@@ -50,8 +52,11 @@ class KitchenServer(
     private var nsdListener: NsdManager.RegistrationListener? = null
     private val clients: MutableSet<Connection> = ConcurrentHashMap.newKeySet()
 
+    /** Meseras conectadas (las pantallas de cocina extra van aparte, en [screenCount]). */
     private val _clientCount = MutableStateFlow(0)
     val clientCount = _clientCount.asStateFlow()
+    private val _screenCount = MutableStateFlow(0)
+    val screenCount = _screenCount.asStateFlow()
     private val _error = MutableStateFlow<String?>(null)
     val error = _error.asStateFlow()
     /** Puerto en que quedó escuchando; nulo mientras no abre. */
@@ -106,7 +111,7 @@ class KitchenServer(
     private fun serve(socket: Socket) {
         val conn = Connection(socket)
         clients += conn
-        _clientCount.value = clients.size
+        recount()
         try {
             conn.send(stateMsg())
             while (true) {
@@ -120,7 +125,7 @@ class KitchenServer(
         } finally {
             conn.close()
             clients -= conn
-            _clientCount.value = clients.size
+            recount()
         }
     }
 
@@ -141,6 +146,7 @@ class KitchenServer(
         }
         // Con límite de meseras solo se atiende a quien se identificó (una app de mesera vieja no).
         if (conn.waiterId == null && waiterLimit() != null) return ServerMsg.Reply(msg.reqId, error = OLD_WAITER_MESSAGE)
+        if (conn.screen) return ServerMsg.Reply(msg.reqId, error = "Las pantallas de cocina solo muestran las órdenes.")
         if (isLocked()) return ServerMsg.Reply(msg.reqId, error = LOCKED_MESSAGE)
         return try {
             when (msg) {
@@ -168,14 +174,22 @@ class KitchenServer(
     private fun hello(msg: ClientMsg.Hello, conn: Connection): ServerMsg.Reply = synchronized(clients) {
         val id = msg.waiterId.take(64)
         clients.filter { it !== conn && it.waiterId == id }.forEach { it.close() }
-        val limit = waiterLimit()
-        val others = clients.mapNotNull { c -> c.waiterId.takeIf { c !== conn && !c.closed && it != id } }.distinct().size
+        // Meseras y pantallas de cocina se cuentan cada una contra su límite.
+        val limit = if (msg.screen) screenLimit() else waiterLimit()
+        val others = clients.mapNotNull { c -> c.waiterId.takeIf { c !== conn && !c.closed && c.screen == msg.screen && it != id } }.distinct().size
         if (limit != null && others >= limit) {
             conn.rejected = true
-            return ServerMsg.Reply(msg.reqId, error = waiterLimitMessage(limit))
+            return ServerMsg.Reply(msg.reqId, error = if (msg.screen) screenLimitMessage(limit) else waiterLimitMessage(limit))
         }
+        conn.screen = msg.screen
         conn.waiterId = id
+        recount()
         ServerMsg.Reply(msg.reqId)
+    }
+
+    private fun recount() {
+        _clientCount.value = clients.count { !it.screen }
+        _screenCount.value = clients.count { it.screen }
     }
 
     private fun stateMsg() = AppJson.encodeToString<ServerMsg>(ServerMsg.State(store.state.value, System.currentTimeMillis(), latestApp()))
@@ -195,7 +209,8 @@ class KitchenServer(
             override fun onUnregistrationFailed(info: NsdServiceInfo, code: Int) {}
         }
         val info = NsdServiceInfo().apply {
-            serviceName = "Taqueria Cocina"
+            // Con varias cocinas independientes en la misma red, el nombre ayuda a distinguirlas.
+            serviceName = "Taqueria ${store.state.value.kitchenName.ifBlank { "Cocina" }}".take(60)
             serviceType = SERVICE_TYPE
             this.port = port
         }
@@ -218,6 +233,8 @@ class KitchenServer(
         @Volatile var waiterId: String? = null
         /** Se rechazó por el límite del plan: se cierra después de avisarle. */
         @Volatile var rejected = false
+        /** Pantalla de cocina extra: solo recibe el estado. */
+        @Volatile var screen = false
         @Volatile var closed = false
         val reader = BufferedReader(InputStreamReader(socket.getInputStream(), Charsets.UTF_8))
         private val writer = BufferedWriter(OutputStreamWriter(socket.getOutputStream(), Charsets.UTF_8))
@@ -236,6 +253,9 @@ class KitchenServer(
         const val PING_MS = 10_000L
         const val LOCKED_MESSAGE = "La cuenta de la taquería está suspendida. Revisa el teléfono de cocina."
         const val OLD_WAITER_MESSAGE = "Actualiza la app de este teléfono para conectarte a cocina."
+        fun screenLimitMessage(limit: Int) =
+            if (limit == 0) "El plan incluye solo la cocina principal. Para más pantallas de cocina, mejora el plan."
+            else "El plan incluye ${if (limit == 1) "1 pantalla" else "$limit pantallas"} de cocina extra y ya están conectadas."
         fun waiterLimitMessage(limit: Int) =
             "El plan incluye ${if (limit == 1) "1 mesera" else "$limit meseras"} a la vez y ya están conectadas. Desconecta otro teléfono o mejora el plan."
         private const val MAX_REQUEST_CHARS = 64 * 1024

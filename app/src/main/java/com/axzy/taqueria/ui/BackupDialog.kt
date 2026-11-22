@@ -3,7 +3,13 @@ package com.axzy.taqueria.ui
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.RadioButton
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -30,6 +36,9 @@ import java.util.Locale
 
 private val whenFmt = DateTimeFormatter.ofPattern("EEE d MMM, HH:mm", Locale.forLanguageTag("es-MX"))
 
+private fun whenText(iso: String) =
+    runCatching { whenFmt.format(OffsetDateTime.parse(iso).atZoneSameInstant(ZoneId.systemDefault())) }.getOrDefault(iso)
+
 private fun AppState.summary(): String {
     val open = openAccounts().count { it.cancelledAt == null }
     return "${if (open == 1) "1 cuenta abierta" else "$open cuentas abiertas"} · ${products.size} productos"
@@ -43,9 +52,12 @@ fun BackupDialog(backup: BackupSync, current: AppState, onDismiss: () -> Unit) {
     val lastBackup by backup.lastBackupAt.collectAsState()
     var result by remember { mutableStateOf<BackupSync.Restore?>(null) }
     var restoring by remember { mutableStateOf(false) }
+    var chosen by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(Unit) { result = backup.fetch() }
 
-    val found = result as? BackupSync.Restore.Found
+    val all = (result as? BackupSync.Restore.Found)?.backups.orEmpty()
+    // Por defecto el de este mismo teléfono; si no tiene, el más reciente.
+    val found = all.firstOrNull { it.deviceId == chosen } ?: all.firstOrNull { it.fromThisDevice } ?: all.firstOrNull()
     AlertDialog(
         onDismissRequest = { if (!restoring) onDismiss() },
         title = { Text("Respaldo en la Central") },
@@ -62,9 +74,17 @@ fun BackupDialog(backup: BackupSync, current: AppState, onDismiss: () -> Unit) {
                     BackupSync.Restore.NotActivated -> Text("Activa la licencia de este teléfono para usar el respaldo.")
                     is BackupSync.Restore.Failed -> Text(r.message, color = Palette.late)
                     is BackupSync.Restore.Found -> {
-                        val b = r.backup
-                        val at = runCatching { whenFmt.format(OffsetDateTime.parse(b.savedAt).atZoneSameInstant(ZoneId.systemDefault())) }.getOrDefault(b.savedAt)
-                        Text("Último respaldo: $at, de «${b.deviceName}»${if (b.fromThisDevice) " (este teléfono)" else ""}.")
+                        val b = found!!
+                        if (r.backups.size > 1) {
+                            Text("Hay respaldos de ${r.backups.size} cocinas. Elige cuál:", fontSize = 14.sp)
+                            r.backups.forEach { o ->
+                                Row(Modifier.fillMaxWidth().clickable { chosen = o.deviceId }, verticalAlignment = Alignment.CenterVertically) {
+                                    RadioButton(selected = o === b, onClick = { chosen = o.deviceId })
+                                    Text("«${o.deviceName}»${if (o.fromThisDevice) " (este teléfono)" else ""} · ${whenText(o.savedAt)}", fontSize = 14.sp)
+                                }
+                            }
+                        }
+                        Text("Último respaldo: ${whenText(b.savedAt)}, de «${b.deviceName}»${if (b.fromThisDevice) " (este teléfono)" else ""}.")
                         Text("Trae: ${b.state.summary()}.")
                         Text("Este teléfono tiene: ${current.summary()}.")
                         Text(
@@ -80,7 +100,7 @@ fun BackupDialog(backup: BackupSync, current: AppState, onDismiss: () -> Unit) {
                 TextButton(enabled = !restoring, onClick = {
                     restoring = true
                     scope.launch {
-                        val ok = withContext(Dispatchers.IO) { runCatching { backup.restore(found.backup) }.isSuccess }
+                        val ok = withContext(Dispatchers.IO) { runCatching { backup.restore(found) }.isSuccess }
                         Toast.makeText(context, if (ok) "Respaldo recuperado" else "No se pudo recuperar el respaldo", Toast.LENGTH_SHORT).show()
                         restoring = false
                         if (ok) onDismiss()
