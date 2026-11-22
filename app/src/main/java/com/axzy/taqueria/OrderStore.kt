@@ -260,6 +260,15 @@ class OrderStore(
         }
     }
 
+    /**
+     * Reemplaza todo el estado (recuperar un respaldo). Lo que había se aparta en
+     * `taqueria.json.antes-de-respaldo-<hora>` por si se recuperó por error.
+     */
+    fun replaceAll(next: AppState) = synchronized(lock) {
+        if (file.exists()) file.copyTo(File(file.parentFile, "${file.name}.antes-de-respaldo-${now()}"), overwrite = true)
+        commit(next)
+    }
+
     // ---------------- Catálogo ----------------
 
     /**

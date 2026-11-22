@@ -67,16 +67,17 @@ run "$COCINA" cocina/07_precio_harina.yaml
 run "$MESERO" mesero/06_harina_y_cancelar.yaml
 run "$COCINA" cocina/08_ticket_harina.yaml
 
-# Las cuentas cerradas se archivan a los 30 s y la cocina las reporta a la Central en ≤ 1 min.
-echo "▸ Ventas reportadas a la Central"
+# Las cuentas cerradas se archivan a los 30 s y la cocina las reporta a la Central en ≤ 1 min;
+# el respaldo del estado sube en el primer minuto.
+echo "▸ Ventas y respaldo en la Central"
 VERSION=$(grep -E '^taqueria.version(Name|Code)=' gradle.properties | sort | cut -d= -f2 | paste -sd' ' -)
 EXPECTED="$(echo "$VERSION" | awk '{print $2" ("$1")"}')"
 for _ in $(seq 1 40); do
   SALES=$(curl -s "http://127.0.0.1:$CENTRAL_PORT/_sales")
-  python3 -c "import json,sys; s=json.loads(sys.argv[1]); sys.exit(0 if s['tickets']>=1 and s['appVersion']==sys.argv[2] else 1)" "$SALES" "$EXPECTED" && break
+  python3 -c "import json,sys; s=json.loads(sys.argv[1]); sys.exit(0 if s['tickets']>=1 and s['appVersion']==sys.argv[2] and s.get('backupAt') else 1)" "$SALES" "$EXPECTED" && break
   sleep 5
 done
 echo "  $SALES"
-python3 -c "import json,sys; s=json.loads(sys.argv[1]); sys.exit(0 if s['tickets']>=1 and s['appVersion']==sys.argv[2] else 1)" "$SALES" "$EXPECTED" \
-  || { echo "✘ La cocina no reportó las ventas (se esperaba al menos 1 cuenta con v$EXPECTED)"; exit 1; }
+python3 -c "import json,sys; s=json.loads(sys.argv[1]); sys.exit(0 if s['tickets']>=1 and s['appVersion']==sys.argv[2] and s.get('backupAt') else 1)" "$SALES" "$EXPECTED" \
+  || { echo "✘ La cocina no reportó las ventas o el respaldo (se esperaba al menos 1 cuenta con v$EXPECTED y backupAt)"; exit 1; }
 echo "✔ Todos los flujos pasaron"

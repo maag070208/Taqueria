@@ -12,8 +12,6 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.Serializable
 import java.io.IOException
-import java.net.HttpURLConnection
-import java.net.URL
 import java.time.Instant
 import java.time.ZoneId
 
@@ -156,23 +154,8 @@ class SalesSync(
 
     /** Devuelve el error o null si la Central lo recibió. */
     private fun post(creds: CentralCredentials, body: String): String? = try {
-        val conn = URL("${creds.apiBase.trimEnd('/')}/sales").openConnection() as HttpURLConnection
-        try {
-            conn.requestMethod = "POST"
-            conn.doOutput = true
-            conn.connectTimeout = TIMEOUT_MS
-            conn.readTimeout = TIMEOUT_MS
-            conn.setRequestProperty("Authorization", "Bearer ${creds.token}")
-            conn.setRequestProperty("Content-Type", "application/json; charset=utf-8")
-            conn.setRequestProperty("Accept", "application/json")
-            conn.outputStream.use { it.write(body.toByteArray(Charsets.UTF_8)) }
-            when (val code = conn.responseCode) {
-                in 200..299 -> null
-                else -> "La Central respondió $code"
-            }
-        } finally {
-            conn.disconnect()
-        }
+        val r = centralCall(creds, "POST", "sales", body, TIMEOUT_MS)
+        if (r.code in 200..299) null else "La Central respondió ${r.code}"
     } catch (e: IOException) {
         "Sin conexión con la Central: ${e.message}"
     }

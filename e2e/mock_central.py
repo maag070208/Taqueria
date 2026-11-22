@@ -9,7 +9,8 @@ llega por 10.0.2.2.
 Un código que empiece con "revocado" responde 401, para probar la pantalla de bloqueo.
 
 `POST /sales` guarda en memoria las cuentas que reporta la cocina; `GET /_sales` dice
-cuántas van y con qué versión de la app, para que el runner lo verifique.
+cuántas van, con qué versión de la app y si llegó el respaldo, para que el runner lo verifique.
+`PUT /backup` guarda el respaldo de la cocina y `GET /backup` lo devuelve.
 """
 import json
 import sys
@@ -32,6 +33,7 @@ def body() -> bytes:
 
 SALES: dict = {}
 VERSION = {"app": None}
+BACKUP: dict = {}
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -63,10 +65,26 @@ class Handler(BaseHTTPRequestHandler):
             return self._unauthorized()
         self._reply(200, body())
 
+    def do_PUT(self) -> None:  # noqa: N802
+        if not self.path.rstrip("/").endswith("/backup"):
+            return self._reply(404, b"{}")
+        if self.headers.get("Authorization", "").startswith("Bearer revocado"):
+            return self._unauthorized()
+        upload = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0) or 0)) or b"{}")
+        BACKUP.update(savedAt=upload.get("savedAt"), appVersion=upload.get("appVersion"), state=upload.get("state", {}),
+                      deviceName="Cocina de pruebas", fromThisDevice=True)
+        self._reply(200, b'{"saved":true}')
+
     def do_GET(self) -> None:  # noqa: N802
         if self.path.rstrip("/") == "/_sales":
             sold = sum(t["totalCents"] for t in SALES.values() if not t["cancelled"])
-            return self._reply(200, json.dumps({"tickets": len(SALES), "soldCents": sold, "appVersion": VERSION["app"]}).encode())
+            return self._reply(200, json.dumps({
+                "tickets": len(SALES), "soldCents": sold, "appVersion": VERSION["app"], "backupAt": BACKUP.get("savedAt"),
+            }).encode())
+        if self.path.rstrip("/").endswith("/backup"):
+            if not BACKUP:
+                return self._reply(404, b'{"code":"NO_BACKUP"}')
+            return self._reply(200, json.dumps(BACKUP).encode())
         if not self.path.rstrip("/").endswith("/license"):
             return self._reply(404, b"{}")
         if self.headers.get("Authorization", "").startswith("Bearer revocado"):

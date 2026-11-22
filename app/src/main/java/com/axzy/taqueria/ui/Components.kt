@@ -234,3 +234,30 @@ fun UndoBar(state: UndoState, onUndo: (UndoItem) -> Unit) {
         ) { Text("Deshacer", color = Color(0xFF8FD8B8), fontWeight = FontWeight.Black) }
     }
 }
+
+/** Aviso de versión nueva: al tocarlo abre el enlace de descarga que publicó el proveedor. */
+@Composable
+fun UpdateBanner(update: com.axzy.taqueria.LatestApp, modifier: Modifier = Modifier) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val url = update.url
+    val text = buildString {
+        append("Hay versión nueva: ${update.versionName}")
+        append(if (url != null) " · Toca para descargarla" else " · Pídela a tu proveedor")
+        update.notes?.let { append("\n$it") }
+    }
+    Text(
+        text, color = Palette.text, fontSize = 14.sp, fontWeight = FontWeight.Bold,
+        modifier = modifier.fillMaxWidth().background(Palette.primary.copy(alpha = 0.14f), Ui.smallShape)
+            .then(
+                if (url == null) Modifier else Modifier.clickable {
+                    runCatching {
+                        context.startActivity(
+                            android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url))
+                                .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK),
+                        )
+                    }
+                },
+            )
+            .padding(12.dp),
+    )
+}

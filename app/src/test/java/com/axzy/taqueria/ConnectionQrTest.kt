@@ -76,4 +76,18 @@ class ConnectionQrTest {
         assertTrue(invalid("taqueria://").contains("dirección"))
         assertTrue(invalid("").contains("vacío"))
     }
+
+    @Test fun conZonaTraeLaRedYSinZonaNo() {
+        val qr = ConnectionQr.encode("192.168.49.1", 7777, KitchenWifi("DIRECT-ab-Tacomanda", "clave-secreta-1"))
+        val r = ConnectionQr.parse(qr) as ConnectionQr.Result.Valid
+        assertEquals("192.168.49.1", r.host)
+        assertEquals(KitchenWifi("DIRECT-ab-Tacomanda", "clave-secreta-1"), r.wifi)
+        // El QR de siempre (red compartida) no trae red.
+        assertEquals(null, (ConnectionQr.parse(ConnectionQr.encode("10.0.0.2")) as ConnectionQr.Result.Valid).wifi)
+    }
+
+    @Test fun rechazaRedConClaveInvalida() {
+        assertTrue(invalid("""{"v":1,"host":"10.0.0.2","port":7777,"ssid":"Zona","pass":"corta"}""").contains("red"))
+        assertTrue(invalid("""{"v":1,"host":"10.0.0.2","port":7777,"ssid":"Zona"}""").contains("red"))
+    }
 }

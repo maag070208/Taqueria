@@ -47,6 +47,8 @@ import com.axzy.taqueria.Staff
 import com.axzy.taqueria.AppState
 import com.axzy.taqueria.ConnectionQr
 import com.axzy.taqueria.Link
+import com.axzy.taqueria.WaiterWifi
+import com.axzy.taqueria.DEFAULT_PORT
 import com.axzy.taqueria.OrderStatus
 import com.axzy.taqueria.PayStatus
 import com.axzy.taqueria.elapsedText
@@ -54,6 +56,7 @@ import com.axzy.taqueria.isTakeout
 import com.axzy.taqueria.money
 import androidx.compose.runtime.saveable.rememberSaveable
 import com.axzy.taqueria.tableLabel
+import com.axzy.taqueria.QueuedOrder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -105,6 +108,9 @@ fun WaiterScreen(app: App, onExit: () -> Unit) {
     var scanning by remember { mutableStateOf(false) }
     val state by app.client.state.collectAsState()
 
+    // Avisos de las órdenes que se mandaron solas al volver la conexión.
+    LaunchedEffect(Unit) { app.outbox.notices.collect { ctx.toast(it) } }
+
     // Si cocina retira un producto mientras se captura, se quita del borrador.
     LaunchedEffect(state.products) {
         app.draft.retainAvailable(state.products.filter { it.active }.map { it.id }.toSet())
@@ -116,15 +122,15 @@ fun WaiterScreen(app: App, onExit: () -> Unit) {
                 scanning = false
                 when (val r = ConnectionQr.parse(raw)) {
                     is ConnectionQr.Result.Valid -> {
-                        app.updateManualHost("${r.host}:${r.port}")
-                        ctx.toast("Cocina configurada: ${r.host}:${r.port}")
+                        app.connectToKitchen(r.host, r.port, r.wifi)
+                        ctx.toast(r.wifi?.let { "Entrando a la red de cocina «${it.ssid}»…" } ?: "Cocina configurada: ${r.host}:${r.port}")
                     }
                     is ConnectionQr.Result.Invalid -> ctx.toast(r.message)
                 }
             },
             onCancel = { scanning = false },
             title = "Escanear QR de cocina",
-            hint = "Apunta la cámara al QR que muestra la cocina (menú → Conectar meseras). Se guarda la dirección automáticamente.",
+            hint = "Apunta al QR de la cocina (menú → Conectar meseras o Activar zona). Si la cocina abrió su zona, el teléfono entra solo a esa red.",
             fallbackLabel = "Cancelar",
         )
         return
@@ -147,6 +153,7 @@ fun WaiterScreen(app: App, onExit: () -> Unit) {
                         onNewOrder = { app.draft.start("", null); page = Page.Capture(pickTable = true) },
                         onNewAccount = { table -> app.draft.start(table, null); page = Page.Capture(pickTable = false) },
                         onOpen = { page = Page.AccountDetail(it) },
+                        onReview = { q -> app.outbox.remove(q.key); app.draft.load(q); page = Page.Capture(pickTable = false) },
                         onMenu = drawer::open,
                     )
                     is Page.Capture -> CaptureScreen(ctx, state, pickTable = p.pickTable, onClose = { page = Page.Home })
@@ -169,7 +176,11 @@ fun WaiterScreen(app: App, onExit: () -> Unit) {
         SettingsDialog(
             current = app.manualHost,
             onDismiss = { showSettings = false },
-            onSave = { showSettings = false; app.updateManualHost(it) },
+            onSave = { text ->
+                showSettings = false
+                val host = text.substringBeforeLast(":", text).trim()
+                if (host.isEmpty()) app.updateManualHost("") else app.connectToKitchen(host, text.substringAfterLast(":", "").toIntOrNull() ?: DEFAULT_PORT, null)
+            },
             onScanQr = { showSettings = false; scanning = true },
         )
     }
@@ -178,18 +189,31 @@ fun WaiterScreen(app: App, onExit: () -> Unit) {
 @Composable
 private fun Home(
     ctx: WaiterCtx, state: AppState,
-    onNewOrder: () -> Unit, onNewAccount: (String) -> Unit, onOpen: (String) -> Unit, onMenu: () -> Unit,
+    onNewOrder: () -> Unit, onNewAccount: (String) -> Unit, onOpen: (String) -> Unit,
+    onReview: (QueuedOrder) -> Unit, onMenu: () -> Unit,
 ) {
     val link by ctx.client.link.collectAsState()
+    val queued by ctx.app.outbox.items.collectAsState()
+    // Sin conexión se puede capturar con el último menú que mandó cocina; la orden queda en cola.
+    val canCapture = link is Link.Connected || state.products.isNotEmpty()
+    val zone by ctx.app.waiterWifi.state.collectAsState()
     val now = rememberNow() + ctx.client.clockOffset
     var paying by remember { mutableStateOf<Account?>(null) }
     // Deslizar → abre las acciones disponibles: entregar (aunque no esté pagada) y cobrar.
     var actions by remember { mutableStateOf<Account?>(null) }
     val connected = link is Link.Connected
-    val (linkColor, linkText) = when (link) {
+    val update by ctx.client.latestApp.collectAsState()
+    val (linkColor, linkText) = when {
+        link is Link.Connected -> Palette.ok to "● Conectado a cocina"
+        link is Link.Rejected -> Palette.late to "● ${(link as Link.Rejected).message}"
+        zone is WaiterWifi.State.Joining -> Palette.warn to "● Entrando a la red de cocina «${(zone as WaiterWifi.State.Joining).ssid}»…"
+        zone is WaiterWifi.State.Failed -> Palette.late to "● ${(zone as WaiterWifi.State.Failed).message}"
+        else -> when (link) {
         is Link.Connected -> Palette.ok to "● Conectado a cocina"
         is Link.Connecting -> Palette.warn to "● Conectando…"
         Link.Searching -> Palette.late to "● Buscando cocina en la red…"
+        is Link.Rejected -> Palette.late to "● ${(link as Link.Rejected).message}"
+        }
     }
 
     // Para llevar va en su propia pestaña: son clientes de paso, no mesas.
@@ -207,6 +231,8 @@ private fun Home(
             if (takeoutTab) 1 else 0, { takeoutTab = it == 1 },
             Modifier.padding(start = Ui.pad, end = Ui.pad, bottom = Ui.gap),
         )
+        update?.let { UpdateBanner(it, Modifier.padding(start = Ui.pad, end = Ui.pad, bottom = Ui.gap)) }
+        if (queued.isNotEmpty()) QueuedOrders(queued, connected, onReview, onDiscard = { ctx.app.outbox.remove(it.key) })
         if (tables.isEmpty()) {
             Column(Modifier.weight(1f).fillMaxWidth(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
                 Illustration(if (takeoutTab) R.drawable.ico_bolsa_llevar else R.drawable.ico_taco_generico, 88.dp)
@@ -225,7 +251,7 @@ private fun Home(
                     item(key = "t-$table") {
                         Row(Modifier.fillMaxWidth().padding(top = 4.dp), verticalAlignment = Alignment.CenterVertically) {
                             SectionTitle(tableLabel(table), Modifier.weight(1f))
-                            ActionButton(if (isTakeout(table)) "+ Pedido" else "+ Cuenta", Palette.card, Palette.primary, Modifier.width(120.dp), enabled = connected) {
+                            ActionButton(if (isTakeout(table)) "+ Pedido" else "+ Cuenta", Palette.card, Palette.primary, Modifier.width(120.dp), enabled = canCapture) {
                                 onNewAccount(table)
                             }
                         }
@@ -267,11 +293,11 @@ private fun Home(
         Box(Modifier.fillMaxWidth().background(Palette.card).padding(Ui.pad)) {
             ActionButton(
                 when {
-                    !connected -> "Sin conexión con cocina"
+                    !canCapture -> "Sin conexión con cocina"
                     takeoutTab -> "+ Pedido para llevar"
                     else -> "+ Nueva orden"
                 },
-                Palette.primary, Color.White, Modifier.fillMaxWidth().height(60.dp), enabled = connected,
+                Palette.primary, Color.White, Modifier.fillMaxWidth().height(60.dp), enabled = canCapture,
             ) { if (takeoutTab) onNewAccount(com.axzy.taqueria.TAKEOUT) else onNewOrder() }
         }
     }
@@ -394,4 +420,44 @@ private fun SettingsDialog(current: String, onDismiss: () -> Unit, onSave: (Stri
         confirmButton = { TextButton(onClick = { onSave(host) }) { Text("Guardar") } },
         dismissButton = { TextButton(onClick = onDismiss) { Text("Cancelar") } },
     )
+}
+
+/** Órdenes que cocina todavía no confirma: las que esperan conexión y las que cocina rechazó. */
+@Composable
+private fun QueuedOrders(
+    queued: List<QueuedOrder>, connected: Boolean, onReview: (QueuedOrder) -> Unit, onDiscard: (QueuedOrder) -> Unit,
+) {
+    var confirmDiscard by remember { mutableStateOf<QueuedOrder?>(null) }
+    val waiting = queued.count { it.error == null }
+    Column(
+        Modifier.fillMaxWidth().padding(start = Ui.pad, end = Ui.pad, bottom = Ui.gap)
+            .background(Palette.card, Ui.smallShape).padding(12.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        if (waiting > 0) {
+            Text(
+                (if (waiting == 1) "1 orden" else "$waiting órdenes") + if (connected) " enviándose a cocina…" else " esperando conexión · se mandan solas",
+                color = Palette.warn, fontSize = 15.sp,
+            )
+        }
+        queued.filter { it.error != null }.forEach { q ->
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Text("${tableLabel(q.table)} · ${q.lines.sumOf { it.qty }} productos", fontSize = 15.sp)
+                    Text("Cocina no la aceptó: ${q.error}", color = Palette.late, fontSize = 13.sp)
+                }
+                TextButton(onClick = { onReview(q) }) { Text("Revisar") }
+                TextButton(onClick = { confirmDiscard = q }) { Text("Descartar", color = Palette.late) }
+            }
+        }
+    }
+    confirmDiscard?.let { q ->
+        AlertDialog(
+            onDismissRequest = { confirmDiscard = null },
+            title = { Text("¿Descartar la orden de ${tableLabel(q.table)}?") },
+            text = { Text("Cocina nunca la recibió.") },
+            confirmButton = { TextButton(onClick = { confirmDiscard = null; onDiscard(q) }) { Text("Descartar", color = Palette.late) } },
+            dismissButton = { TextButton(onClick = { confirmDiscard = null }) { Text("Conservar") } },
+        )
+    }
 }

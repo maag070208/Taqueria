@@ -16,6 +16,14 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.launch
 import java.io.File
 import java.util.UUID
 
@@ -39,9 +47,42 @@ class App : Application() {
             putSent = { salesPrefs.edit().putInt("sent", it).apply() },
         )
     }
-    val server by lazy { KitchenServer(this, store, isLocked = { license.locked }) }
-    val client by lazy { WaiterClient(this) }
+    /** Respaldo del estado de cocina en la Central, para recuperarlo en otro teléfono. */
+    val backupSync by lazy { BackupSync(store, license::credentials, versionLabel) }
+    /** Cierres inesperados de la app; llegan a la Central por la cocina. */
+    val crashes by lazy { CrashReporter(File(filesDir, "fallas"), versionLabel, source = { if (role == Role.WAITER) "mesero" else "cocina" }) }
+    val server by lazy {
+        KitchenServer(
+            this, store,
+            isLocked = { license.locked },
+            waiterLimit = { license.waiterLimit },
+            latestApp = { license.update },
+            onWaiterErrors = crashes::add,
+        )
+    }
+    val client by lazy { WaiterClient(this, waiterId, crashes) }
+    /** Id fijo de este teléfono para la cocina (cuenta contra las meseras del plan). */
+    private val waiterId by lazy {
+        prefs.getString("waiterId", null) ?: UUID.randomUUID().toString().also { prefs.edit().putString("waiterId", it).apply() }
+    }
+    /** Zona WiFi que abre la cocina para las meseras. */
+    val zone by lazy { KitchenZone(this) }
+    /** La mesera se une a la zona de la cocina; al cambiar de red se reconecta con cocina. */
+    val waiterWifi by lazy {
+        WaiterWifi(
+            this,
+            onNetworkChanged = { if (role == Role.WAITER) client.start(manualHost) },
+            onGaveUp = { savedWifi = null; prefs.edit().remove("kitchenSsid").remove("kitchenPass").apply() },
+        )
+    }
     val draft = WaiterDraft()
+    /** Órdenes que la mesera capturó sin conexión; se mandan solas al volver. */
+    val outbox by lazy {
+        OrderOutbox(load = { prefs.getString("outbox", null) }, save = { prefs.edit().putString("outbox", it).apply() })
+    }
+    private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private var outboxJob: Job? = null
+    private var errorsJob: Job? = null
     val adminPin by lazy {
         AdminPin(
             get = { prefs.getString(it, null) },
@@ -66,7 +107,9 @@ class App : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        crashes.install()
         manualHost = prefs.getString("manualHost", "").orEmpty()
+        savedWifi = prefs.getString("kitchenSsid", null)?.let { ssid -> prefs.getString("kitchenPass", null)?.let { KitchenWifi(ssid, it) } }
         applyRole(prefs.getString("role", null)?.let { runCatching { Role.valueOf(it) }.getOrNull() })
     }
 
@@ -79,12 +122,33 @@ class App : Application() {
             server.start()
             serverStarted = true
             salesSync.start()
+            backupSync.start()
+            errorsJob?.cancel()
+            errorsJob = appScope.launch {
+                while (true) {
+                    license.credentials()?.let { runCatching { crashes.upload(it) } }
+                    delay(5 * 60_000L)
+                }
+            }
         } else {
             // En mesera no se instancia el servidor (ni su OrderStore): no se guardan datos de negocio.
-            if (serverStarted) { server.stop(); serverStarted = false; salesSync.stop() }
+            if (serverStarted) { server.stop(); serverStarted = false; salesSync.stop(); backupSync.stop() }
+            errorsJob?.cancel()
+            errorsJob = null
             license.stop()
         }
-        if (next == Role.WAITER) client.start(manualHost) else client.stop()
+        if (next != Role.KITCHEN) zone.stop()
+        outboxJob?.cancel()
+        outboxJob = null
+        if (next == Role.WAITER) {
+            client.start(manualHost)
+            outboxJob = appScope.launch { sendQueuedOrders() }
+            // Si la mesera ya se había unido a la zona, Android la reconecta sin preguntar.
+            savedWifi?.let(waiterWifi::join)
+        } else {
+            client.stop()
+            if (savedWifi != null) waiterWifi.leave()
+        }
     }
 
     /** Reinicia servidor/cliente, p. ej. después de conceder el permiso de red local. */
@@ -112,6 +176,29 @@ class App : Application() {
         manualHost = host.trim()
         prefs.edit().putString("manualHost", manualHost).apply()
         if (role == Role.WAITER) client.start(manualHost)
+    }
+
+    /** Red de la zona de cocina que trajo el QR (null = la cocina está en la red del local). */
+    var savedWifi: KitchenWifi? = null
+        private set
+
+    /** Mientras haya conexión y órdenes pendientes, las manda (reintenta cada 5 s si cocina no contesta). */
+    private suspend fun sendQueuedOrders() {
+        combine(client.link, outbox.items) { link, items -> link is Link.Connected && items.any { it.error == null } }
+            .collectLatest { ready ->
+                while (ready) {
+                    outbox.flush { q -> client.createOrder(q.key, q.table, q.accountId, q.lines, q.extras) }
+                    delay(5_000)
+                }
+            }
+    }
+
+    /** QR de conexión escaneado: guarda la cocina y, si trae red, se une a la zona. */
+    fun connectToKitchen(host: String, port: Int, wifi: KitchenWifi?) {
+        savedWifi = wifi
+        prefs.edit().putString("kitchenSsid", wifi?.ssid).putString("kitchenPass", wifi?.pass).apply()
+        if (wifi != null) waiterWifi.join(wifi) else waiterWifi.leave()
+        updateManualHost("$host:$port")
     }
 }
 
@@ -201,6 +288,14 @@ class WaiterDraft {
         order.lines.forEach { lines.add(DraftLine(it.productId, it.person, it.variant, it.mix, it.mods.toSet(), it.qty, it.priceCents, it.note)) }
         order.extras.forEach { extras[it.person] = it.items.toSet() }
         persons = order.persons.maxOrNull() ?: 1
+    }
+
+    /** Vuelve a abrir una orden que cocina rechazó, para corregirla y mandarla de nuevo. */
+    fun load(q: QueuedOrder) {
+        start(q.table, q.accountId)
+        q.lines.forEach { lines.add(DraftLine(it.productId, it.person, it.variant, it.mix, it.mods.toSet(), it.qty, it.amountCents, it.note)) }
+        q.extras.forEach { extras[it.person] = it.items.toSet() }
+        persons = (q.lines.map { it.person } + q.extras.map { it.person }).maxOrNull() ?: 1
     }
 
     /** ¿El borrador difiere de lo que tiene la orden? (sin importar el orden de los renglones). */

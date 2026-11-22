@@ -59,6 +59,7 @@ import com.axzy.taqueria.DraftLine
 import com.axzy.taqueria.Link
 import com.axzy.taqueria.MeatColor
 import com.axzy.taqueria.Product
+import com.axzy.taqueria.QueuedOrder
 import com.axzy.taqueria.TAKEOUT
 import com.axzy.taqueria.money
 import com.axzy.taqueria.parseMoney
@@ -204,13 +205,15 @@ fun CaptureScreen(ctx: WaiterCtx, state: AppState, pickTable: Boolean, onClose: 
                     ActionButton(
                         when {
                             sending -> "Enviando…"
-                            !connected -> "Sin conexión"
+                            isEdit && !connected -> "Sin conexión"
                             count == 0 -> "Sin productos: mejor cancela la orden"
                             isEdit -> "Guardar cambios · ${money(total)}"
+                            !connected -> "Guardar · sale al conectar · ${money(total)}"
                             else -> "Enviar a cocina · ${money(total)}"
                         },
                         Palette.primary, Color.White, Modifier.weight(2f).height(60.dp),
-                        enabled = connected && !sending && count > 0,
+                        // Una orden nueva se puede guardar sin conexión; editar sí necesita a cocina.
+                        enabled = (connected || !isEdit) && !sending && count > 0,
                     ) {
                         sending = true
                         val key = draft.clientKey
@@ -219,7 +222,19 @@ fun CaptureScreen(ctx: WaiterCtx, state: AppState, pickTable: Boolean, onClose: 
                         val lines = draft.lines()
                         val extras = draft.extrasRequest()
                         val editId = draft.editingOrderId
+                        val queued = QueuedOrder(key, table, accId, lines, extras, System.currentTimeMillis())
+                        fun queue(msg: String) {
+                            ctx.app.outbox.add(queued)
+                            if (draft.clientKey == key) draft.clear()
+                            ctx.toast(msg)
+                            onClose()
+                        }
                         ctx.scope.launch {
+                            if (editId == null && !connected) {
+                                queue("Orden guardada · se manda sola al volver la conexión")
+                                sending = false
+                                return@launch
+                            }
                             try {
                                 val order = if (editId != null) ctx.client.editOrder(editId, lines, extras)
                                 else ctx.client.createOrder(key, table, accId, lines, extras)
@@ -230,6 +245,10 @@ fun CaptureScreen(ctx: WaiterCtx, state: AppState, pickTable: Boolean, onClose: 
                                     else "Orden #${order.number} enviada · ${tableLabel(order.table)} · Cuenta ${order.accountNumber}",
                                 )
                                 onClose()
+                            } catch (e: java.io.IOException) {
+                                // No se sabe si cocina la recibió: se reintenta con la misma clave, sin duplicar.
+                                if (editId == null) queue("Cocina no respondió · la orden se manda sola")
+                                else ctx.toast(e.message ?: "No se pudo enviar; vuelve a intentar")
                             } catch (e: Exception) {
                                 ctx.toast(e.message ?: "No se pudo enviar; vuelve a intentar")
                             } finally {

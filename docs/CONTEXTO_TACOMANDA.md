@@ -81,6 +81,37 @@ App Android (Kotlin + Jetpack Compose) para taquerías, con dos roles en la mism
   - Revisa cada minuto si hay cuentas nuevas, las manda en lotes de 20 y recuerda cuántas lleva en prefs `sales_sync`. Si falla, reintenta a los 10 minutos. Sin internet la operación no se afecta.
   - La Central no duplica. Las métricas salen de `GET /clients/:id/sales/metrics` (`api/src/lib/sales-metrics.ts`).
 
+### Zona de cocina, cola de órdenes y respaldo (1.2.0, código 5)
+
+- **Zona de cocina (`KitchenZone.kt`):**
+  - "Activar zona" abre un hotspot local de Android (`startLocalOnlyHotspot`).
+  - Android elige el nombre y la contraseña, cambian en cada activación y van dentro del QR (`ConnectionQr`, campos `ssid`/`pass`).
+  - La mesera se une con `WaiterWifi.kt` (`WifiNetworkSpecifier` y `bindProcessToNetwork`). Si no la encuentra, olvida la red.
+  - La zona se apaga al cerrar la app de cocina.
+  - Probado en emulador y con el escaneo del teléfono real. **Falta la prueba con dos teléfonos físicos.**
+- **Cola de órdenes de la mesera (`OrderOutbox.kt`):**
+  - Sin conexión, o si cocina no contesta, una orden nueva se guarda en prefs `outbox` y se manda sola al volver la conexión.
+  - Usa la misma `clientKey` del borrador, así que cocina no duplica.
+  - Si cocina la rechaza (por ejemplo, un producto agotado), queda marcada en Inicio con "Revisar" (la regresa a captura) y "Descartar".
+  - Editar una orden, cobrar y cancelar siguen necesitando conexión.
+- **Respaldo en la Central (`BackupSync.kt`):**
+  - La cocina sube su `AppState` completo a `PUT /backup` cada minuto, solo si cambió.
+  - Admin → "Respaldo en la Central" lo recupera en otro teléfono activado para la misma taquería. Lo anterior queda en `taqueria.json.antes-de-respaldo-<hora>`.
+  - El contrato está en `AxzyCentral/docs/CONTRATO-VENTAS.md` §6.
+- `CentralHttp.kt` es la llamada HTTP común a la Central, que usan `SalesSync`, `BackupSync` y `CrashReporter`.
+- **Límite de meseras del plan:**
+  - La licencia trae `limits.waiters`.
+  - La mesera manda `ClientMsg.Hello` con un id fijo (prefs `waiterId`).
+  - `KitchenServer` rechaza a la que excede el límite; ella ve el motivo y reintenta cada 20 s.
+  - Si el mismo teléfono se reconecta, la cocina suelta su conexión vieja y no cuenta doble.
+- **Aviso de versión nueva:**
+  - Sale de `latestApp` de la licencia (se publica en la consola → Productos) y se ve en cocina y en mesera (`UpdateBanner`).
+  - Al tocarlo abre el enlace de descarga.
+- **Fallas (`CrashReporter.kt`):**
+  - Cada cierre inesperado se guarda en `files/fallas/`.
+  - La mesera las pasa a la cocina al conectar, y la cocina las sube a `POST /app-errors` cada 5 minutos.
+- El contrato de todo esto está en `AxzyCentral/docs/CONTRATO-VENTAS.md` §6–8.
+
 ## Estado de entornos
 
 - **AxzyCentral (Railway):**
@@ -94,7 +125,7 @@ App Android (Kotlin + Jetpack Compose) para taquerías, con dos roles en la mism
 
 ## Pruebas
 
-- `./gradlew :app:testDebugUnitTest`: 75 pruebas. `SalesSyncTest` cubre el reporte de ventas contra una Central de mentira. Las unitarias cubren tortilla y precio, mixto, órdenes por monto, personas y extras, atajos de "Va", Admin, edición, cobros, archivo, reinicio y el PIN de admin.
+- `./gradlew :app:testDebugUnitTest`: 87 pruebas. `SalesSyncTest` y `BackupSyncTest` cubren ventas y respaldo contra una Central de mentira, y `OrderOutboxTest` cubre la cola de órdenes. `KitchenWaiterE2ETest` también cubre el límite de meseras y las fallas que pasa la mesera. Las unitarias cubren tortilla y precio, mixto, órdenes por monto, personas y extras, atajos de "Va", Admin, edición, cobros, archivo, reinicio y el PIN de admin.
 - `KitchenWaiterE2ETest` es de punta a punta: levanta el `KitchenServer` real con su `OrderStore` en disco y meseros `WaiterClient` reales por TCP en localhost (puerto libre, sin mDNS). Cubre:
   - menú al conectar;
   - orden por persona con broadcast a dos meseros;
@@ -109,7 +140,7 @@ App Android (Kotlin + Jetpack Compose) para taquerías, con dos roles en la mism
 - **Maestro (app completa en dos emuladores):** se corre con `e2e/run_maestro.sh`; los detalles están en `e2e/README.md`.
   - Son 14 flujos con cocina en `maestro_cocina` (emulator-5560) y mesero en `maestro_mesero` (emulator-5562).
   - Usan una Central falsa local (`e2e/mock_central.py`) para activar sin tocar Railway.
-  - Al 21/nov los 14 pasan de corrido. Al final el runner revisa que la cocina haya reportado sus ventas a la Central falsa con la versión correcta.
+  - Al 21/nov los 14 pasan de corrido. Al final el runner revisa que la cocina haya reportado sus ventas y su respaldo a la Central falsa con la versión correcta.
 - **URL de la Central:** ahora es un recurso (`R.string.license_api_url`), no `BuildConfig`. Kotlin copiaba la constante de `BuildConfig` dentro del código que la usa y la compilación incremental no la actualizaba, así que algunos APK salían con la URL de la compilación anterior.
 
 ## Pendientes
@@ -121,8 +152,10 @@ App Android (Kotlin + Jetpack Compose) para taquerías, con dos roles en la mism
    - Mixto $35/$100.
    - Quesatacos de Suadero, Cabeza y Mixto a $45.
    - Burritos, Vampiros y Quesadillas por carne.
-4. Hacer commit y generar el APK release (`release.sh`) cuando se apruebe. La versión ya es 1.1.0 (4).
-5. Desplegar la Central con la migración `20261122010000_sales`. Railway la aplica al arrancar (`prisma migrate deploy`), junto con la de usuarios y roles que sigue pendiente. Hasta entonces la cocina reintenta y no pierde nada.
-6. Pendientes opcionales:
+4. Hacer commit y generar el APK release (`release.sh`) cuando se apruebe. La versión ya es 1.2.0 (5).
+5. Desplegar la Central con las migraciones `20261122010000_sales`, `20261122020000_backups` y `20261122030000_app_updates_errors`. Railway la aplica al arrancar (`prisma migrate deploy`), junto con la de usuarios y roles que sigue pendiente. Hasta entonces la cocina reintenta y no pierde nada.
+6. Probar la zona con dos teléfonos físicos.
+   - Impresora térmica: descartada por ahora (22/nov).
+7. Pendientes opcionales:
    - Íconos para Kitchen y Waiter en pantallas vacías.
    - Ilustraciones de pastor, chorizo y demás cuando se agreguen al menú (ya existen los PNG).

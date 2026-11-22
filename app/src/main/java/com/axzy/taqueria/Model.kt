@@ -338,12 +338,23 @@ sealed interface ClientMsg {
 
     @Serializable @SerialName("voidPayment")
     data class VoidPayment(override val reqId: Long, val accountId: String, val paymentId: String) : ClientMsg
+
+    /**
+     * Lo primero que manda la mesera al conectar: con [waiterId] la cocina cuenta
+     * cuántas meseras hay (el plan puede limitarlas) y suelta una conexión vieja del mismo teléfono.
+     */
+    @Serializable @SerialName("hello")
+    data class Hello(override val reqId: Long, val waiterId: String, val model: String = "") : ClientMsg
+
+    /** Fallas de la app de mesera; la cocina las sube a la Central. */
+    @Serializable @SerialName("appErrors")
+    data class ReportErrors(override val reqId: Long, val errors: List<AppErrorReport>) : ClientMsg
 }
 
 @Serializable
 sealed interface ServerMsg {
     @Serializable @SerialName("state")
-    data class State(val state: AppState, val serverTime: Long) : ServerMsg
+    data class State(val state: AppState, val serverTime: Long, val latestApp: LatestApp? = null) : ServerMsg
 
     @Serializable @SerialName("reply")
     data class Reply(val reqId: Long, val error: String? = null, val order: Order? = null, val paymentId: String? = null) : ServerMsg

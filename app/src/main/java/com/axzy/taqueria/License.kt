@@ -35,10 +35,21 @@ data class LicenseResponse(
     val nextDueDate: String? = null,
     val validUntil: String,
     val serverTime: String,
+    /** Lo que incluye el plan; una Central sin este campo = ilimitado. */
+    val limits: PlanLimits = PlanLimits(),
+    val latestApp: LatestApp? = null,
 )
 
 @Serializable
 data class NameRef(val name: String)
+
+/** null = ilimitado. */
+@Serializable
+data class PlanLimits(val kitchens: Int? = null, val waiters: Int? = null)
+
+/** Última versión que publicó el proveedor en la Central. */
+@Serializable
+data class LatestApp(val versionCode: Long, val versionName: String, val url: String? = null, val notes: String? = null)
 
 // ---------------- Alta del dispositivo (POST /activate) ----------------
 
@@ -72,6 +83,9 @@ data class LicenseCache(
     /** Hora más reciente que se ha visto: atrasar el reloj del teléfono no alarga la licencia. */
     val maxSeenMs: Long = 0,
     val lastCheckMs: Long = 0,
+    /** Meseras a la vez que incluye el plan (null = ilimitadas). */
+    val waiterLimit: Int? = null,
+    val latestApp: LatestApp? = null,
 ) {
     fun effectiveNow(phoneNowMs: Long) = maxOf(phoneNowMs + clockOffsetMs, maxSeenMs)
 
@@ -86,6 +100,8 @@ data class LicenseCache(
             clockOffsetMs = server - phoneNowMs,
             maxSeenMs = maxOf(maxSeenMs, server),
             lastCheckMs = phoneNowMs,
+            waiterLimit = r.limits.waiters,
+            latestApp = r.latestApp,
         )
     }
 }
@@ -133,10 +149,18 @@ class LicenseManager(context: Context, private val buildApiUrl: String, private 
     private var cache: LicenseCache? = load()
     private var scope: CoroutineScope? = null
     private var callback: ConnectivityManager.NetworkCallback? = null
+    private val installedVersionCode = appContext.packageManager.getPackageInfo(appContext.packageName, 0).longVersionCode
 
     var state by mutableStateOf(evaluateLicense(cache, System.currentTimeMillis()))
         private set
     var checking by mutableStateOf(false)
+        private set
+
+    /** Meseras a la vez que permite el plan; lo lee el servidor de cocina (null = ilimitadas). */
+    val waiterLimit: Int? get() = cache?.takeIf { !it.revoked }?.waiterLimit
+
+    /** Versión nueva publicada en la Central, si es mayor que la instalada. */
+    var update by mutableStateOf(cache?.latestApp?.takeIf { it.versionCode > installedVersionCode })
         private set
 
     /** Lo lee el servidor de cocina desde sus hilos. */
@@ -338,8 +362,9 @@ class LicenseManager(context: Context, private val buildApiUrl: String, private 
     private fun publish() {
         val next = evaluateLicense(cache, System.currentTimeMillis())
         locked = next !is LicenseState.Active
+        val newer = cache?.latestApp?.takeIf { it.versionCode > installedVersionCode }
         // El estado de Compose se escribe desde el hilo principal.
-        android.os.Handler(android.os.Looper.getMainLooper()).post { state = next }
+        android.os.Handler(android.os.Looper.getMainLooper()).post { state = next; update = newer }
     }
 
     private fun load(): LicenseCache? = prefs.getString(KEY, null)?.let {

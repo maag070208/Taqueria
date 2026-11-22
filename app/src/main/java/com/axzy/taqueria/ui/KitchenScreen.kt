@@ -59,6 +59,10 @@ import com.axzy.taqueria.Alerts
 import com.axzy.taqueria.App
 import com.axzy.taqueria.AppState
 import com.axzy.taqueria.KitchenServer
+import com.axzy.taqueria.KitchenZone
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.compose.rememberLauncherForActivityResult
+import android.content.pm.PackageManager
 import com.axzy.taqueria.Order
 import com.axzy.taqueria.OrderStatus
 import com.axzy.taqueria.OrderStore
@@ -94,7 +98,9 @@ fun KitchenScreen(app: App, notice: String?) {
     var showQr by rememberSaveable { mutableStateOf(false) }
     var pinMode by remember { mutableStateOf<PinMode?>(null) }
     var confirmExit by remember { mutableStateOf(false) }
+    var showBackup by remember { mutableStateOf(false) }
     val drawer = rememberDrawerControl()
+    val context = LocalContext.current
     // La pantalla de cocina nunca se apaga.
     val view = LocalView.current
     DisposableEffect(Unit) {
@@ -103,23 +109,35 @@ fun KitchenScreen(app: App, notice: String?) {
     }
     fun toOrders() { app.lockAdmin(); page = KitchenPage.ORDERS }
     fun item(@DrawableRes icon: Int, label: String, to: KitchenPage) = DrawerItem(icon, label, page == to) { page = to }
+    val zone by app.zone.state.collectAsState()
+    // La zona pide permiso de dispositivos cercanos (Android 13+) o de ubicación (antes).
+    // Aunque lo nieguen se intenta: la zona responde con el mensaje de qué permiso falta.
+    val zonePermissions = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { app.zone.start() }
+    fun startZone() {
+        showQr = true
+        val missing = KitchenZone.permissions.filter { context.checkSelfPermission(it) != PackageManager.PERMISSION_GRANTED }
+        if (missing.isEmpty()) app.zone.start() else zonePermissions.launch(missing.toTypedArray())
+    }
     val qr = DrawerItem(R.drawable.ic_qr, "Conectar meseras (QR)") { showQr = true }
+    val zoneItem = if (zone is KitchenZone.State.On) DrawerItem(R.drawable.ic_wifi, "Zona activa") { showQr = true }
+        else DrawerItem(R.drawable.ic_wifi, "Activar zona", onClick = ::startZone)
     val groups = if (app.admin) listOf(
-        listOf(item(R.drawable.ic_chart, "Ventas", KitchenPage.SALES), item(R.drawable.ic_tag, "Menú y precios", KitchenPage.MENU), qr),
+        listOf(item(R.drawable.ic_chart, "Ventas", KitchenPage.SALES), item(R.drawable.ic_tag, "Menú y precios", KitchenPage.MENU), qr, zoneItem),
         listOf(
+            DrawerItem(R.drawable.ic_download, "Respaldo en la Central") { showBackup = true },
             DrawerItem(R.drawable.ic_keypad, "Cambiar PIN") { pinMode = PinMode.CHANGE },
             DrawerItem(R.drawable.ic_swap, "Cambiar rol del teléfono") { confirmExit = true },
             DrawerItem(R.drawable.ic_lock, "Salir de admin", onClick = ::toOrders),
         ),
     ) else listOf(
-        listOf(item(R.drawable.ic_orders, "Órdenes", KitchenPage.ORDERS), item(R.drawable.ic_toggle, "Disponibilidad", KitchenPage.AVAILABILITY), qr),
+        listOf(item(R.drawable.ic_orders, "Órdenes", KitchenPage.ORDERS), item(R.drawable.ic_toggle, "Disponibilidad", KitchenPage.AVAILABILITY), qr, zoneItem),
         listOf(DrawerItem(R.drawable.ic_key, "Entrar como admin") { pinMode = if (app.adminPin.isSet) PinMode.ENTER else PinMode.CREATE }),
     )
 
     AppDrawer(drawer, staff, "Teléfono de cocina", groups) {
         if (page != KitchenPage.ORDERS) BackHandler(onBack = ::toOrders)
         when (page) {
-            KitchenPage.ORDERS -> OrdersBoard(store, server, notice, onMenu = drawer::open)
+            KitchenPage.ORDERS -> OrdersBoard(store, server, notice, (zone as? KitchenZone.State.On)?.wifi?.ssid, app.license.update, onMenu = drawer::open)
             KitchenPage.AVAILABILITY -> AdminScreen(store, canEdit = false, onMenu = drawer::open)
             KitchenPage.MENU -> AdminScreen(store, canEdit = true, onMenu = drawer::open)
             KitchenPage.SALES -> SalesScreen(store, onMenu = drawer::open)
@@ -127,7 +145,10 @@ fun KitchenScreen(app: App, notice: String?) {
     }
 
     if (showQr) {
-        ConnectionQrDialog(ips = KitchenServer.localIps(), port = DEFAULT_PORT, onDismiss = { showQr = false })
+        ConnectionQrDialog(
+            ips = KitchenServer.localIps(), port = DEFAULT_PORT, zone = zone,
+            onStartZone = ::startZone, onStopZone = app.zone::stop, onDismiss = { showQr = false },
+        )
     }
     pinMode?.let { mode ->
         AdminPinDialog(
@@ -140,6 +161,10 @@ fun KitchenScreen(app: App, notice: String?) {
             },
             onDismiss = { pinMode = null },
         )
+    }
+    if (showBackup && app.admin) {
+        val current by store.state.collectAsState()
+        BackupDialog(app.backupSync, current, onDismiss = { showBackup = false })
     }
     if (confirmExit) {
         AlertDialog(
@@ -157,7 +182,9 @@ fun KitchenScreen(app: App, notice: String?) {
  * primero) con cada orden, su cuenta y sus grupos de preparación.
  */
 @Composable
-private fun OrdersBoard(store: OrderStore, server: KitchenServer, notice: String?, onMenu: () -> Unit) {
+private fun OrdersBoard(
+    store: OrderStore, server: KitchenServer, notice: String?, zoneSsid: String?, update: com.axzy.taqueria.LatestApp?, onMenu: () -> Unit,
+) {
     val context = LocalContext.current
     val state by store.state.collectAsState()
     val waiters by server.clientCount.collectAsState()
@@ -186,7 +213,7 @@ private fun OrdersBoard(store: OrderStore, server: KitchenServer, notice: String
     Column(Modifier.fillMaxSize().safeDrawingPadding()) {
         TopBar(
             title = "Cocina · ${pending.size} ${if (pending.size == 1) "orden" else "órdenes"}",
-            subtitle = serverError ?: "${if (waiters > 0) "●" else "○"} ${if (waiters == 1) "1 mesera conectada" else "$waiters meseras conectadas"} · IP $ips",
+            subtitle = serverError ?: "${if (waiters > 0) "●" else "○"} ${if (waiters == 1) "1 mesera conectada" else "$waiters meseras conectadas"} · ${zoneSsid?.let { "Zona «$it»" } ?: "IP $ips"}",
             subtitleColor = when {
                 serverError != null -> Palette.late
                 waiters > 0 -> Palette.ok
@@ -201,6 +228,7 @@ private fun OrdersBoard(store: OrderStore, server: KitchenServer, notice: String
                     .background(Palette.warn.copy(alpha = 0.2f), Ui.smallShape).padding(12.dp),
             )
         }
+        update?.let { UpdateBanner(it, Modifier.padding(horizontal = Ui.pad).padding(bottom = Ui.gap)) }
 
         BoxWithConstraints(Modifier.weight(1f).fillMaxWidth()) {
             if (tickets.isEmpty()) {

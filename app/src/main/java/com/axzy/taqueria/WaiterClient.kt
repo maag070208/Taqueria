@@ -34,13 +34,21 @@ sealed interface Link {
     data object Searching : Link
     data class Connecting(val host: String) : Link
     data class Connected(val host: String) : Link
+    /** Cocina no aceptó a esta mesera (p. ej. el plan ya tiene todas sus meseras). */
+    data class Rejected(val message: String) : Link
 }
 
 /**
  * Conexión del mesero con la cocina: la busca por mDNS (o usa la IP fija que
  * se configure), mantiene el estado sincronizado y reconecta sola.
  */
-class WaiterClient(private val context: Context) {
+class WaiterClient(
+    private val context: Context,
+    /** Identifica a este teléfono ante la cocina (no cambia al reiniciar la app). */
+    private val waiterId: String = java.util.UUID.randomUUID().toString(),
+    /** Fallas de esta app que se le pasan a la cocina al conectar. */
+    private val crashes: CrashReporter? = null,
+) {
     private val tag = "WaiterClient"
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var loop: Job? = null
@@ -53,6 +61,9 @@ class WaiterClient(private val context: Context) {
     val link = _link.asStateFlow()
     private val _state = MutableStateFlow(AppState())
     val state = _state.asStateFlow()
+    /** Versión nueva que avisó la cocina (la publica el proveedor en la Central). */
+    private val _latestApp = MutableStateFlow<LatestApp?>(null)
+    val latestApp = _latestApp.asStateFlow()
 
     /** Diferencia reloj cocina − reloj mesero, para que los tiempos coincidan en ambos teléfonos. */
     @Volatile var clockOffset = 0L
@@ -62,11 +73,12 @@ class WaiterClient(private val context: Context) {
     fun start(manualHost: String) {
         loop?.cancel()
         closeSocket()
+        _link.value = Link.Searching
         loop = scope.launch {
             while (isActive) {
                 try {
                     val target = parseHost(manualHost) ?: run {
-                        _link.value = Link.Searching
+                        if (_link.value !is Link.Rejected) _link.value = Link.Searching
                         discover()
                     }
                     session(target)
@@ -76,7 +88,8 @@ class WaiterClient(private val context: Context) {
                     Log.i(tag, "Sin conexión: ${e.message}")
                 }
                 failPending("Se perdió la conexión con cocina")
-                delay(1_500)
+                // Rechazada por el plan: se reintenta despacio por si otra mesera se desconecta.
+                delay(if (_link.value is Link.Rejected) 20_000 else 1_500)
             }
         }
     }
@@ -120,7 +133,9 @@ class WaiterClient(private val context: Context) {
         request { ClientMsg.VoidPayment(it, accountId, paymentId) }
     }
 
-    private suspend fun request(build: (Long) -> ClientMsg): ServerMsg.Reply {
+    /** [direct]: también antes de que cocina acepte a la mesera (solo el saludo y las fallas). */
+    private suspend fun request(direct: Boolean = false, build: (Long) -> ClientMsg): ServerMsg.Reply {
+        if (!direct && _link.value !is Link.Connected) throw IOException("Sin conexión con cocina")
         val w = writer ?: throw IOException("Sin conexión con cocina")
         val reqId = nextReq.getAndIncrement()
         val deferred = CompletableDeferred<ServerMsg.Reply>()
@@ -144,7 +159,8 @@ class WaiterClient(private val context: Context) {
     }
 
     private fun session(target: InetSocketAddress) {
-        _link.value = Link.Connecting(target.hostString)
+        // Si cocina rechazó a esta mesera, el aviso se queda hasta que la acepte.
+        if (_link.value !is Link.Rejected) _link.value = Link.Connecting(target.hostString)
         val s = Socket()
         socket = s
         s.connect(target, 4_000)
@@ -152,7 +168,9 @@ class WaiterClient(private val context: Context) {
         s.soTimeout = (KitchenServer.PING_MS * 2.5).toInt()
         val reader = BufferedReader(InputStreamReader(s.getInputStream(), Charsets.UTF_8))
         writer = BufferedWriter(OutputStreamWriter(s.getOutputStream(), Charsets.UTF_8))
-        _link.value = Link.Connected(target.hostString)
+        // Conectada solo cuando cocina la acepta; mientras tanto ya se ven las cuentas.
+        // No se cancela al cerrar: si cocina contestó "rechazada" y cerró, el aviso igual debe llegar.
+        scope.launch { introduce(target.hostString, s) }
         try {
             while (true) {
                 val line = s.readLineLimited(reader, MAX_STATE_CHARS) ?: throw IOException("Cocina cerró la conexión")
@@ -160,6 +178,7 @@ class WaiterClient(private val context: Context) {
                     is ServerMsg.State -> {
                         clockOffset = msg.serverTime - System.currentTimeMillis()
                         _state.value = msg.state
+                        _latestApp.value = msg.latestApp
                     }
                     is ServerMsg.Reply -> pending[msg.reqId]?.complete(msg)
                     ServerMsg.Ping -> Unit
@@ -167,6 +186,27 @@ class WaiterClient(private val context: Context) {
             }
         } finally {
             closeSocket()
+        }
+    }
+
+    /** Se presenta con cocina y le pasa las fallas guardadas de este teléfono. */
+    private suspend fun introduce(host: String, session: Socket) {
+        try {
+            request(direct = true) { ClientMsg.Hello(it, waiterId, "${android.os.Build.MANUFACTURER} ${android.os.Build.MODEL}") }
+        } catch (e: ValidationException) {
+            _link.value = Link.Rejected(e.message ?: "Cocina no aceptó la conexión")
+            if (socket === session) closeSocket()
+            return
+        } catch (e: IOException) {
+            return
+        }
+        // La conexión pudo caerse mientras cocina contestaba.
+        if (socket !== session) return
+        _link.value = Link.Connected(host)
+        val errors = crashes?.pending().orEmpty().take(20)
+        if (errors.isNotEmpty()) {
+            runCatching { request(direct = true) { ClientMsg.ReportErrors(it, errors) } }
+                .onSuccess { crashes?.remove(errors.map { e -> e.id }) }
         }
     }
 
@@ -215,7 +255,7 @@ class WaiterClient(private val context: Context) {
         writer = null
         runCatching { socket?.close() }
         socket = null
-        if (_link.value is Link.Connected) _link.value = Link.Searching
+        if (_link.value is Link.Connected || _link.value is Link.Connecting) _link.value = Link.Searching
     }
 
     private fun failPending(reason: String) {

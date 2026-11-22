@@ -47,18 +47,31 @@ class KitchenWaiterE2ETest {
 
     // ---------------- Arranque ----------------
 
+    private var waiterLimit: Int? = null
+    private val waiterErrors = mutableListOf<AppErrorReport>()
+
     private fun startKitchen(store: OrderStore, port: Int = 0) =
-        KitchenServer(context, store, isLocked = { locked }, port = port).also { it.start() }
+        KitchenServer(
+            context, store, isLocked = { locked }, port = port,
+            waiterLimit = { waiterLimit }, latestApp = { LatestApp(9, "9.0.0", "https://example.com/apk") },
+            onWaiterErrors = { synchronized(waiterErrors) { waiterErrors += it } },
+        ).also { it.start() }
 
     private fun port(server: KitchenServer = kitchen): Int = runBlocking {
         withTimeout(5_000) { server.localPort.first { it != null }!! }
     }
 
     /** Mesero conectado y con el menú de cocina ya recibido. */
-    private fun waiter(port: Int = port()): WaiterClient = WaiterClient(context).also { w ->
-        waiters += w
-        w.start("127.0.0.1:$port")
-        await(w) { it.products.isNotEmpty() }
+    private fun waiter(port: Int = port(), id: String = key(), crashes: CrashReporter? = null): WaiterClient =
+        WaiterClient(context, id, crashes).also { w ->
+            waiters += w
+            w.start("127.0.0.1:$port")
+            await(w) { it.products.isNotEmpty() }
+            awaitLink(w) { it is Link.Connected }
+        }
+
+    private fun awaitLink(w: WaiterClient, timeoutMs: Long = 5_000, check: (Link) -> Boolean): Link = runBlocking {
+        withTimeout(timeoutMs) { w.link.first(check) }
     }
 
     /** Espera a que el estado que ve el mesero cumpla la condición (llega por broadcast). */
@@ -72,6 +85,37 @@ class KitchenWaiterE2ETest {
     private fun key() = UUID.randomUUID().toString()
 
     // ---------------- Escenarios ----------------
+
+    @Test fun `el plan limita las meseras a la vez y el mismo telefono no cuenta doble`() {
+        waiterLimit = 2
+        // Mesera A con una conexión que se quedó colgada (se fue la red sin cerrar el socket).
+        val stale = java.net.Socket("127.0.0.1", port())
+        stale.getOutputStream().write((AppJson.encodeToString<ClientMsg>(ClientMsg.Hello(1, "mesera-a")) + "\n").toByteArray())
+        stale.getOutputStream().flush()
+        waiter(id = "mesera-b")
+        // La tercera se rechaza con el motivo, sin poder mandar órdenes.
+        val c = WaiterClient(context, "mesera-c").also { waiters += it; it.start("127.0.0.1:${port()}") }
+        val rejected = awaitLink(c) { it is Link.Rejected } as Link.Rejected
+        assertTrue(rejected.message, rejected.message.contains("2 meseras"))
+        assertThrows(java.io.IOException::class.java) {
+            runBlocking { c.createOrder(key(), "1", null, listOf(LineRequest(store.state.value.products.first().id, 1))) }
+        }
+        c.stop()
+        // A vuelve desde el mismo teléfono: suelta la conexión colgada y entra sin ocupar otro lugar.
+        val again = waiter(id = "mesera-a")
+        assertTrue(again.link.value is Link.Connected)
+        stale.close()
+    }
+
+    @Test fun `la mesera le pasa sus fallas a cocina y ve el aviso de version nueva`() {
+        val crashes = CrashReporter(tmp.newFolder("fallas-mesera"), "1.2.0 (5)", source = { "mesero" }, model = "Prueba")
+        crashes.record(IllegalStateException("boom"))
+        val w = waiter(crashes = crashes)
+        runBlocking { withTimeout(5_000) { while (crashes.pending().isNotEmpty()) delay(50) } }
+        assertEquals(listOf("IllegalStateException: boom"), synchronized(waiterErrors) { waiterErrors.map { it.message } })
+        assertEquals("mesero", waiterErrors.single().source)
+        assertEquals("9.0.0", w.latestApp.value?.versionName)
+    }
 
     @Test fun `el mesero se conecta y recibe el menu de cocina`() {
         val w = waiter()
