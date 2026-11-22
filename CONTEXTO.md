@@ -27,6 +27,7 @@ Teléfono COCINA                                Teléfono MESERA
 
 - **Una sola app**; el rol (Cocina / Mesero) se elige al abrirla y se guarda en preferencias.
 - La red puede ser un router sin internet o el **hotspot del teléfono de cocina**.
+- **Conexión sin fricción:** la cocina muestra con **📲** un QR que lleva su IP y puerto; la mesera lo escanea desde **⚙ → Conexión → «Escanear QR de cocina»**. mDNS sigue como respaldo y la IP manual queda para casos extremos.
 - Cocina transmite el **estado completo** a cada mesera en cada cambio y un `ping` cada 10 s; la mesera considera la conexión muerta tras 25 s sin mensajes.
 - La mesera nunca guarda datos de negocio: todo vive en cocina.
 
@@ -75,16 +76,17 @@ Teléfono COCINA                                Teléfono MESERA
 - Pantalla principal: **cuentas abiertas agrupadas por mesa** (tarjetas uniformes con estado de pago, consumo, tiempo en cocina y saldo).
 - **+ Nueva orden** → mesa (cuadrícula) → cuenta existente o nueva → productos (**un toque = +1**, mantener presionado = modificar) → **Revisar** → **Enviar a cocina**. Se limpia solo después de la confirmación de cocina.
 - En el resumen, tocar un producto abre el editor: cada grupo con cantidad −/+, opciones por tipo y nota; **✂ Dividir preparación** parte a la mitad el grupo más grande (4 → 2+2).
-- Gestos en la tarjeta de cuenta: **tocar** = detalle · **← deslizar** = cancelar cuenta · **→ deslizar** = cobrar (si debe) / **entregar** (si ya pagó y sigue en cocina) / devolver (saldo negativo). Umbral: 1/3 del ancho.
+- Gestos en la tarjeta de cuenta: **tocar** = detalle · **← deslizar** = cancelar cuenta · **→ deslizar** = menú rápido de acciones: **entregar** lo que está en cocina (aunque la cuenta se cobre al final) y **cobrar**/**devolver** según el saldo. Umbral: 1/3 del ancho.
 - Cobro en efectivo: botones **Exacto · $100 · $200 · $300 · $500 · $1,000** u "Otra cantidad"; muestra el **cambio** grande. La barra de deshacer muestra "Cambio $X" primero.
 - Detalle de cuenta: totales, órdenes (Cancelar · **Editar** · Entregada), pagos, *Agregar productos*, *Cobrar/Entregar*.
+- **Ajustes → Conexión**: escanear el QR de la cocina o escribir su IP a mano.
 
 ## Pantalla de cocina
 
 - Monitor **pasivo**: el taquero no toca nada. Un ticket por mesa, la más antigua primero; cada orden con cuenta, número, hora de recepción y sus grupos (producto en mayúsculas + modificaciones).
 - Colores por espera (siempre con el tiempo en texto): verde < 5 min, amarillo ≥ 5, rojo ≥ 10, **rojo con pulso** ≥ 15.
 - Orden nueva: "● NUEVA" 1 min + sonido/vibración. Orden editada: "● EDITADA" 3 min, grupos nuevos resaltados y "QUITAR: …" tachado; también suena.
-- Pantalla siempre encendida. Botones solo de configuración: 📋 catálogo y ⇄ cambiar rol. Muestra IP y meseras conectadas.
+- Pantalla siempre encendida. Botones solo de configuración: 📲 QR de conexión, 📋 catálogo y ⇄ cambiar rol. Muestra IP y meseras conectadas.
 
 ## Diseño
 

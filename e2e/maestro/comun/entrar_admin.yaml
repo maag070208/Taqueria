@@ -1,0 +1,10 @@
+# Entra como admin con el PIN ya creado (05_admin_pin).
+appId: com.axzy.taqueria
+---
+- tapOn: "Abrir menú"
+- tapOn: "Entrar como admin"
+- tapOn: "PIN"
+- inputText: "2468"
+- hideKeyboard
+- tapOn: "Entrar"
+- assertVisible: "Lo vendido y lo cobrado en este teléfono"

@@ -1,0 +1,3192 @@
+{
+  "casos": [
+    {
+      "id": "FUN-ROLES-01",
+      "tipo": "FUN",
+      "modulo": "Roles",
+      "titulo": "Primer arranque en el teléfono de la mesera: elegir Mesero",
+      "prioridad": "Alta",
+      "precondiciones": "APK instalada sin rol guardado (o Datos de la app borrados) en el teléfono/emulador de la mesera; cocina activa y conectada a la misma red; catálogo semilla.",
+      "pasos": [
+        "Abrir Tacomanda.",
+        "En «¿Qué hará este teléfono?» tocar la tarjeta «Mesero» (📝).",
+        "Esperar 2 s a que se establezca el enlace con cocina."
+      ],
+      "esperado": "Se abre «Cuentas abiertas» con subtítulo «● Conectado a cocina», la ayuda «Toca: detalle · ← cancelar · → cobrar o entregar», el estado vacío «No hay cuentas abiertas» y el botón «+ Nueva orden» habilitado. En cocina el subtítulo pasa a «● 1 mesera conectada». El rol queda guardado en SharedPreferences (taqueria.xml, role=WAITER) y se conserva al cerrar y reabrir.",
+      "cobertura": "e2e",
+      "dispositivo": "ambos",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "FUN-ROLES-02",
+      "tipo": "FUN",
+      "modulo": "Roles",
+      "titulo": "Primer arranque en cocina: la licencia bloquea el monitor",
+      "prioridad": "Alta",
+      "precondiciones": "Teléfono de cocina sin licencia guardada (SharedPreferences license.xml sin cache) y sin activar; misma red.",
+      "pasos": [
+        "Abrir Tacomanda.",
+        "Tocar la tarjeta «Cocina» (👨‍🍳)."
+      ],
+      "esperado": "Aparece «Activa esta cocina», el botón «Escanear QR de la Central», el campo «Código de activación» y «Activar» deshabilitado mientras el código esté vacío; el monitor de cocina NO se muestra (LicenseGate). El servidor TCP sí queda escuchando en el puerto 7777 porque arranca con el rol, pero rechaza a las meseras con «La cuenta de la taquería está suspendida. Revisa el teléfono de cocina.» mientras la licencia no esté activa (ver LIC-LICENCIA-11).",
+      "cobertura": "e2e",
+      "dispositivo": "cocina",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "FUN-ROLES-03",
+      "tipo": "FUN",
+      "modulo": "Roles",
+      "titulo": "Cambiar rol de cocina a mesera conserva órdenes y menú",
+      "prioridad": "Alta",
+      "precondiciones": "Cocina activa, con al menos una orden pendiente (p. ej. Mesa 4 · Cuenta 1) y menú editado; misma red.",
+      "pasos": [
+        "En el monitor de cocina tocar «⇄».",
+        "Confirmar en «¿Cambiar el rol de este teléfono?» con «Cambiar».",
+        "Elegir «Mesero»."
+      ],
+      "esperado": "KitchenServer y LicenseManager se detienen; el teléfono entra a «Cuentas abiertas» y muestra la Mesa 4 · Cuenta 1 con el mismo estado y saldo. El menú y las órdenes no se pierden porque viven en taqueria.json de ese mismo teléfono.",
+      "cobertura": "e2e",
+      "dispositivo": "cocina",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "FUN-ROLES-04",
+      "tipo": "FUN",
+      "modulo": "Roles",
+      "titulo": "Volver a cocina desde el engrane de la mesera",
+      "prioridad": "Media",
+      "precondiciones": "Teléfono en rol Mesero, con enlace conectado a cocina.",
+      "pasos": [
+        "Tocar «⚙».",
+        "Tocar «Cambiar rol de este teléfono».",
+        "Elegir «Cocina»."
+      ],
+      "esperado": "Vuelve la pantalla «¿Qué hará este teléfono?»; al elegir Cocina se muestra el monitor (o el bloqueo de licencia si corresponde). El WaiterClient se detiene, el servidor TCP arranca en el puerto 7777 y cocina anuncia «● 1 mesera conectada» cuando se reconecta la otra mesera.",
+      "cobertura": "e2e",
+      "dispositivo": "mesera",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "FUN-CUENTAS-01",
+      "tipo": "FUN",
+      "modulo": "Cuentas",
+      "titulo": "Nueva orden en Mesa 4 crea la Cuenta 1 y llega a cocina",
+      "prioridad": "Alta",
+      "precondiciones": "Ambos teléfonos conectados (IP manual o mDNS); catálogo semilla; sin cuentas abiertas.",
+      "pasos": [
+        "Mesera: tocar «+ Nueva orden».",
+        "Tocar la mesa «4».",
+        "Tocar dos veces el mosaico «Asada» ($20.00).",
+        "Tocar «Revisar · 2 · $40.00  →».",
+        "Tocar «Enviar a cocina · $40.00» y esperar la confirmación."
+      ],
+      "esperado": "Toast «Orden #1 enviada · Mesa 4 · Cuenta 1». La lista muestra la sección «Mesa 4», la tarjeta «Cuenta 1», el chip «Sin pagar», «2 Asada», «En cocina · 0:0x» y «Debe $40.00». Cocina pinta el ticket «MESA 4» con «Cuenta 1 · #1 · HH:mm», «ESPERA 0:0x», y «2 ASADA». regla 1 y 4.",
+      "cobertura": "e2e",
+      "dispositivo": "ambos",
+      "regla": "regla 1, regla 4",
+      "estado": "pendiente"
+    },
+    {
+      "id": "FUN-CUENTAS-02",
+      "tipo": "FUN",
+      "modulo": "Cuentas",
+      "titulo": "Segunda cuenta de la misma mesa con «+ Cuenta»",
+      "prioridad": "Alta",
+      "precondiciones": "Existe Mesa 4 con Cuenta 1 abierta; ambos conectados.",
+      "pasos": [
+        "En la sección «Mesa 4» tocar «+ Cuenta».",
+        "Tocar «Refresco» ($30.00).",
+        "Tocar «Revisar · 1 · $30.00  →» y «Enviar a cocina · $30.00»."
+      ],
+      "esperado": "Toast «Orden #2 enviada · Mesa 4 · Cuenta 2». La mesa muestra «Cuenta 1» y «Cuenta 2» ordenadas por número, cada una con su saldo y consumo; cocina junta las dos órdenes en un solo ticket «MESA 4». regla 4. Adicionalmente cubierto a nivel unitario por `OrderStoreTest.cuentas separadas en la misma mesa con saldos independientes`.",
+      "cobertura": "ambas",
+      "dispositivo": "ambos",
+      "regla": "regla 4",
+      "estado": "pendiente"
+    },
+    {
+      "id": "FUN-CUENTAS-03",
+      "tipo": "FUN",
+      "modulo": "Cuentas",
+      "titulo": "Agregar productos a una cuenta abierta desde el detalle",
+      "prioridad": "Alta",
+      "precondiciones": "Cuenta 1 de Mesa 4 con Orden #1; ambos conectados.",
+      "pasos": [
+        "Tocar la tarjeta «Cuenta 1».",
+        "Tocar «+ Agregar productos».",
+        "Tocar «Pastor» ($18.00).",
+        "Tocar «Revisar · 1 · $18.00  →» y «Enviar a cocina · $18.00»."
+      ],
+      "esperado": "Toast «Orden #2 enviada · Mesa 4 · Cuenta 1». Al enviar se vuelve a «Cuentas abiertas»; al abrir de nuevo la cuenta, el detalle muestra «Orden #1» y «Orden #2», «Total $58.00» (suma de subtotales) y cocina agrega la nueva orden al ticket de la mesa. La cantidad del producto se calcula sumando sus grupos, nunca con un total aparte. regla 1.",
+      "cobertura": "e2e",
+      "dispositivo": "ambos",
+      "regla": "regla 1",
+      "estado": "pendiente"
+    },
+    {
+      "id": "FUN-CUENTAS-04",
+      "tipo": "FUN",
+      "modulo": "Cuentas",
+      "titulo": "Varias mesas se ordenan por la cuenta más antigua",
+      "prioridad": "Media",
+      "precondiciones": "Tres mesas con cuentas creadas en este orden: Mesa 5, Mesa 2 y Mesa 7; después se agregan productos solo a Mesa 5.",
+      "pasos": [
+        "Crear una orden en Mesa 5.",
+        "Crear una orden en Mesa 2.",
+        "Crear una orden en Mesa 7.",
+        "Agregar otro producto a Mesa 5.",
+        "Volver a «Cuentas abiertas»."
+      ],
+      "esperado": "Las secciones aparecen «Mesa 5», «Mesa 2», «Mesa 7» (se ordenan por la orden más antigua de cada mesa, no por la última actividad) y dentro de cada mesa las cuentas van por número ascendente. La mesa más vieja queda primero para atenderla antes.",
+      "cobertura": "e2e",
+      "dispositivo": "mesera",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "FUN-CAPTURA-01",
+      "tipo": "FUN",
+      "modulo": "Captura",
+      "titulo": "Un toque suma +1 y el total se calcula en vivo",
+      "prioridad": "Alta",
+      "precondiciones": "Conectados; menú semilla.",
+      "pasos": [
+        "«+ Nueva orden» → mesa «1».",
+        "Tocar 3 veces «Asada» y 1 vez «Pastor».",
+        "Mirar los badges de los mosaicos y la barra inferior."
+      ],
+      "esperado": "Badge «3» sobre Asada y «1» sobre Pastor, con botón «−» en ambos y badge ✎ solo si el grupo tiene modificaciones. La barra inferior muestra «Revisar · 4 · $78.00  →» (3×$20 + $18). Cocina no recibe nada hasta tocar «Enviar a cocina». regla 1.",
+      "cobertura": "e2e",
+      "dispositivo": "ambos",
+      "regla": "regla 1",
+      "estado": "pendiente"
+    },
+    {
+      "id": "FUN-CAPTURA-02",
+      "tipo": "FUN",
+      "modulo": "Captura",
+      "titulo": "Los chips de categoría desplazan la rejilla a su sección",
+      "prioridad": "Media",
+      "precondiciones": "Menú semilla con las categorías Tacos, Especiales y Bebidas (más de una categoría).",
+      "pasos": [
+        "«+ Nueva orden» → mesa «2».",
+        "Tocar el chip «Bebidas» (🥤).",
+        "Tocar «Refresco»."
+      ],
+      "esperado": "La lista hace scroll animado a la sección «Bebidas» con «Refresco», «Agua de horchata» y «Agua de jamaica»; el chip es solo un atajo y no altera el pedido. Con una sola categoría los chips no se muestran.",
+      "cobertura": "e2e",
+      "dispositivo": "mesera",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "FUN-CAPTURA-03",
+      "tipo": "FUN",
+      "modulo": "Captura",
+      "titulo": "Mantener presionado abre el editor con modificaciones y nota",
+      "prioridad": "Alta",
+      "precondiciones": "Conectados; menú semilla.",
+      "pasos": [
+        "«+ Nueva orden» → mesa «3».",
+        "Mantener presionado «Asada» (se agrega 1 y abre el editor).",
+        "Tocar «Con cebolla» (tipo Cebolla, exclusiva), luego «Bien dorado» y «Con queso» (Extras, combinable).",
+        "Escribir en «Nota de este grupo (opcional)»: sin picante.",
+        "Tocar «Listo» y luego «Revisar · 1 · $20.00  →»."
+      ],
+      "esperado": "El mosaico muestra badge «1» y ✎. El resumen muestra una fila de grupo «1» con «Con cebolla, Bien dorado, Con queso, sin picante» y el total sigue $20.00. Al enviar, cocina muestra «1 ASADA» con «CON CEBOLLA · BIEN DORADO · CON QUESO» y «⚠ sin picante». regla 2.",
+      "cobertura": "e2e",
+      "dispositivo": "ambos",
+      "regla": "regla 2",
+      "estado": "pendiente"
+    },
+    {
+      "id": "FUN-CAPTURA-04",
+      "tipo": "FUN",
+      "modulo": "Captura",
+      "titulo": "✂ Dividir preparación: 4 asada → 2+2 en una sola orden",
+      "prioridad": "Alta",
+      "precondiciones": "Conectados; menú semilla; sin cuentas abiertas.",
+      "pasos": [
+        "«+ Nueva orden» → mesa «4».",
+        "Tocar 4 veces «Asada».",
+        "Tocar «Revisar · 4 · $80.00  →».",
+        "Tocar la tarjeta «Asada» del resumen para abrir el editor.",
+        "Tocar «✂ Dividir preparación».",
+        "En «Grupo 1» tocar «Sin cebolla».",
+        "Tocar «Listo» y luego «Enviar a cocina · $80.00»."
+      ],
+      "esperado": "El editor muestra «Total 4 · 2 grupos de preparación» con «Grupo 1» y «Grupo 2» de 2 cada uno. El resumen muestra «× 4» con una fila «2 Sin cebolla» y otra «2 Normal». Cocina recibe UNA sola orden con «2 ASADA · SIN CEBOLLA» y «2 ASADA»; el total no cambia ($80.00). Cubierto además por `OrderStoreTest.cuatro tacos de asada se dividen en dos grupos dentro de una sola orden`. regla 1.",
+      "cobertura": "ambas",
+      "dispositivo": "ambos",
+      "regla": "regla 1",
+      "estado": "pendiente"
+    },
+    {
+      "id": "FUN-CAPTURA-05",
+      "tipo": "FUN",
+      "modulo": "Captura",
+      "titulo": "Grupos idénticos se unen y Extras combinables se aceptan (payload TCP)",
+      "prioridad": "Media",
+      "precondiciones": "Cocina en primer plano; `adb -s <cocina> forward tcp:7777 tcp:7777`; leer el `state` inicial para obtener el id real de «Pastor».",
+      "pasos": [
+        "Conectar `nc 127.0.0.1 7777` y leer la línea `state`.",
+        "Enviar `{\"type\":\"create\",\"reqId\":1,\"clientKey\":\"k-fun-05\",\"table\":\"7\",\"accountId\":null,\"lines\":[{\"productId\":\"<id Pastor>\",\"qty\":1,\"mods\":[\"Sin salsa\",\"Cebolla aparte\"],\"note\":\"\"},{\"productId\":\"<id Pastor>\",\"qty\":1,\"mods\":[\"Cebolla aparte\",\"Sin salsa\"],\"note\":\"\"},{\"productId\":\"<id Pastor>\",\"qty\":2,\"mods\":[\"Bien dorado\",\"Con queso\"],\"note\":\"\"}]}`.",
+        "Leer la línea `reply` y revisar `order.lines`."
+      ],
+      "esperado": "La respuesta no trae `error`; `order.lines` trae 2 grupos: qty 2 con mods en el orden del catálogo («Sin salsa», «Cebolla aparte») y qty 2 con («Bien dorado», «Con queso»). Los grupos idénticos se unen y las opciones combinables de Extras conviven. Cubierto por `OrderStoreTest.grupos identicos se unen y las modificaciones combinables se aceptan`. regla 1 y 2.",
+      "cobertura": "ambas",
+      "dispositivo": "ambos",
+      "regla": "regla 1, regla 2",
+      "estado": "pendiente"
+    },
+    {
+      "id": "FUN-CAPTURA-06",
+      "tipo": "FUN",
+      "modulo": "Captura",
+      "titulo": "Mesa «Llevar» se muestra como «Para llevar»",
+      "prioridad": "Media",
+      "precondiciones": "Conectados; menú semilla.",
+      "pasos": [
+        "«+ Nueva orden» → tocar «Llevar».",
+        "Tocar «Quesadilla» ($45.00).",
+        "«Revisar · 1 · $45.00  →» y «Enviar a cocina · $45.00»."
+      ],
+      "esperado": "El título de captura pasa a «Para llevar · Cuenta nueva»; la lista y cocina muestran «PARA LLEVAR» en lugar de «Mesa Llevar». El ticket se comporta como cualquier mesa. regla 4.",
+      "cobertura": "e2e",
+      "dispositivo": "ambos",
+      "regla": "regla 4",
+      "estado": "pendiente"
+    },
+    {
+      "id": "FUN-CAPTURA-07",
+      "tipo": "FUN",
+      "modulo": "Captura",
+      "titulo": "Mesa personalizada con «Otra…»",
+      "prioridad": "Media",
+      "precondiciones": "Conectados.",
+      "pasos": [
+        "«+ Nueva orden».",
+        "Tocar «Otra…» y en el diálogo «Mesa» escribir «Barra 2».",
+        "Tocar «Listo».",
+        "Tocar «Refresco» y «Enviar a cocina · $30.00»."
+      ],
+      "esperado": "Toast «Orden #1 enviada · Mesa Barra 2 · Cuenta 1»; la lista muestra la sección «Mesa Barra 2» y cocina el ticket «MESA BARRA 2». El campo del diálogo acepta hasta 20 caracteres y «Listo» está deshabilitado si el texto está vacío.",
+      "cobertura": "e2e",
+      "dispositivo": "ambos",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "FUN-CAPTURA-08",
+      "tipo": "FUN",
+      "modulo": "Captura",
+      "titulo": "Descartar una captura pide confirmación y no crea nada",
+      "prioridad": "Media",
+      "precondiciones": "Conectados; sin cuentas abiertas.",
+      "pasos": [
+        "«+ Nueva orden» → mesa «6» → tocar «Asada».",
+        "Tocar «←».",
+        "En «¿Descartar esta orden?» tocar «Descartar»."
+      ],
+      "esperado": "Vuelve a «Cuentas abiertas» sin crear cuenta ni orden; cocina no recibe nada. La opción «Seguir capturando» conserva el borrador. Al descartar una EDICIÓN el diálogo dice «¿Descartar los cambios?» y «La orden se queda como estaba en cocina.»",
+      "cobertura": "e2e",
+      "dispositivo": "mesera",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "FUN-CAPTURA-09",
+      "tipo": "FUN",
+      "modulo": "Captura",
+      "titulo": "Editar una orden: 4 asada → 2 asada + 1 adobada + 1 chorizo",
+      "prioridad": "Alta",
+      "precondiciones": "Orden #1 PENDING de Mesa 4 con 4 asada; ambos conectados.",
+      "pasos": [
+        "Abrir la cuenta → en «Orden #1» tocar «Editar» (se abre el resumen de la edición).",
+        "Tocar la tarjeta «Asada» del resumen para abrir el editor y bajar la cantidad a 2 con el stepper «−».",
+        "Tocar «Listo» para volver al resumen y luego «+ Agregar».",
+        "Agregar «Adobada» y «Chorizo».",
+        "Tocar «Revisar» → «Guardar cambios · $76.00»."
+      ],
+      "esperado": "Toast «Orden #1 actualizada en cocina». El detalle muestra «Orden #1 · HH:mm · editada» y las nuevas líneas. Cocina muestra «● EDITADA» durante 3 min, resalta las filas nuevas y muestra «QUITAR: 2 ASADA» tachado; internamente quedan las revisiones (versión anterior). Cubierto por `OrderStoreTest.editar 4 de asada a 2 asada 1 adobada 1 chorizo conserva la version anterior`. regla 7.",
+      "cobertura": "ambas",
+      "dispositivo": "ambos",
+      "regla": "regla 7",
+      "estado": "pendiente"
+    },
+    {
+      "id": "FUN-CAPTURA-10",
+      "tipo": "FUN",
+      "modulo": "Captura",
+      "titulo": "Editar quita un grupo y agrega otro: cocina muestra «QUITAR: …» tachado",
+      "prioridad": "Alta",
+      "precondiciones": "Orden PENDING con 2 asada (una sola línea); ambos conectados.",
+      "pasos": [
+        "Detalle → «Editar» (se abre el resumen de la edición).",
+        "Tocar la tarjeta «Asada» → en el editor bajar a 1 → «Listo».",
+        "«+ Agregar» → «Gringa» → «Revisar».",
+        "Tocar «Guardar cambios · $75.00»."
+      ],
+      "esperado": "Cocina muestra la fila nueva «1 GRINGA» resaltada y debajo «QUITAR: 1 ASADA» en rojo y tachado (comparación contra la última revisión); el ticket queda con 1 asada + 1 gringa. El resumen y el detalle reflejan las mismas líneas. regla 7.",
+      "cobertura": "e2e",
+      "dispositivo": "ambos",
+      "regla": "regla 7",
+      "estado": "pendiente"
+    },
+    {
+      "id": "FUN-COCINA-01",
+      "tipo": "FUN",
+      "modulo": "Cocina",
+      "titulo": "Ticket de cocina con todos los datos de la orden",
+      "prioridad": "Alta",
+      "precondiciones": "Cocina activa con una orden PENDING de Mesa 4 · Cuenta 1 con dos grupos, modificaciones y una nota.",
+      "pasos": [
+        "Mirar el monitor de cocina."
+      ],
+      "esperado": "Un ticket por mesa con «MESA 4» en mayúsculas, hora HH:mm arriba y «ESPERA m:ss» siempre en texto; por orden «Cuenta 1 · #1 · HH:mm»; por grupo la cantidad en cuadro, el producto en MAYÚSCULAS, las modificaciones en mayúsculas separadas por « · », y la nota como «⚠ texto» sobre fondo ámbar. La pantalla es pasiva: solo tiene «📋» y «⇄» en la barra.",
+      "cobertura": "e2e",
+      "dispositivo": "cocina",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "FUN-COCINA-02",
+      "tipo": "FUN",
+      "modulo": "Cocina",
+      "titulo": "Orden nueva: suena, vibra y muestra «● NUEVA» durante 1 min",
+      "prioridad": "Alta",
+      "precondiciones": "Cocina con un ticket de Mesa 4 que ya tiene al menos una orden (el código solo pinta «● NUEVA» cuando la mesa tiene más de una orden); sonido y vibración activos.",
+      "pasos": [
+        "Enviar una segunda orden a Mesa 4 desde la mesera.",
+        "Observar y escuchar el monitor de cocina durante 1 min."
+      ],
+      "esperado": "Al llegar la orden suena un beep doble y vibra; la orden nueva muestra «● NUEVA» junto a «Cuenta N · #N · HH:mm» durante 60 s y luego desaparece. El ticket se reordena por hora de recepción.",
+      "cobertura": "e2e",
+      "dispositivo": "cocina",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "FUN-COCINA-03",
+      "tipo": "FUN",
+      "modulo": "Cocina",
+      "titulo": "Varias órdenes de una mesa en un solo ticket, la más antigua primero",
+      "prioridad": "Alta",
+      "precondiciones": "Mesa 4 con Orden #1 (11:29) y #2 (11:34); Mesa 2 con #3 (11:38).",
+      "pasos": [
+        "Mirar el monitor de cocina."
+      ],
+      "esperado": "Los tickets se ordenan por su orden más antigua: «MESA 4» antes que «MESA 2». Dentro del ticket de Mesa 4 las órdenes van de más vieja a más nueva («Cuenta 1 · #1» y luego «Cuenta 2 · #2») separadas por un divisor, y el color/espera del ticket se calcula con la orden más antigua. Cada orden conserva su cuenta y número.",
+      "cobertura": "e2e",
+      "dispositivo": "cocina",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "FUN-COBRO-01",
+      "tipo": "FUN",
+      "modulo": "Cobro",
+      "titulo": "Cobro exacto en efectivo cierra la cuenta y quita el ticket",
+      "prioridad": "Alta",
+      "precondiciones": "Mesa 4 · Cuenta 1 con 2 asada PENDING, total $40.00; ambos conectados.",
+      "pasos": [
+        "Deslizar la tarjeta de la cuenta hacia la derecha hasta pasar 1/3 del ancho («💵 Cobrar»).",
+        "En el diálogo «Cobrar · Cuenta 1» tocar «Exacto».",
+        "Tocar «Registrar $40.00»."
+      ],
+      "esperado": "Toast «Pago de $40.00 registrado · entregada». En Pagos aparece «Efectivo · HH:mm  $40.00»; la orden pasa a «Entregada»; la cuenta se cierra y desaparece de «Cuentas abiertas»; cocina borra el ticket; aparece la barra «Pago de $40.00 registrado · entregada» con «Deshacer» por 6 s. regla 6 y 9.",
+      "cobertura": "e2e",
+      "dispositivo": "ambos",
+      "regla": "regla 6, regla 9",
+      "estado": "pendiente"
+    },
+    {
+      "id": "FUN-COBRO-02",
+      "tipo": "FUN",
+      "modulo": "Cobro",
+      "titulo": "Cobro con cambio: total $80 pagado con $100 → «Cambio $20.00»",
+      "prioridad": "Alta",
+      "precondiciones": "Cuenta con total $80.00 y orden PENDING; ambos conectados.",
+      "pasos": [
+        "Deslizar a la derecha → tocar «$100» en «¿Con cuánto paga?».",
+        "Verificar el recuadro «Cambio $20.00».",
+        "Tocar «Registrar $80.00»."
+      ],
+      "esperado": "El recuadro «Cambio $20.00» se muestra en grande; el toast y la barra empiezan con «Cambio $20.00 · cobrado $80.00» (el cambio es lo primero que ve la mesera). El pago guarda `receivedCents=10000` y la orden se entrega en el mismo paso. Cubierto por `OrderStoreTest.cobrar en efectivo guarda con cuanto pagaron y entrega la orden`. regla 5 y 6.",
+      "cobertura": "ambas",
+      "dispositivo": "ambos",
+      "regla": "regla 5, regla 6",
+      "estado": "pendiente"
+    },
+    {
+      "id": "FUN-COBRO-03",
+      "tipo": "FUN",
+      "modulo": "Cobro",
+      "titulo": "Transferencia exige confirmar que el abono llegó",
+      "prioridad": "Alta",
+      "precondiciones": "Cuenta con total $60.00 y orden PENDING; ambos conectados.",
+      "pasos": [
+        "Deslizar a la derecha → elegir «Transferencia».",
+        "Verificar que «Registrar …» está deshabilitado.",
+        "Marcar «Ya verifiqué que la transferencia llegó».",
+        "Tocar «Registrar $60.00»."
+      ],
+      "esperado": "El botón de confirmación solo se habilita con la casilla marcada. Se registra «Transferencia · HH:mm  $60.00», la orden queda «Entregada» (casilla «Marcar como entregada» marcada por defecto) y la cuenta se cierra. regla 5.",
+      "cobertura": "e2e",
+      "dispositivo": "ambos",
+      "regla": "regla 5",
+      "estado": "pendiente"
+    },
+    {
+      "id": "FUN-COBRO-04",
+      "tipo": "FUN",
+      "modulo": "Cobro",
+      "titulo": "Pagar una cuenta no paga las demás de la misma mesa",
+      "prioridad": "Alta",
+      "precondiciones": "Mesa 4 con Cuenta 1 (2 asada, $40) y Cuenta 2 (Refresco, $30), ambas PENDING.",
+      "pasos": [
+        "Cobrar Cuenta 1 con «Exacto».",
+        "Abrir Cuenta 2."
+      ],
+      "esperado": "Cuenta 1 queda «Pagada» y se cierra; Cuenta 2 sigue «Sin pagar» con «Saldo pendiente $30.00» y su orden sigue en cocina. Cubierto por `OrderStoreTest.pagar una cuenta no paga las demas de la mesa`. regla 4.",
+      "cobertura": "ambas",
+      "dispositivo": "ambos",
+      "regla": "regla 4",
+      "estado": "pendiente"
+    },
+    {
+      "id": "FUN-COBRO-05",
+      "tipo": "FUN",
+      "modulo": "Cobro",
+      "titulo": "Pago parcial efectivo + transferencia sin sacar la orden de cocina",
+      "prioridad": "Alta",
+      "precondiciones": "Cuenta con total $60.00 y orden PENDING; ambos conectados.",
+      "pasos": [
+        "Deslizar a la derecha, desmarcar «Marcar como entregada (sale de cocina)», poner importe $20 y «Exacto» → «Registrar $20.00».",
+        "Verificar chip «Pago parcial» y que la orden sigue «En cocina».",
+        "Deslizar de nuevo, elegir «Transferencia», importe $40, marcar «Ya verifiqué que la transferencia llegó» y «Registrar $40.00»."
+      ],
+      "esperado": "El primer pago deja «Pago parcial» y la orden PENDING en cocina; el segundo deja «Pagada» y, como la casilla de entregar quedó marcada por defecto, la orden pasa a «Entregada» y la cuenta se cierra. Cubierto por `OrderStoreTest.pago parcial en efectivo y transferencia no cambia la preparacion`. regla 5 y 6.",
+      "cobertura": "ambas",
+      "dispositivo": "ambos",
+      "regla": "regla 5, regla 6",
+      "estado": "pendiente"
+    },
+    {
+      "id": "FUN-COBRO-06",
+      "tipo": "FUN",
+      "modulo": "Cobro",
+      "titulo": "Devolución de un saldo negativo",
+      "prioridad": "Media",
+      "precondiciones": "Cuenta con una orden de 3 asada ($60) pagada en efectivo SIN marcar «Marcar como entregada»; después se cancela esa orden para que el saldo quede en -$60.",
+      "pasos": [
+        "Desde el detalle tocar «Cancelar» en la orden (y no deshacer).",
+        "Verificar en la tarjeta «Devolver $60.00» y que el gesto derecho diga «💵  Devolver».",
+        "Deslizar a la derecha → diálogo «Devolver · Cuenta 1» → «Registrar $60.00»."
+      ],
+      "esperado": "Se registra un pago negativo («Devolución · HH:mm  -$60.00»), el saldo vuelve a $0 y la cuenta se cierra y archiva (no queda pendiente en cocina). La devolución no pide método ni cambio. regla 5, 9 y 10.",
+      "cobertura": "e2e",
+      "dispositivo": "ambos",
+      "regla": "regla 5, regla 9, regla 10",
+      "estado": "pendiente"
+    },
+    {
+      "id": "FUN-CATALOGO-01",
+      "tipo": "FUN",
+      "modulo": "Catálogo",
+      "titulo": "Alta de producto nuevo disponible para la mesera",
+      "prioridad": "Alta",
+      "precondiciones": "Cocina activa y conectada; menú semilla (15 productos, 5 tipos de modificación).",
+      "pasos": [
+        "En cocina tocar «📋».",
+        "Tocar «+ Agregar producto».",
+        "Escribir Nombre «Volcán», Precio «35», Categoría «Especiales»; tocar el ícono «🧀» y marcar «Extras» en «Modificaciones permitidas».",
+        "Tocar «Guardar»."
+      ],
+      "esperado": "El menú muestra la fila «Volcán $35.00» en «Especiales» y el subtítulo suma un producto («16 productos · 5 tipos de modificación»). La mesera recibe el estado nuevo por TCP y la rejilla de Especiales ya muestra «Volcán $35.00» sin reiniciar. El producto queda en taqueria.json y sobrevive a reiniciar.",
+      "cobertura": "e2e",
+      "dispositivo": "ambos",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "FUN-CATALOGO-02",
+      "tipo": "FUN",
+      "modulo": "Catálogo",
+      "titulo": "Apagar un producto lo marca agotado y lo quita de la captura",
+      "prioridad": "Alta",
+      "precondiciones": "Cocina activa; mesera conectada; producto «Pastor» activo.",
+      "pasos": [
+        "Cocina → «📋» → apagar el interruptor de «Pastor».",
+        "En la mesera abrir «+ Nueva orden» → mesa 1 y mirar la rejilla.",
+        "En otra mesera/borrador tener «Pastor» agregado y esperar el estado de cocina."
+      ],
+      "esperado": "En cocina la fila queda «Pastor $18.00 · agotado» en gris y la mesera ya no muestra «Pastor» en la rejilla; si estaba en un borrador de captura se retira solo (`retainAvailable`). Lo ya pedido se conserva en cocina y se puede seguir editando (regla 7). regla 7.",
+      "cobertura": "e2e",
+      "dispositivo": "ambos",
+      "regla": "regla 7",
+      "estado": "pendiente"
+    },
+    {
+      "id": "FUN-CONEXION-01",
+      "tipo": "FUN",
+      "modulo": "Conexión",
+      "titulo": "Conexión de los 2 teléfonos por IP manual y sincronización en vivo",
+      "prioridad": "Alta",
+      "precondiciones": "Cocina en primer plano con licencia activa; `adb -s <cocina> forward tcp:7777 tcp:7777`; mesera con IP manual configurada.",
+      "pasos": [
+        "Mesera: «⚙» → escribir «10.0.2.2» en «IP de cocina (opcional)» → «Guardar».",
+        "Verificar el subtítulo «● Conectado a cocina».",
+        "Crear una orden y mirarla en cocina; cancelarla desde el detalle y mirar la mesera."
+      ],
+      "esperado": "Cocina muestra «● 1 mesera conectada · IP 10.0.2.15» (o la IP real del teléfono). Cada cambio de estado llega a la mesera en menos de 1 s porque cocina transmite el estado completo en cada cambio; la cancelación se refleja en ambos teléfonos. Si la IP se escribe mal, la mesera se queda en «● Conectando…».",
+      "cobertura": "e2e",
+      "dispositivo": "ambos",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "FUN-LICENCIA-01",
+      "tipo": "FUN",
+      "modulo": "Licencia",
+      "titulo": "Activación manual con un código válido deja la cocina operativa",
+      "prioridad": "Alta",
+      "precondiciones": "Cocina sin activar; API de Axzy Central accesible (en debug la URL compilada es `http://10.0.2.2:4100/api/v1`, admite http; se puede usar un mock local con el contrato de `/activate`).",
+      "pasos": [
+        "Elegir «Cocina» en la pantalla de rol.",
+        "Escribir un código `axc_…` válido en «Código de activación».",
+        "Tocar «Activar» y esperar."
+      ],
+      "esperado": "Mientras consulta se ve «Activando…» y «Conectando con la Central…». Con respuesta 200/201 del contrato se guarda la cache en SharedPreferences (status ACTIVE, tenant, validUntil, serverTime) y se abre el monitor de cocina. Al cerrar y reabrir sin internet la cocina sigue operativa hasta `validUntil`.",
+      "cobertura": "e2e",
+      "dispositivo": "cocina",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "BOR-CAPTURA-01",
+      "tipo": "BOR",
+      "modulo": "Captura",
+      "titulo": "Tope de 99 piezas por grupo (UI y TCP)",
+      "prioridad": "Media",
+      "precondiciones": "Conectados; editor de «Asada» abierto con 1 pieza; TCP disponible para la variante directa.",
+      "pasos": [
+        "En el editor tocar «+» 98 veces hasta que el contador marque 99.",
+        "Intentar un toque más de «+».",
+        "Variante TCP: enviar `{\"type\":\"create\",\"reqId\":1,\"clientKey\":\"b99\",\"table\":\"1\",\"accountId\":null,\"lines\":[{\"productId\":\"<Asada>\",\"qty\":99}]}` y después otra con `\"qty\":100` y clave distinta."
+      ],
+      "esperado": "El stepper se topa en 99 y no pasa de ahí. Por TCP, qty 99 se acepta y qty 100 responde error «Cantidad inválida para Asada» sin crear la orden ni la cuenta. regla 1.",
+      "cobertura": "e2e",
+      "dispositivo": "ambos",
+      "regla": "regla 1",
+      "estado": "pendiente"
+    },
+    {
+      "id": "BOR-CAPTURA-02",
+      "tipo": "BOR",
+      "modulo": "Captura",
+      "titulo": "Bajar de 1 quita el grupo y deselecciona el mosaico",
+      "prioridad": "Media",
+      "precondiciones": "Dos asada capturadas en una orden nueva; conectados.",
+      "pasos": [
+        "En la rejilla tocar el botón «−» de Asada 2 veces."
+      ],
+      "esperado": "Al llegar a 0 el grupo desaparece, el mosaico pierde el badge y el botón «−», y la barra inferior queda deshabilitada con «Toca los productos para agregarlos». Si era el único producto, enviar queda imposible. regla 1.",
+      "cobertura": "e2e",
+      "dispositivo": "mesera",
+      "regla": "regla 1",
+      "estado": "pendiente"
+    },
+    {
+      "id": "BOR-CAPTURA-03",
+      "tipo": "BOR",
+      "modulo": "Captura",
+      "titulo": "Dividir 5 → 3+2 sin cambiar el total",
+      "prioridad": "Media",
+      "precondiciones": "Editor de Asada abierto con un único grupo de 5 (TCP qty 5 o 5 toques); conectados.",
+      "pasos": [
+        "Tocar «✂ Dividir preparación»."
+      ],
+      "esperado": "El grupo mayor de 5 se parte en 3 + 2 («Grupo 1» 3 y «Grupo 2» 2); el resumen sigue «× 5» y el total no cambia. El botón de dividir sigue habilitado porque queda un grupo con qty > 1.",
+      "cobertura": "e2e",
+      "dispositivo": "mesera",
+      "regla": "regla 1",
+      "estado": "pendiente"
+    },
+    {
+      "id": "BOR-CAPTURA-04",
+      "tipo": "BOR",
+      "modulo": "Captura",
+      "titulo": "«✂ Dividir preparación» deshabilitado con todos los grupos en 1",
+      "prioridad": "Media",
+      "precondiciones": "Editor abierto con dos grupos de 1 pieza cada uno (4 → dividir → volver a dividir).",
+      "pasos": [
+        "Mirar el botón «✂ Dividir preparación».",
+        "Tocarlo (no debe responder)."
+      ],
+      "esperado": "El botón aparece deshabilitado (grupos.any { qty > 1 } es falso) y no se crea ningún grupo nuevo; el total y el número de grupos quedan igual.",
+      "cobertura": "e2e",
+      "dispositivo": "mesera",
+      "regla": "regla 1",
+      "estado": "pendiente"
+    },
+    {
+      "id": "BOR-CAPTURA-05",
+      "tipo": "BOR",
+      "modulo": "Captura",
+      "titulo": "Dividir repetido parte el mayor: 4 → 2+2 → 1+2+1",
+      "prioridad": "Baja",
+      "precondiciones": "Editor abierto con 4 asada sin modificaciones.",
+      "pasos": [
+        "Tocar «✂ Dividir preparación» (queda 2+2).",
+        "Tocar otra vez «✂ Dividir preparación»."
+      ],
+      "esperado": "El segundo corte toma el primer grupo mayor (qty 2), lo deja en 1 e inserta un grupo de 1 junto a los del mismo producto: el editor muestra 3 grupos con cantidades 1, 2 y 1 y el total sigue 4; el resumen sigue «× 4».",
+      "cobertura": "e2e",
+      "dispositivo": "mesera",
+      "regla": "regla 1",
+      "estado": "pendiente"
+    },
+    {
+      "id": "BOR-CAPTURA-06",
+      "tipo": "BOR",
+      "modulo": "Captura",
+      "titulo": "Máximo 60 grupos por orden; el 61 se rechaza",
+      "prioridad": "Baja",
+      "precondiciones": "TCP conectado; id real de «Asada».",
+      "pasos": [
+        "Enviar un `create` con 60 `LineRequest` de Asada qty 1 y notas distintas (0…59) para que no se unan.",
+        "Enviar otro `create` con 61 líneas y `clientKey` nuevo."
+      ],
+      "esperado": "El de 60 líneas se acepta y crea una orden con 60 grupos (no se unen porque cambia la nota). El de 61 responde error «Demasiados grupos en una orden» y no crea orden ni cuenta. El límite es por líneas recibidas, antes de unir grupos. regla 1.",
+      "cobertura": "e2e",
+      "dispositivo": "cocina",
+      "regla": "regla 1",
+      "estado": "pendiente"
+    },
+    {
+      "id": "BOR-CAPTURA-07",
+      "tipo": "BOR",
+      "modulo": "Captura",
+      "titulo": "Nota de 100 caracteres se conserva; 101 se rechaza por TCP",
+      "prioridad": "Media",
+      "precondiciones": "Editor de un producto abierto; TCP disponible.",
+      "pasos": [
+        "Escribir en «Nota de este grupo (opcional)» una nota de exactamente 100 caracteres (p. ej. 100 letras «a»).",
+        "Tocar «Listo» y enviar la orden.",
+        "Por TCP, enviar `create` con `\"note\":\"<101 caracteres>\"`."
+      ],
+      "esperado": "En la UI el campo corta a 100 (`take(100)`) y la nota de 100 se guarda y se ve completa en cocina. Por TCP la nota de 101 responde «Nota: máximo 100 caracteres» y no crea la orden. Los acentos y emoji se conservan.",
+      "cobertura": "ambas",
+      "dispositivo": "ambos",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "BOR-CATALOGO-01",
+      "tipo": "BOR",
+      "modulo": "Catálogo",
+      "titulo": "Precio 0 y tope de precio del catálogo",
+      "prioridad": "Media",
+      "precondiciones": "Cocina activa; menú semilla.",
+      "pasos": [
+        "«📋» → «+ Agregar producto» → Nombre «Muestra», Precio «0», Categoría «Tacos» → «Guardar».",
+        "Editar «Muestra» → Precio «100000» → «Guardar».",
+        "Editar «Muestra» → Precio «100000.01» y luego «1.234» y «-5»."
+      ],
+      "esperado": "El precio 0 se acepta ($0.00). «100000» equivale a $100,000.00 (10 000 000 centavos, el máximo) y se acepta; «100000.01» (10 000 001 centavos), «1.234» (3 decimales) y «-5» marcan el campo en error y «Guardar» queda deshabilitado porque `parseMoney` devuelve nulo. regla n/a.",
+      "cobertura": "e2e",
+      "dispositivo": "cocina",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "BOR-CATALOGO-02",
+      "tipo": "BOR",
+      "modulo": "Catálogo",
+      "titulo": "Límites de texto del catálogo y de la mesa personalizada",
+      "prioridad": "Baja",
+      "precondiciones": "Cocina activa; mesera conectada.",
+      "pasos": [
+        "En «Otra…» escribir una mesa de 25 caracteres y contar lo que acepta el campo.",
+        "En «+ Agregar producto» escribir un Nombre de 50 caracteres y una Categoría de 40.",
+        "En «+ Agregar tipo de modificación» escribir una opción de 35 caracteres."
+      ],
+      "esperado": "Cada campo recorta a su tope al escribir: mesa 20, IP 40, Nombre de producto 40, Categoría 30, Nombre de tipo 30, Opción 30 y texto de opciones 400 caracteres. Los límites del modelo (`text()`, opciones de 30) se respetan; no se puede guardar más largo aunque se pegue el texto. regla n/a.",
+      "cobertura": "e2e",
+      "dispositivo": "ambos",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "BOR-COBRO-01",
+      "tipo": "BOR",
+      "modulo": "Cobro",
+      "titulo": "Importe menor al saldo muestra «Quedará pendiente»",
+      "prioridad": "Media",
+      "precondiciones": "Cuenta con total $80.00 y orden PENDING; conectados.",
+      "pasos": [
+        "Abrir «Cobrar $80.00» y escribir importe «30»."
+      ],
+      "esperado": "Debajo del campo aparece «Quedará pendiente $50.00», «Registrar $30.00» está habilitado y, al registrar, la cuenta queda «Pago parcial» por $30.00. El saldo se recalcula al instante. regla 5.",
+      "cobertura": "e2e",
+      "dispositivo": "ambos",
+      "regla": "regla 5",
+      "estado": "pendiente"
+    },
+    {
+      "id": "BOR-COBRO-02",
+      "tipo": "BOR",
+      "modulo": "Cobro",
+      "titulo": "«Exacto» deja recibido igual al importe y cambio $0.00",
+      "prioridad": "Media",
+      "precondiciones": "Cuenta con total $80.00; conectados.",
+      "pasos": [
+        "Abrir el cobro y escribir importe «30».",
+        "Tocar «Exacto».",
+        "Registrar."
+      ],
+      "esperado": "El recuadro muestra «Cambio $0.00» (no «Falta»); el pago guarda `receivedCents=3000` y el toast es «Pago de $30.00 registrado». El importe no puede quedar por debajo del saldo sin avisar: el chip pasa a «Pago parcial». regla 5.",
+      "cobertura": "e2e",
+      "dispositivo": "ambos",
+      "regla": "regla 5",
+      "estado": "pendiente"
+    },
+    {
+      "id": "BOR-COBRO-03",
+      "tipo": "BOR",
+      "modulo": "Cobro",
+      "titulo": "Recibido un centavo menos que el importe: «Falta $0.01»",
+      "prioridad": "Media",
+      "precondiciones": "Cuenta con total $80.00; conectados.",
+      "pasos": [
+        "Abrir el cobro con importe $80.",
+        "En «Otra cantidad» escribir «79.99»."
+      ],
+      "esperado": "El recuadro cambia a «Falta $0.01» en rojo y «Registrar $80.00» queda deshabilitado (`change >= 0` es falso). Al corregir a 80.00 o más vuelve a habilitarse. regla 5.",
+      "cobertura": "e2e",
+      "dispositivo": "mesera",
+      "regla": "regla 5",
+      "estado": "pendiente"
+    },
+    {
+      "id": "BOR-COBRO-04",
+      "tipo": "BOR",
+      "modulo": "Cobro",
+      "titulo": "Importe igual al saldo se acepta; un centavo más se rechaza",
+      "prioridad": "Alta",
+      "precondiciones": "Cuenta con saldo $80.00; conectados y TCP disponible.",
+      "pasos": [
+        "En el diálogo escribir «80» y verificar que «Registrar $80.00» se habilita.",
+        "Escribir «80.01».",
+        "Por TCP enviar `{\"type\":\"pay\",\"reqId\":9,\"clientKey\":\"b-over\",\"accountId\":\"<cuenta>\",\"amountCents\":8001,\"method\":\"CASH\",\"receivedCents\":null,\"deliver\":false}`."
+      ],
+      "esperado": "80 se acepta y cierra la cuenta; 80.01 marca el campo en error y deshabilita el botón, y por TCP responde «El importe excede el saldo pendiente de $80.00» sin registrar el pago. regla 5.",
+      "cobertura": "e2e",
+      "dispositivo": "ambos",
+      "regla": "regla 5",
+      "estado": "pendiente"
+    },
+    {
+      "id": "BOR-COCINA-01",
+      "tipo": "BOR",
+      "modulo": "Cocina",
+      "titulo": "Umbrales de color y pulso por tiempo de espera",
+      "prioridad": "Baja",
+      "precondiciones": "Cocina activa y orden PENDING recién creada; reloj del teléfono estable; se acepta esperar ~15 min.",
+      "pasos": [
+        "A los ~4:30 de espera verificar color verde (y su texto «ESPERA 4:xx»).",
+        "A los ~5:00 verificar amarillo.",
+        "A los ~10:00 verificar rojo.",
+        "A los ~15:00 verificar rojo con pulso (animación)."
+      ],
+      "esperado": "El color del encabezado del ticket cambia en los umbrales 5, 10 y 15 minutos (min = elapsedMs/60000): verde <5, amarillo ≥5, rojo ≥10 y rojo con pulso ≥15; el tiempo siempre se muestra en texto para no depender solo del color. La espera se mide desde la orden más antigua de la mesa.",
+      "cobertura": "manual",
+      "dispositivo": "cocina",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "BOR-CUENTAS-01",
+      "tipo": "BOR",
+      "modulo": "Cuentas",
+      "titulo": "El número de orden reinicia en 1 cada día",
+      "prioridad": "Baja",
+      "precondiciones": "Cocina con permiso de root o emulador AOSP; app detenida; taqueria.json con `counterDate` de ayer.",
+      "pasos": [
+        "Editar `files/taqueria.json` (o cambiar el reloj del emulador con `adb shell su 0 date`) para que `counterDate` sea la fecha de ayer y `counterLast` un número alto.",
+        "Abrir cocina y crear una orden nueva desde la mesera."
+      ],
+      "esperado": "La nueva orden recibe número 1 (no `counterLast+1`), `counterDate` se actualiza a la fecha actual y `counterLast` queda en 1. Al archivar cuentas, los números de orden no se reutilizan dentro del mismo día. regla n/a.",
+      "cobertura": "manual",
+      "dispositivo": "cocina",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "BOR-LICENCIA-01",
+      "tipo": "BOR",
+      "modulo": "Licencia",
+      "titulo": "Activa hasta validUntil exacto y vence justo después",
+      "prioridad": "Media",
+      "precondiciones": "Cocina activada con un mock de Axzy Central que devuelva `validUntil` a 90 s en el futuro y `serverTime` actual; app abierta.",
+      "pasos": [
+        "Activar y confirmar que el monitor se muestra («LicenciaState.Active»).",
+        "Esperar a que `effectiveNow` supere `validUntilMs` (hasta 60 s por el tick de licencia)."
+      ],
+      "esperado": "Antes del vencimiento la cocina opera; al pasar `validUntil` la pantalla cambia a «Falta confirmar la cuenta» (LockReason.EXPIRED) mostrando «Reintentar». La comparación es `now > validUntil` (el instante exacto de `validUntil` todavía se considera activo).",
+      "cobertura": "e2e",
+      "dispositivo": "cocina",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "BOR-LICENCIA-02",
+      "tipo": "BOR",
+      "modulo": "Licencia",
+      "titulo": "Aviso de vencimiento justo en los 3 días",
+      "prioridad": "Baja",
+      "precondiciones": "Cocina activada contra mock con `validUntil` = ahora + 3 días - 1 h; y otra corrida con ahora + 3 días + 1 h.",
+      "pasos": [
+        "Activar con el primer valor y mirar el aviso de la pantalla de cocina.",
+        "Repetir la activación con el segundo valor."
+      ],
+      "esperado": "Con `validUntil - now < 3 días` aparece el aviso «Conecta este teléfono a internet antes del <fecha> para que la app siga funcionando.»; con más de 3 días no aparece. El caso límite exacto de 3 días no muestra aviso (`< EXPIRES_SOON_MS`).",
+      "cobertura": "e2e",
+      "dispositivo": "cocina",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "BOR-QR-01",
+      "tipo": "BOR",
+      "modulo": "QR",
+      "titulo": "Código suelto de 200 caracteres se acepta y 201 se rechaza",
+      "prioridad": "Baja",
+      "precondiciones": "Teléfono de cocina con cámara (físico o webcam del emulador) y un generador de QR; app sin activar.",
+      "pasos": [
+        "Generar un QR con el texto `axc_` + 196 caracteres alfanuméricos (200 en total) y escanearlo desde «Escanear QR de la Central».",
+        "Repetir con 201 caracteres."
+      ],
+      "esperado": "El de 200 se acepta como código válido (intenta activar); el de 201 se rechaza con «El QR no trae un código de activación válido.» sin llamar al servidor. Límite `MAX_CODE=200`.",
+      "cobertura": "manual",
+      "dispositivo": "cocina",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "BOR-QR-02",
+      "tipo": "BOR",
+      "modulo": "QR",
+      "titulo": "URL de servidor de 500 caracteres se acepta y 501 se rechaza",
+      "prioridad": "Baja",
+      "precondiciones": "Cocina sin activar; generador de QR; cámara disponible.",
+      "pasos": [
+        "Generar un QR `{\"v\":1,\"u\":\"https://<host>/<relleno hasta 500>\",\"c\":\"axc_abc\"}` con URL de 500 caracteres y escanearlo.",
+        "Repetir con una URL de 501 caracteres."
+      ],
+      "esperado": "La URL de 500 se normaliza (sin diagonal final) y se usa en la activación; la de 501 se rechaza con «El QR trae una dirección de servidor inválida. Pide un QR nuevo a tu proveedor.» Límite `MAX_URL=500`.",
+      "cobertura": "manual",
+      "dispositivo": "cocina",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "VAL-CAPTURA-01",
+      "tipo": "VAL",
+      "modulo": "Captura",
+      "titulo": "Dos opciones del mismo tipo exclusivo se rechazan",
+      "prioridad": "Alta",
+      "precondiciones": "TCP conectado; id real de «Asada» y del tipo «Salsa» leído del `state`.",
+      "pasos": [
+        "Enviar `{\"type\":\"create\",\"reqId\":101,\"clientKey\":\"v-excl\",\"table\":\"1\",\"accountId\":null,\"lines\":[{\"productId\":\"<Asada>\",\"qty\":1,\"mods\":[\"Con salsa\",\"Sin salsa\"]}]}`."
+      ],
+      "esperado": "La respuesta trae `error` = «Asada: elige solo una opción de Salsa» y no se crea orden ni cuenta. Cubierto por `OrderStoreTest.opciones exclusivas contradictorias o ajenas se rechazan`. regla 2.",
+      "cobertura": "ambas",
+      "dispositivo": "ambos",
+      "regla": "regla 2",
+      "estado": "pendiente"
+    },
+    {
+      "id": "VAL-CAPTURA-02",
+      "tipo": "VAL",
+      "modulo": "Captura",
+      "titulo": "Una modificación que no aplica al producto se rechaza",
+      "prioridad": "Alta",
+      "precondiciones": "TCP conectado; id de «Asada» (tiene Salsa, Cebolla, Cilantro y Extras, no Hielo).",
+      "pasos": [
+        "Enviar `{\"type\":\"create\",\"reqId\":102,\"clientKey\":\"v-ajena\",\"table\":\"1\",\"accountId\":null,\"lines\":[{\"productId\":\"<Asada>\",\"qty\":1,\"mods\":[\"Sin hielo\"]}]}`."
+      ],
+      "esperado": "Responde `error` = «\"Sin hielo\" no aplica a Asada» y no crea nada. Cubierto por `OrderStoreTest.opciones exclusivas contradictorias o ajenas se rechazan`. regla 2.",
+      "cobertura": "ambas",
+      "dispositivo": "ambos",
+      "regla": "regla 2",
+      "estado": "pendiente"
+    },
+    {
+      "id": "VAL-CAPTURA-03",
+      "tipo": "VAL",
+      "modulo": "Captura",
+      "titulo": "Cantidad 0 o fuera de rango se rechaza",
+      "prioridad": "Alta",
+      "precondiciones": "TCP conectado; id real de «Asada».",
+      "pasos": [
+        "Enviar un `create` con `\"qty\":0` y otro con `\"qty\":-1` (claves distintas)."
+      ],
+      "esperado": "Ambas respuestas traen `error` = «Cantidad inválida para Asada» y no se crea orden. En la UI el stepper nunca deja enviar 0: al bajar de 1 elimina el grupo. Cubierto por `OrderStoreTest.opciones exclusivas contradictorias o ajenas se rechazan` (caso qty 0). regla 1.",
+      "cobertura": "ambas",
+      "dispositivo": "ambos",
+      "regla": "regla 1",
+      "estado": "pendiente"
+    },
+    {
+      "id": "VAL-CAPTURA-04",
+      "tipo": "VAL",
+      "modulo": "Captura",
+      "titulo": "Orden sin productos se rechaza",
+      "prioridad": "Media",
+      "precondiciones": "TCP conectado.",
+      "pasos": [
+        "Enviar `{\"type\":\"create\",\"reqId\":103,\"clientKey\":\"v-vacia\",\"table\":\"2\",\"accountId\":null,\"lines\":[]}`."
+      ],
+      "esperado": "Responde `error` = «La orden no tiene productos» y no se crea cuenta ni orden. En la UI el botón «Enviar a cocina» está deshabilitado si no hay productos. regla 1.",
+      "cobertura": "e2e",
+      "dispositivo": "cocina",
+      "regla": "regla 1",
+      "estado": "pendiente"
+    },
+    {
+      "id": "VAL-CAPTURA-05",
+      "tipo": "VAL",
+      "modulo": "Captura",
+      "titulo": "Producto inexistente o agotado sin pedido previo se rechaza",
+      "prioridad": "Alta",
+      "precondiciones": "TCP conectado; cocina con «Pastor» apagado desde «📋» y sin órdenes previas con Pastor.",
+      "pasos": [
+        "Enviar un `create` con `\"productId\":\"no-existe\"`.",
+        "Enviar otro con el id real de «Pastor» (agotado) y `clientKey` nuevo."
+      ],
+      "esperado": "Ambos responden `error` = «Un producto ya no está disponible» y no crean orden. La excepción es editar una orden que ya tenía Pastor: ese grupo se conserva aunque el producto esté agotado (regla 7). regla 7.",
+      "cobertura": "e2e",
+      "dispositivo": "ambos",
+      "regla": "regla 7",
+      "estado": "pendiente"
+    },
+    {
+      "id": "VAL-CAPTURA-06",
+      "tipo": "VAL",
+      "modulo": "Captura",
+      "titulo": "Llave de idempotencia vacía o de más de 64 caracteres",
+      "prioridad": "Media",
+      "precondiciones": "TCP conectado; id real de «Asada».",
+      "pasos": [
+        "Enviar `create` con `\"clientKey\":\"\"`.",
+        "Enviar `create` con una clave de 65 caracteres."
+      ],
+      "esperado": "Ambos responden `error` = «Solicitud inválida» y no crean orden ni cuenta. La UI siempre manda un UUID de 36 caracteres, así que este límite solo se ve por TCP. regla 3.",
+      "cobertura": "e2e",
+      "dispositivo": "cocina",
+      "regla": "regla 3",
+      "estado": "pendiente"
+    },
+    {
+      "id": "VAL-CAPTURA-07",
+      "tipo": "VAL",
+      "modulo": "Captura",
+      "titulo": "No se puede editar una orden que ya salió de cocina",
+      "prioridad": "Alta",
+      "precondiciones": "Orden #1 ya marcada «Entregada» (o cancelada); TCP conectado.",
+      "pasos": [
+        "Enviar `{\"type\":\"editOrder\",\"reqId\":104,\"orderId\":\"<orden>\",\"lines\":[{\"productId\":\"<Asada>\",\"qty\":3}]}`.",
+        "Repetir con una orden cancelada."
+      ],
+      "esperado": "Entregada responde `error` = «Solo se puede editar una orden que sigue en cocina (esta ya está entregada)»; cancelada responde «...esta ya está cancelada». No se modifica ninguna revisión. Cubierto por `OrderStoreTest.no se edita una orden entregada y se respeta lo agotado ya pedido`. regla 7.",
+      "cobertura": "ambas",
+      "dispositivo": "ambos",
+      "regla": "regla 7",
+      "estado": "pendiente"
+    },
+    {
+      "id": "VAL-CAPTURA-08",
+      "tipo": "VAL",
+      "modulo": "Captura",
+      "titulo": "Editar una orden que ya no existe",
+      "prioridad": "Media",
+      "precondiciones": "TCP conectado.",
+      "pasos": [
+        "Enviar `editOrder` con `\"orderId\":\"00000000-0000-0000-0000-000000000000\"`."
+      ],
+      "esperado": "Responde `error` = «La orden ya no está activa»; no se crea nada. Ocurre si otra mesera ya la eliminó o el estado se archivó. regla 7.",
+      "cobertura": "e2e",
+      "dispositivo": "cocina",
+      "regla": "regla 7",
+      "estado": "pendiente"
+    },
+    {
+      "id": "VAL-ORDENES-01",
+      "tipo": "VAL",
+      "modulo": "Órdenes",
+      "titulo": "Transiciones de estado de orden inválidas",
+      "prioridad": "Alta",
+      "precondiciones": "Dos órdenes: una PENDING y una ya entregada; TCP conectado.",
+      "pasos": [
+        "Enviar `orderStatus` DELIVERED sobre la orden ya entregada.",
+        "Enviar `orderStatus` CANCELLED sobre una orden DELIVERED.",
+        "Enviar `orderStatus` DELIVERED sobre una orden CANCELLED."
+      ],
+      "esperado": "Las tres responden error: «La orden ya está entregada» (las dos primeras) y «La orden ya está cancelada» (la tercera), sin cambiar el estado. Las únicas transiciones válidas son PENDING→DELIVERED, PENDING→CANCELLED y las vueltas dentro de la ventana de 30 s. regla 7 y 8.",
+      "cobertura": "e2e",
+      "dispositivo": "ambos",
+      "regla": "regla 7, regla 8",
+      "estado": "pendiente"
+    },
+    {
+      "id": "VAL-CUENTAS-01",
+      "tipo": "VAL",
+      "modulo": "Cuentas",
+      "titulo": "Cancelar una cuenta que ya estaba cancelada",
+      "prioridad": "Media",
+      "precondiciones": "Cuenta cancelada dentro de la ventana; TCP conectado.",
+      "pasos": [
+        "Enviar `{\"type\":\"cancelAccount\",\"reqId\":110,\"accountId\":\"<cuenta cancelada>\"}`."
+      ],
+      "esperado": "Responde `error` = «La cuenta ya estaba cancelada»; no se vuelve a marcar ni cambia la hora de cancelación. regla 8 y 10.",
+      "cobertura": "e2e",
+      "dispositivo": "cocina",
+      "regla": "regla 8, regla 10",
+      "estado": "pendiente"
+    },
+    {
+      "id": "VAL-CUENTAS-02",
+      "tipo": "VAL",
+      "modulo": "Cuentas",
+      "titulo": "Restaurar una cuenta que no está cancelada",
+      "prioridad": "Media",
+      "precondiciones": "Cuenta abierta sin cancelar; TCP conectado.",
+      "pasos": [
+        "Enviar `restoreAccount` para esa cuenta."
+      ],
+      "esperado": "Responde `error` = «La cuenta no está cancelada»; no modifica órdenes ni pagos. regla 8.",
+      "cobertura": "e2e",
+      "dispositivo": "cocina",
+      "regla": "regla 8",
+      "estado": "pendiente"
+    },
+    {
+      "id": "VAL-CUENTAS-03",
+      "tipo": "VAL",
+      "modulo": "Cuentas",
+      "titulo": "Agregar una orden a una cuenta cancelada",
+      "prioridad": "Alta",
+      "precondiciones": "Cuenta cancelada dentro de la ventana; TCP conectado; id de «Asada».",
+      "pasos": [
+        "Enviar `create` con `\"accountId\":\"<cuenta cancelada>\"` y líneas de Asada."
+      ],
+      "esperado": "Responde `error` = «La cuenta está cancelada»; no se crea la orden. Primero habría que deshacer la cancelación (regla 8) y la ventana es de 30 s. regla 8 y 10.",
+      "cobertura": "e2e",
+      "dispositivo": "cocina",
+      "regla": "regla 8, regla 10",
+      "estado": "pendiente"
+    },
+    {
+      "id": "VAL-CUENTAS-04",
+      "tipo": "VAL",
+      "modulo": "Cuentas",
+      "titulo": "Agregar una orden a una cuenta ya cerrada",
+      "prioridad": "Alta",
+      "precondiciones": "Cuenta pagada + entregada (cerrada y todavía no archivada); TCP conectado.",
+      "pasos": [
+        "Enviar `create` con `\"accountId\":\"<cuenta cerrada>\"`."
+      ],
+      "esperado": "Responde `error` = «La cuenta ya se cerró; abre una nueva» y no crea la orden. En la UI la tarjeta ya no aparece en «Cuentas abiertas»; el mensaje guía a abrir otra cuenta. regla 4 y 9.",
+      "cobertura": "e2e",
+      "dispositivo": "cocina",
+      "regla": "regla 4, regla 9",
+      "estado": "pendiente"
+    },
+    {
+      "id": "VAL-CUENTAS-05",
+      "tipo": "VAL",
+      "modulo": "Cuentas",
+      "titulo": "Reutilizar una cuenta de otra mesa",
+      "prioridad": "Media",
+      "precondiciones": "Cuenta abierta de Mesa 4; TCP conectado.",
+      "pasos": [
+        "Enviar `create` con `\"table\":\"5\"` y `\"accountId\":\"<cuenta de Mesa 4>\"`."
+      ],
+      "esperado": "Responde `error` = «La cuenta es de otra mesa»; no se mezclan cuentas entre mesas. regla 4.",
+      "cobertura": "e2e",
+      "dispositivo": "cocina",
+      "regla": "regla 4",
+      "estado": "pendiente"
+    },
+    {
+      "id": "VAL-CUENTAS-06",
+      "tipo": "VAL",
+      "modulo": "Cuentas",
+      "titulo": "Mesa vacía o de más de 20 caracteres",
+      "prioridad": "Media",
+      "precondiciones": "TCP conectado; id de «Asada».",
+      "pasos": [
+        "Enviar `create` con `\"table\":\"   \"`.",
+        "Enviar `create` con una mesa de 21 caracteres."
+      ],
+      "esperado": "Ambos responden error: «Mesa es requerido» y «Mesa: máximo 20 caracteres» respectivamente. En la UI el diálogo «Mesa» tiene «Listo» deshabilitado si está vacío y el campo corta a 20. regla n/a.",
+      "cobertura": "e2e",
+      "dispositivo": "cocina",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "VAL-COBRO-01",
+      "tipo": "VAL",
+      "modulo": "Cobro",
+      "titulo": "No se acepta pagar más que el saldo",
+      "prioridad": "Alta",
+      "precondiciones": "Cuenta con saldo $80.00; TCP conectado.",
+      "pasos": [
+        "Enviar `pay` con `\"amountCents\":8001` y una clave nueva."
+      ],
+      "esperado": "Responde `error` = «El importe excede el saldo pendiente de $80.00» y no registra pago; el saldo y el estado de pago no cambian. En la UI el campo se marca en error. regla 5.",
+      "cobertura": "e2e",
+      "dispositivo": "ambos",
+      "regla": "regla 5",
+      "estado": "pendiente"
+    },
+    {
+      "id": "VAL-COBRO-02",
+      "tipo": "VAL",
+      "modulo": "Cobro",
+      "titulo": "La devolución no puede exceder lo que se debe regresar",
+      "prioridad": "Media",
+      "precondiciones": "Cuenta con saldo -$60.00 (pagó $60 y luego se canceló la orden); TCP conectado.",
+      "pasos": [
+        "Enviar `pay` con `\"amountCents\":-6001` y clave nueva."
+      ],
+      "esperado": "Responde `error` = «La devolución excede lo que se debe regresar» y no registra la devolución; el saldo sigue -$60.00. En la UI el importe máximo ya viene limitado a $60.00. regla 5.",
+      "cobertura": "e2e",
+      "dispositivo": "ambos",
+      "regla": "regla 5",
+      "estado": "pendiente"
+    },
+    {
+      "id": "VAL-COBRO-03",
+      "tipo": "VAL",
+      "modulo": "Cobro",
+      "titulo": "El cambio solo aplica a cobros en efectivo",
+      "prioridad": "Media",
+      "precondiciones": "Cuenta con saldo $50.00; TCP conectado.",
+      "pasos": [
+        "Enviar `pay` con `\"method\":\"TRANSFER\",\"amountCents\":5000,\"receivedCents\":6000`."
+      ],
+      "esperado": "Responde `error` = «El cambio solo aplica a cobros en efectivo» y no registra el pago. En la UI la casilla de «¿Con cuánto paga?» no se muestra para transferencia. regla 5.",
+      "cobertura": "e2e",
+      "dispositivo": "cocina",
+      "regla": "regla 5",
+      "estado": "pendiente"
+    },
+    {
+      "id": "VAL-COBRO-04",
+      "tipo": "VAL",
+      "modulo": "Cobro",
+      "titulo": "Efectivo recibido menor al importe",
+      "prioridad": "Alta",
+      "precondiciones": "Cuenta con saldo $40.00; TCP conectado.",
+      "pasos": [
+        "Enviar `pay` con `\"amountCents\":4000,\"method\":\"CASH\",\"receivedCents\":3999`."
+      ],
+      "esperado": "Responde `error` = «Recibiste menos que el importe» y no registra el pago. Cubierto por `OrderStoreTest.cobrar en efectivo guarda con cuanto pagaron y entrega la orden` (primer `assertThrows`). En la UI se ve «Falta $0.01» y el botón queda deshabilitado. regla 5.",
+      "cobertura": "ambas",
+      "dispositivo": "ambos",
+      "regla": "regla 5",
+      "estado": "pendiente"
+    },
+    {
+      "id": "VAL-COBRO-05",
+      "tipo": "VAL",
+      "modulo": "Cobro",
+      "titulo": "Importe recibido fuera del máximo razonable",
+      "prioridad": "Baja",
+      "precondiciones": "Cuenta con saldo $80.00; TCP conectado.",
+      "pasos": [
+        "Enviar `pay` con `\"amountCents\":8000,\"method\":\"CASH\",\"receivedCents\":10000001`."
+      ],
+      "esperado": "Responde `error` = «Importe recibido inválido» y no registra el pago. El tope del modelo es 10 000 000 centavos ($100,000.00); un valor mayor no se acepta aunque el cambio sería enorme. regla 5.",
+      "cobertura": "e2e",
+      "dispositivo": "cocina",
+      "regla": "regla 5",
+      "estado": "pendiente"
+    },
+    {
+      "id": "VAL-COBRO-06",
+      "tipo": "VAL",
+      "modulo": "Cobro",
+      "titulo": "Pago sobre una cuenta ya cerrada",
+      "prioridad": "Media",
+      "precondiciones": "Cuenta cerrada (pagada y entregada) aún no archivada; TCP conectado.",
+      "pasos": [
+        "Enviar `pay` con una clave nueva por $10 sobre esa cuenta."
+      ],
+      "esperado": "Responde `error` = «La cuenta ya está cerrada»; no se registra el movimiento. La cuenta se archiva a los 30 s y después el error de cuenta pasa a «La cuenta ya se cerró». regla 5 y 9.",
+      "cobertura": "e2e",
+      "dispositivo": "cocina",
+      "regla": "regla 5, regla 9",
+      "estado": "pendiente"
+    },
+    {
+      "id": "VAL-COBRO-07",
+      "tipo": "VAL",
+      "modulo": "Cobro",
+      "titulo": "Importe de pago en cero",
+      "prioridad": "Media",
+      "precondiciones": "Cuenta con saldo $40.00; TCP conectado.",
+      "pasos": [
+        "Enviar `pay` con `\"amountCents\":0`."
+      ],
+      "esperado": "Responde `error` = «El importe no puede ser cero»; no se registra movimiento. En la UI «Registrar» queda deshabilitado con importe 0 o vacío. regla 5.",
+      "cobertura": "e2e",
+      "dispositivo": "ambos",
+      "regla": "regla 5",
+      "estado": "pendiente"
+    },
+    {
+      "id": "VAL-CATALOGO-01",
+      "tipo": "VAL",
+      "modulo": "Catálogo",
+      "titulo": "Producto sin nombre o con precio inválido no se guarda",
+      "prioridad": "Media",
+      "precondiciones": "Cocina activa, pantalla «Menú» → «Productos».",
+      "pasos": [
+        "Tocar «+ Agregar producto» y dejar Nombre vacío.",
+        "Escribir Nombre «Prueba» y Precio «abc»; luego «1.234»."
+      ],
+      "esperado": "Sin nombre el botón «Guardar» está deshabilitado; con precio no numérico el campo «Precio» se marca en error y «Guardar» sigue deshabilitado. El diálogo no cierra hasta corregir; no se crea producto. regla n/a.",
+      "cobertura": "e2e",
+      "dispositivo": "cocina",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "VAL-CATALOGO-02",
+      "tipo": "VAL",
+      "modulo": "Catálogo",
+      "titulo": "Tipo de modificación sin nombre o sin opciones",
+      "prioridad": "Media",
+      "precondiciones": "Cocina activa → «Menú» → «Modificaciones».",
+      "pasos": [
+        "Tocar «+ Agregar tipo de modificación».",
+        "Dejar Nombre vacío y opciones vacías.",
+        "Escribir Nombre «Prueba» y opciones vacías."
+      ],
+      "esperado": "«Guardar» está deshabilitado hasta tener nombre y al menos una opción; si se fuerza el guardado por código responde «Nombre es requerido» y «Agrega al menos una opción». No se crea el tipo. regla 2.",
+      "cobertura": "e2e",
+      "dispositivo": "cocina",
+      "regla": "regla 2",
+      "estado": "pendiente"
+    },
+    {
+      "id": "VAL-CATALOGO-03",
+      "tipo": "VAL",
+      "modulo": "Catálogo",
+      "titulo": "Una opción no puede existir en dos tipos de modificación",
+      "prioridad": "Media",
+      "precondiciones": "Cocina activa con los tipos semilla (Salsa, Cebolla, Cilantro, Extras, Hielo).",
+      "pasos": [
+        "«Modificaciones» → editar «Cilantro» → agregar la opción «Con queso» (ya existe en Extras) → «Guardar»."
+      ],
+      "esperado": "Muestra el error «\"Con queso\" ya existe en otro tipo de modificación» y no guarda. Cada opción pertenece a un solo tipo para que la validación de exclusivas no sea ambigua. regla 2.",
+      "cobertura": "e2e",
+      "dispositivo": "cocina",
+      "regla": "regla 2",
+      "estado": "pendiente"
+    },
+    {
+      "id": "VAL-CATALOGO-04",
+      "tipo": "VAL",
+      "modulo": "Catálogo",
+      "titulo": "Opción de modificación de más de 30 caracteres",
+      "prioridad": "Baja",
+      "precondiciones": "Cocina activa → «Modificaciones».",
+      "pasos": [
+        "Crear un tipo «Prueba» con una opción de 31 caracteres y guardar."
+      ],
+      "esperado": "Muestra «Opción: máximo 30 caracteres» y no guarda. En el campo se pueden escribir 31 (el límite se valida al guardar), por lo que el mensaje es necesario. regla 2.",
+      "cobertura": "e2e",
+      "dispositivo": "cocina",
+      "regla": "regla 2",
+      "estado": "pendiente"
+    },
+    {
+      "id": "ERR-PROTOCOLO-01",
+      "tipo": "ERR",
+      "modulo": "Protocolo TCP",
+      "titulo": "JSON inválido por TCP se ignora y la conexión sigue viva",
+      "prioridad": "Media",
+      "precondiciones": "Cocina en primer plano; `adb -s <cocina> forward tcp:7777 tcp:7777`; `nc 127.0.0.1 7777`.",
+      "pasos": [
+        "Enviar la línea `esto no es json`.",
+        "Esperar 2 s.",
+        "Enviar un `create` válido con id real de «Asada»."
+      ],
+      "esperado": "La línea inválida no produce `reply` (el servidor solo escribe en logcat «Mensaje inválido»), la conexión NO se cierra y el siguiente `create` válido responde con la orden creada. Es robustez del protocolo ante un mesero con una versión distinta. regla 3.",
+      "cobertura": "e2e",
+      "dispositivo": "cocina",
+      "regla": "regla 3",
+      "estado": "pendiente"
+    },
+    {
+      "id": "ERR-PROTOCOLO-02",
+      "tipo": "ERR",
+      "modulo": "Protocolo TCP",
+      "titulo": "Mensaje de más de 64 KB corta la conexión sin tumbar el servidor",
+      "prioridad": "Baja",
+      "precondiciones": "Cocina en primer plano; puerto expuesto a la Mac.",
+      "pasos": [
+        "Enviar una sola línea de 70,000 caracteres: `python3 -c \"print('A'*70000)\" | nc 127.0.0.1 7777`.",
+        "Esperar a que se cierre; volver a conectar y enviar un `create` válido."
+      ],
+      "esperado": "El servidor cierra esa conexión al superar `MAX_REQUEST_CHARS=64*1024` (log «Mensaje demasiado grande» / «Mesero desconectado») sin agotar la memoria; el proceso sigue vivo y acepta una conexión nueva con normalidad. El mesero reconecta solo. regla n/a.",
+      "cobertura": "e2e",
+      "dispositivo": "cocina",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "ERR-PROTOCOLO-03",
+      "tipo": "ERR",
+      "modulo": "Protocolo TCP",
+      "titulo": "Tipo de mensaje o enum desconocido se ignora",
+      "prioridad": "Media",
+      "precondiciones": "Cocina en primer plano; puerto expuesto.",
+      "pasos": [
+        "Enviar `{\"type\":\"nope\",\"reqId\":1}`.",
+        "Enviar `{\"type\":\"orderStatus\",\"reqId\":2,\"orderId\":\"x\",\"status\":\"XXX\"}`.",
+        "Enviar un `create` válido."
+      ],
+      "esperado": "Los dos primeros no reciben `reply` (falla el decode) y la conexión sigue abierta; el tercero responde normal. No se corrompe el estado ni se escribe en taqueria.json. regla 3.",
+      "cobertura": "e2e",
+      "dispositivo": "cocina",
+      "regla": "regla 3",
+      "estado": "pendiente"
+    },
+    {
+      "id": "ERR-CONEXION-01",
+      "tipo": "ERR",
+      "modulo": "Conexión",
+      "titulo": "Sin respuesta de cocina: la mesera corta a los 8 s y conserva el borrador",
+      "prioridad": "Media",
+      "precondiciones": "En la Mac: `adb forward --remove tcp:7777` y levantar un servidor mudo `nc -l 7777`; mesera con IP manual 10.0.2.2 y «● Conectado a cocina».",
+      "pasos": [
+        "En la mesera armar una orden y tocar «Enviar a cocina».",
+        "Esperar 8 s sin respuesta."
+      ],
+      "esperado": "Aparece el toast «Cocina no respondió, revisa la conexión» tras 8 s (`withTimeout(8_000)`), el botón vuelve a «Enviar a cocina · $X» y el borrador se conserva para reintentar. El `clientKey` no cambia, así que si la orden sí llegó el reintento no la duplica (regla 3). regla 3.",
+      "cobertura": "e2e",
+      "dispositivo": "mesera",
+      "regla": "regla 3",
+      "estado": "pendiente"
+    },
+    {
+      "id": "ERR-CONEXION-02",
+      "tipo": "ERR",
+      "modulo": "Conexión",
+      "titulo": "Puerto 7777 ocupado: la cocina muestra el error y no acepta meseras",
+      "prioridad": "Media",
+      "precondiciones": "Cocina detenida; ocupar el puerto dentro del teléfono de cocina (`adb -s <cocina> shell` y un `nc -l 7777` de toybox, o abrir otra app que lo use); luego abrir cocina.",
+      "pasos": [
+        "Abrir la app en cocina (rol Cocina).",
+        "Mirar el subtítulo de la barra superior.",
+        "Liberar el puerto y reiniciar la app."
+      ],
+      "esperado": "El subtítulo muestra en rojo «No se pudo abrir el puerto 7777: <detalle>» y «○ 0 meseras conectadas»; la mesera no logra conectar. Al liberar el puerto y reiniciar la cocina el servidor arranca, el error desaparece y la mesera reconecta sola. regla n/a.",
+      "cobertura": "e2e",
+      "dispositivo": "cocina",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "ERR-CONEXION-03",
+      "tipo": "ERR",
+      "modulo": "Conexión",
+      "titulo": "Se pierde la conexión durante el envío: error, borrador intacto",
+      "prioridad": "Alta",
+      "precondiciones": "Mesera con orden capturada en «Revisar» y enlace «● Conectado a cocina»; cocina en primer plano.",
+      "pasos": [
+        "Forzar la detención de la app de cocina (o desactivar Wi-Fi de la cocina).",
+        "En la mesera tocar «Enviar a cocina · $X»."
+      ],
+      "esperado": "La mesera muestra un toast de error de conexión («Se perdió la conexión con cocina» o «Sin conexión con cocina»), el botón deja de decir «Enviando…», el borrador NO se limpia y la barra pasa a «● Buscando cocina en la red…». Al volver la cocina, reenviar con la misma llave no duplica la orden si ya había llegado (regla 3). regla 3.",
+      "cobertura": "e2e",
+      "dispositivo": "ambos",
+      "regla": "regla 3",
+      "estado": "pendiente"
+    },
+    {
+      "id": "ERR-PERSISTENCIA-01",
+      "tipo": "ERR",
+      "modulo": "Persistencia",
+      "titulo": "taqueria.json corrupto se respalda y arranca con menú semilla",
+      "prioridad": "Alta",
+      "precondiciones": "App de cocina detenida; `adb -s <cocina> shell run-as com.axzy.taqueria` con acceso a `files/`; respaldar antes el archivo bueno.",
+      "pasos": [
+        "Con la app detenida, escribir basura en `files/taqueria.json`: `run-as com.axzy.taqueria sh -c 'echo \"{basura\" > files/taqueria.json'`.",
+        "Abrir Tacomanda en rol Cocina.",
+        "Listar `files/` con `run-as`."
+      ],
+      "esperado": "La app arranca sin crash, con el menú semilla (15 productos, 5 tipos), sin cuentas y con un archivo `taqueria.json.corrupt-<timestamp>` que conserva el contenido dañado; en logcat `OrderStore` registra «Datos ilegibles, respaldados en taqueria.json.corrupt-…». Nunca se pisa la evidencia. regla n/a.",
+      "cobertura": "e2e",
+      "dispositivo": "cocina",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "ERR-PERSISTENCIA-02",
+      "tipo": "ERR",
+      "modulo": "Persistencia",
+      "titulo": "taqueria.json vacío o truncado se trata como corrupto",
+      "prioridad": "Media",
+      "precondiciones": "Igual que el caso anterior; app de cocina detenida.",
+      "pasos": [
+        "Dejar `files/taqueria.json` vacío: `run-as com.axzy.taqueria sh -c ': > files/taqueria.json'`.",
+        "Abrir la app en rol Cocina."
+      ],
+      "esperado": "Se respalda como `.corrupt-<ts>` y se arranca con el menú semilla, sin bloqueo ni crash. Es el mismo camino de recuperación que un archivo con JSON inválido o de un formato incompatible. regla n/a.",
+      "cobertura": "e2e",
+      "dispositivo": "cocina",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "ERR-LICENCIA-01",
+      "tipo": "ERR",
+      "modulo": "Licencia",
+      "titulo": "Activación con código inválido o revocado (401)",
+      "prioridad": "Alta",
+      "precondiciones": "Cocina sin activar; mock de Axzy Central que responde 401 en `POST /activate`.",
+      "pasos": [
+        "Escribir un código `axc_invalido` y tocar «Activar»."
+      ],
+      "esperado": "El campo se marca en error y muestra «Código inválido o revocado. Pide uno nuevo a tu proveedor.»; la cocina sigue en la pantalla de activación y no se guarda cache. regla n/a.",
+      "cobertura": "e2e",
+      "dispositivo": "cocina",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "ERR-LICENCIA-02",
+      "tipo": "ERR",
+      "modulo": "Licencia",
+      "titulo": "Activación sin internet",
+      "prioridad": "Alta",
+      "precondiciones": "Cocina sin activar y sin salida a internet (modo avión o mock apagado); URL del servidor configurada.",
+      "pasos": [
+        "Abrir la app en Cocina, escribir un código y tocar «Activar»."
+      ],
+      "esperado": "Tras el timeout de 10 s (`TIMEOUT_MS`) aparece «Sin internet. Conecta este teléfono a internet e intenta otra vez.» y se queda en la pantalla de activación; no se modifica la cache. regla n/a.",
+      "cobertura": "e2e",
+      "dispositivo": "cocina",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "ERR-LICENCIA-03",
+      "tipo": "ERR",
+      "modulo": "Licencia",
+      "titulo": "El servidor de licencias responde 500",
+      "prioridad": "Media",
+      "precondiciones": "Cocina sin activar; mock que responde 500 en `/activate` (o en `/license`).",
+      "pasos": [
+        "Intentar activar con un código; o refrescar con «Reintentar» si ya está bloqueada."
+      ],
+      "esperado": "Muestra «El servidor respondió 500. Intenta más tarde.» y conserva el estado anterior (sin activar, o bloqueada). No se toma una respuesta 5xx como activa. regla n/a.",
+      "cobertura": "e2e",
+      "dispositivo": "cocina",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "ERR-LICENCIA-04",
+      "tipo": "ERR",
+      "modulo": "Licencia",
+      "titulo": "Respuesta de licencia que no es JSON válido",
+      "prioridad": "Baja",
+      "precondiciones": "Mock de Axzy Central que devuelve 200 con `<html>error</html>` en `/license` o `/activate`.",
+      "pasos": [
+        "Activar o tocar «Reintentar» contra el mock."
+      ],
+      "esperado": "Muestra «No se pudo leer la respuesta del servidor.» y no guarda cache ni desbloquea. El catch de excepciones distintas de IOException es el que produce este mensaje. regla n/a.",
+      "cobertura": "e2e",
+      "dispositivo": "cocina",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "ERR-LICENCIA-05",
+      "tipo": "ERR",
+      "modulo": "Licencia",
+      "titulo": "Build release sin servidor de licencias configurado",
+      "prioridad": "Baja",
+      "precondiciones": "APK release compilada sin `-Ptaqueria.apiUrl`; cocina sin QR escaneado y sin cache.",
+      "pasos": [
+        "Abrir la app en Cocina y escribir el código `axc_...` a mano.",
+        "Tocar «Activar»."
+      ],
+      "esperado": "Muestra «Esta versión de la app no tiene servidor configurado. Escanea el QR de la Central o pide la versión correcta a tu proveedor.» y no intenta red. Con un QR que traiga `u`, la URL guardada manda y la activación funciona. regla n/a.",
+      "cobertura": "manual",
+      "dispositivo": "cocina",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "ERR-CAMARA-01",
+      "tipo": "ERR",
+      "modulo": "Cámara",
+      "titulo": "Permiso de cámara denegado: la activación cae al código manual",
+      "prioridad": "Media",
+      "precondiciones": "Cocina sin activar; permiso de cámara denegado para Tacomanda en Ajustes de Android.",
+      "pasos": [
+        "Tocar «Escanear QR de la Central».",
+        "Denegar el permiso cuando Android lo pida."
+      ],
+      "esperado": "Aparece «Sin permiso de cámara» con el texto «Para escanear el QR hay que permitir la cámara. También puedes activar escribiendo el código a mano.» y los botones «Escribir el código a mano» y «Abrir ajustes de la app»; la app no se cierra y se puede activar escribiendo el código. regla n/a.",
+      "cobertura": "e2e",
+      "dispositivo": "cocina",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "UND-CUENTAS-01",
+      "tipo": "UND",
+      "modulo": "Deshacer",
+      "titulo": "Deshacer la cancelación de una cuenta desde la barra",
+      "prioridad": "Alta",
+      "precondiciones": "Cuenta de Mesa 4 con una orden PENDING; ambos conectados.",
+      "pasos": [
+        "Deslizar la tarjeta hacia la izquierda más de 1/3 («Cancelar cuenta  ✕»).",
+        "Verificar la barra «Mesa 4 · Cuenta 1 cancelada» con «Deshacer».",
+        "Tocar «Deshacer» antes de 6 s."
+      ],
+      "esperado": "La cuenta queda «Cancelada» y la orden CANCELLED en cocina; al deshacer aparece el toast «Listo, se deshizo», la cuenta vuelve a abierta y la orden regresa a PENDING en cocina. La restauración se pide a cocina con `restoreAccount`. regla 8 y 10.",
+      "cobertura": "e2e",
+      "dispositivo": "ambos",
+      "regla": "regla 8, regla 10",
+      "estado": "pendiente"
+    },
+    {
+      "id": "UND-CUENTAS-02",
+      "tipo": "UND",
+      "modulo": "Deshacer",
+      "titulo": "La barra de deshacer dura 6 s; la ventana del servidor 30 s",
+      "prioridad": "Alta",
+      "precondiciones": "Cuenta recién cancelada con la barra visible; TCP conectado.",
+      "pasos": [
+        "Esperar 6 s sin tocar la barra.",
+        "Verificar que la barra desapareció.",
+        "Por TCP, a los ~10 s de la cancelación, enviar `restoreAccount` de esa cuenta."
+      ],
+      "esperado": "A los 6 s la barra desaparece y ya no hay «Deshacer» en la UI (la mesera no puede deshacer desde pantalla); aun así cocina acepta la restauración dentro de sus 30 s (`UNDO_WINDOW_MS`), por lo que el TCP responde sin error y la cuenta vuelve. regla 8.",
+      "cobertura": "e2e",
+      "dispositivo": "ambos",
+      "regla": "regla 8",
+      "estado": "pendiente"
+    },
+    {
+      "id": "UND-CUENTAS-03",
+      "tipo": "UND",
+      "modulo": "Deshacer",
+      "titulo": "Ventana de 30 s: a los 29 s se puede restaurar y a los 31 s no",
+      "prioridad": "Alta",
+      "precondiciones": "Cuenta con una orden PENDING; TCP conectado; respaldar el estado.",
+      "pasos": [
+        "Enviar `cancelAccount` de la cuenta.",
+        "Esperar 29 s y enviar `restoreAccount`: debe aceptar.",
+        "Cancelar de nuevo, esperar 31 s y enviar `restoreAccount`."
+      ],
+      "esperado": "La restauración a los 29 s se acepta y devuelve orden y cuenta a PENDING; a los 31 s responde `error` = «Ya pasó el tiempo para deshacer» y el estado queda cancelado. Cubierto por `OrderStoreTest.cancelar cuenta se puede deshacer solo dentro del periodo`. regla 8.",
+      "cobertura": "ambas",
+      "dispositivo": "ambos",
+      "regla": "regla 8",
+      "estado": "pendiente"
+    },
+    {
+      "id": "UND-CUENTAS-04",
+      "tipo": "UND",
+      "modulo": "Deshacer",
+      "titulo": "Tras 30 s la cuenta se archiva y ya no se puede deshacer",
+      "prioridad": "Alta",
+      "precondiciones": "Cuenta cancelada cuya orden quedó cancelada (saldo 0, sin pendientes), de modo que se cierra al instante; TCP conectado.",
+      "pasos": [
+        "Enviar `cancelAccount`.",
+        "Esperar a que cocina archive (el servidor llama `archiveClosed()` cada 10 s; máximo ~40 s).",
+        "Enviar `restoreAccount` de esa cuenta."
+      ],
+      "esperado": "La cuenta desaparece de `accounts` y su línea queda en `historial.jsonl`; `restoreAccount` responde «La cuenta ya se cerró» (el id ya no existe). El historial conserva la cancelación y los pagos; nada se borra. Cubierto por `OrderStoreTest.cuenta cerrada pasa al historial despues del periodo de deshacer`. regla 8 y 9.",
+      "cobertura": "ambas",
+      "dispositivo": "cocina",
+      "regla": "regla 8, regla 9",
+      "estado": "pendiente"
+    },
+    {
+      "id": "UND-ORDENES-01",
+      "tipo": "UND",
+      "modulo": "Deshacer",
+      "titulo": "Deshacer la cancelación de una sola orden",
+      "prioridad": "Alta",
+      "precondiciones": "Cuenta con dos órdenes PENDING en cocina; ambos conectados.",
+      "pasos": [
+        "En el detalle de la cuenta tocar «Cancelar» en una de las órdenes.",
+        "En la barra «Orden #N cancelada» tocar «Deshacer»."
+      ],
+      "esperado": "Solo esa orden pasa a CANCELLED y desaparece de cocina; al deshacer vuelve a PENDING con el mismo número y hora, y la otra orden nunca cambió. regla 8.",
+      "cobertura": "e2e",
+      "dispositivo": "ambos",
+      "regla": "regla 8",
+      "estado": "pendiente"
+    },
+    {
+      "id": "UND-ORDENES-02",
+      "tipo": "UND",
+      "modulo": "Deshacer",
+      "titulo": "Deshacer la entrega de una orden",
+      "prioridad": "Alta",
+      "precondiciones": "Cuenta con una orden PENDING; ambos conectados.",
+      "pasos": [
+        "En el detalle tocar «Entregada» (botón verde).",
+        "Verificar que cocina borra el ticket y la orden muestra «Entregada».",
+        "En la barra «Orden #N entregada» tocar «Deshacer»."
+      ],
+      "esperado": "La orden vuelve a PENDING, `deliveredAt` se limpia, cocina vuelve a mostrar el ticket y la tarjeta de la cuenta muestra «En cocina · m:ss». regla 8.",
+      "cobertura": "e2e",
+      "dispositivo": "ambos",
+      "regla": "regla 8",
+      "estado": "pendiente"
+    },
+    {
+      "id": "UND-COBRO-01",
+      "tipo": "UND",
+      "modulo": "Deshacer",
+      "titulo": "Deshacer un pago: primero se muestra el cambio y luego se anula",
+      "prioridad": "Alta",
+      "precondiciones": "Cuenta con total $80.00 y orden PENDING; ambos conectados.",
+      "pasos": [
+        "Cobrar $80 con «$100» y registrar.",
+        "En la barra verificar el texto «Cambio $20.00 · cobrado $80.00».",
+        "Tocar «Deshacer»."
+      ],
+      "esperado": "El pago queda anulado (no se borra), la orden que se entregó con ese pago regresa a PENDING en cocina, la cuenta vuelve a «Sin pagar» con saldo $80.00 y el ticket reaparece. Cubierto en parte por `OrderStoreTest.cobrar en efectivo guarda con cuanto pagaron y entrega la orden` (revertir `deliveredByPayment`). regla 6 y 8.",
+      "cobertura": "ambas",
+      "dispositivo": "ambos",
+      "regla": "regla 6, regla 8",
+      "estado": "pendiente"
+    },
+    {
+      "id": "UND-COBRO-02",
+      "tipo": "UND",
+      "modulo": "Deshacer",
+      "titulo": "Deshacer un pago lo anula sin borrarlo (renglón tachado)",
+      "prioridad": "Alta",
+      "precondiciones": "Cuenta con un pago registrado y ventana de deshacer abierta.",
+      "pasos": [
+        "Tocar «Deshacer» en la barra del pago.",
+        "Abrir la cuenta y revisar la sección «Pagos»."
+      ],
+      "esperado": "En «Pagos» el movimiento sigue listado como «Efectivo · HH:mm · anulado» con el importe tachado y en gris; `paidCents` no lo cuenta y el estado vuelve a «Sin pagar»/«Pago parcial». Nada se borra. Cubierto por `OrderStoreTest.deshacer pago lo anula sin borrarlo`. regla 8.",
+      "cobertura": "ambas",
+      "dispositivo": "ambos",
+      "regla": "regla 8",
+      "estado": "pendiente"
+    },
+    {
+      "id": "UND-COBRO-03",
+      "tipo": "UND",
+      "modulo": "Deshacer",
+      "titulo": "Deshacer una devolución",
+      "prioridad": "Media",
+      "precondiciones": "Cuenta con saldo -$60.00 por una devolución registrada; barra visible.",
+      "pasos": [
+        "Tocar «Deshacer» en la barra de la devolución."
+      ],
+      "esperado": "La devolución se marca anulada (importe tachado), el saldo vuelve a -$60.00 y la tarjeta vuelve a mostrar «Devolver $60.00» con el gesto «💵  Devolver». La cuenta no se cierra. regla 5 y 8.",
+      "cobertura": "e2e",
+      "dispositivo": "ambos",
+      "regla": "regla 5, regla 8",
+      "estado": "pendiente"
+    },
+    {
+      "id": "UND-COBRO-04",
+      "tipo": "UND",
+      "modulo": "Deshacer",
+      "titulo": "Deshacer dos veces el mismo pago no duplica ni falla",
+      "prioridad": "Media",
+      "precondiciones": "Pago anulado por deshacer; TCP conectado y el id del pago conocido.",
+      "pasos": [
+        "Enviar `voidPayment` otra vez para el mismo pago.",
+        "Revisar `paidCents` y la lista de pagos."
+      ],
+      "esperado": "La segunda llamada no produce error ni un segundo movimiento: `voidPayment` retorna sin cambios si ya estaba anulado. El pago sigue apareciendo una sola vez como «anulado» y el saldo no se mueve. regla 3 y 8.",
+      "cobertura": "e2e",
+      "dispositivo": "cocina",
+      "regla": "regla 3, regla 8",
+      "estado": "pendiente"
+    },
+    {
+      "id": "IDEM-CAPTURA-01",
+      "tipo": "IDEM",
+      "modulo": "Idempotencia",
+      "titulo": "Reintento con la misma llave no duplica la orden",
+      "prioridad": "Alta",
+      "precondiciones": "TCP conectado; id real de «Asada».",
+      "pasos": [
+        "Enviar `create` con `clientKey` «same-1» y 2 asada.",
+        "Enviar exactamente el mismo `create` (mismo `clientKey`) con otro `reqId`.",
+        "Revisar `accounts` y `orders` en el `state`."
+      ],
+      "esperado": "La segunda respuesta trae la MISMA orden (mismo `id` y `number`), no se crea otra cuenta ni otra orden: queda 1 cuenta y 1 orden. Es el seguro contra mala señal. Cubierto por `OrderStoreTest.reintento con la misma llave no duplica`. regla 3.",
+      "cobertura": "ambas",
+      "dispositivo": "ambos",
+      "regla": "regla 3",
+      "estado": "pendiente"
+    },
+    {
+      "id": "IDEM-CAPTURA-02",
+      "tipo": "IDEM",
+      "modulo": "Idempotencia",
+      "titulo": "Una llave distinta crea una orden nueva con el mismo contenido",
+      "prioridad": "Media",
+      "precondiciones": "TCP conectado.",
+      "pasos": [
+        "Enviar dos `create` idénticos en líneas pero con `clientKey` distinta."
+      ],
+      "esperado": "Se crean DOS órdenes (y dos cuentas si `accountId` era nulo), porque representan dos pedidos distintos. La UI garantiza esto generando una llave nueva en cada edición del borrador (`WaiterDraft.touch`). regla 3.",
+      "cobertura": "e2e",
+      "dispositivo": "cocina",
+      "regla": "regla 3",
+      "estado": "pendiente"
+    },
+    {
+      "id": "IDEM-CAPTURA-03",
+      "tipo": "IDEM",
+      "modulo": "Idempotencia",
+      "titulo": "Dos meseros envían a la vez la misma llave y solo se crea una orden",
+      "prioridad": "Alta",
+      "precondiciones": "Cocina en primer plano; puerto expuesto; id de «Asada»; dos terminales.",
+      "pasos": [
+        "Lanzar dos envíos simultáneos en la Mac: `(printf '%s\\n' '<create same key>' | nc 127.0.0.1 7777 &); (printf '%s\\n' '<mismo create>' | nc 127.0.0.1 7777 &)`.",
+        "Leer los `reply` de ambos y el `state`."
+      ],
+      "esperado": "Ambas conexiones reciben la misma orden (mismo `id`); en `state` hay 1 cuenta y 1 orden. El `synchronized(lock)` de OrderStore y la búsqueda por `clientKey` evitan la carrera. regla 3.",
+      "cobertura": "e2e",
+      "dispositivo": "ambos",
+      "regla": "regla 3",
+      "estado": "pendiente"
+    },
+    {
+      "id": "IDEM-CAPTURA-04",
+      "tipo": "IDEM",
+      "modulo": "Idempotencia",
+      "titulo": "Reintento automático del mesero tras reconectar no duplica",
+      "prioridad": "Alta",
+      "precondiciones": "Mesera con orden capturada; cocina conectada; se simula corte justo después de que cocina procesó el `create`.",
+      "pasos": [
+        "En la Mac, ponerse en medio: `nc -l 7777` que reciba el `create` y no devuelva `reply` (mientras la cocina real no recibe nada) — o cortar la conexión con `adb forward --remove tcp:7777` justo después de enviar.",
+        "Reconectar la mesera y volver a tocar «Enviar a cocina» (mismo `clientKey`)."
+      ],
+      "esperado": "El segundo intento con la misma llave devuelve la orden ya creada; en cocina hay una sola orden y una sola cuenta. Si el primer envío no llegó, el reintento la crea una sola vez. regla 3.",
+      "cobertura": "e2e",
+      "dispositivo": "ambos",
+      "regla": "regla 3",
+      "estado": "pendiente"
+    },
+    {
+      "id": "IDEM-CAPTURA-05",
+      "tipo": "IDEM",
+      "modulo": "Idempotencia",
+      "titulo": "Cada cambio del borrador cambia la llave (dos pedidos iguales a propósito)",
+      "prioridad": "Media",
+      "precondiciones": "Mesera conectada.",
+      "pasos": [
+        "Crear una orden con 1 asada y enviarla (llave K1).",
+        "Tocar «+ Nueva orden», agregar 1 asada otra vez y enviarla (llave K2)."
+      ],
+      "esperado": "Se crean 2 órdenes distintas: la llave se renueva en cada `touch()` del borrador, por lo que enviar dos veces lo mismo de forma deliberada sí crea dos pedidos. regla 3.",
+      "cobertura": "e2e",
+      "dispositivo": "mesera",
+      "regla": "regla 3",
+      "estado": "pendiente"
+    },
+    {
+      "id": "IDEM-COBRO-01",
+      "tipo": "IDEM",
+      "modulo": "Idempotencia",
+      "titulo": "El reintento del mismo pago no duplica el movimiento",
+      "prioridad": "Alta",
+      "precondiciones": "Cuenta con saldo $40.00; TCP conectado.",
+      "pasos": [
+        "Enviar `pay` con `clientKey` «pay-1» por 2000 en efectivo.",
+        "Enviar el mismo `pay` (misma clave, otro `reqId`).",
+        "Revisar `payments` y `paidCents`."
+      ],
+      "esperado": "Ambas respuestas traen el mismo `paymentId`; la cuenta tiene UN solo `Payment`, `paidCents=2000` y el saldo baja una sola vez. Cubre el caso de la red que falla después de que cocina ya cobró. regla 3 y 5.",
+      "cobertura": "e2e",
+      "dispositivo": "ambos",
+      "regla": "regla 3, regla 5",
+      "estado": "pendiente"
+    },
+    {
+      "id": "IDEM-COBRO-02",
+      "tipo": "IDEM",
+      "modulo": "Idempotencia",
+      "titulo": "Dos pagos simultáneos no exceden el saldo",
+      "prioridad": "Alta",
+      "precondiciones": "Cuenta con saldo $100.00 (p. ej. 5 asada); TCP conectado; dos envíos en paralelo.",
+      "pasos": [
+        "Lanzar a la vez dos `pay` de 6000 con claves distintas sobre la misma cuenta (`(... &); (... &)`).",
+        "Revisar `payments` y `paidCents`."
+      ],
+      "esperado": "Solo uno de los dos se acepta; el otro responde «El importe excede el saldo pendiente de $40.00» (o el saldo que quede) porque cada pago se valida contra el saldo actual dentro del lock. `paidCents` nunca supera el total. regla 5.",
+      "cobertura": "e2e",
+      "dispositivo": "cocina",
+      "regla": "regla 5",
+      "estado": "pendiente"
+    },
+    {
+      "id": "IDEM-ORDENES-01",
+      "tipo": "IDEM",
+      "modulo": "Idempotencia",
+      "titulo": "Marcar entregada dos veces",
+      "prioridad": "Media",
+      "precondiciones": "Orden PENDING; TCP conectado.",
+      "pasos": [
+        "Enviar `orderStatus` DELIVERED.",
+        "Enviar otra vez DELIVERED para la misma orden."
+      ],
+      "esperado": "La primera entrega; la segunda responde `error` = «La orden ya está entregada» y no cambia `deliveredAt` ni vuelve a sacar el ticket. regla 7 y 8.",
+      "cobertura": "e2e",
+      "dispositivo": "cocina",
+      "regla": "regla 7, regla 8",
+      "estado": "pendiente"
+    },
+    {
+      "id": "IDEM-CUENTAS-01",
+      "tipo": "IDEM",
+      "modulo": "Idempotencia",
+      "titulo": "Cancelar dos veces la misma cuenta",
+      "prioridad": "Media",
+      "precondiciones": "Cuenta abierta; TCP conectado.",
+      "pasos": [
+        "Enviar `cancelAccount`.",
+        "Enviar `cancelAccount` otra vez."
+      ],
+      "esperado": "La segunda responde «La cuenta ya estaba cancelada» y no cambia la hora de cancelación ni vuelve a cancelar órdenes ya entregadas. regla 10.",
+      "cobertura": "e2e",
+      "dispositivo": "cocina",
+      "regla": "regla 10",
+      "estado": "pendiente"
+    },
+    {
+      "id": "IDEM-CAPTURA-06",
+      "tipo": "IDEM",
+      "modulo": "Idempotencia",
+      "titulo": "Guardar la edición sin cambios no crea revisión nueva",
+      "prioridad": "Media",
+      "precondiciones": "Orden PENDING con 2 asada; TCP conectado.",
+      "pasos": [
+        "Enviar `editOrder` con exactamente los mismos grupos que ya tiene (`qty` y mods idénticos).",
+        "Revisar `revisions` y `editedAt`."
+      ],
+      "esperado": "Responde la misma orden sin agregar revisión ni tocar `editedAt` (`lines == order.lines` → return). Cocina no muestra «● EDITADA» porque `editedAt` no cambió. regla 7.",
+      "cobertura": "e2e",
+      "dispositivo": "cocina",
+      "regla": "regla 7",
+      "estado": "pendiente"
+    },
+    {
+      "id": "IDEM-CAPTURA-07",
+      "tipo": "IDEM",
+      "modulo": "Idempotencia",
+      "titulo": "Dos ediciones reales dejan dos revisiones en orden",
+      "prioridad": "Media",
+      "precondiciones": "Orden PENDING con 4 asada; TCP conectado.",
+      "pasos": [
+        "Enviar `editOrder` con 3 asada.",
+        "Enviar `editOrder` con 2 asada + 1 pastor.",
+        "Revisar `revisions`, `editedAt` y `lines`."
+      ],
+      "esperado": "`revisions` tiene 2 entradas, de la más vieja (4 asada) a la más reciente (3 asada); `lines` queda con 2 asada + 1 pastor y `editedAt` se actualiza en cada cambio. Cocina compara contra la última revisión para resaltar y tachar. regla 7.",
+      "cobertura": "e2e",
+      "dispositivo": "cocina",
+      "regla": "regla 7",
+      "estado": "pendiente"
+    },
+    {
+      "id": "PER-PERSISTENCIA-01",
+      "tipo": "PER",
+      "modulo": "Persistencia",
+      "titulo": "Reiniciar la app de cocina conserva órdenes, cuentas y menú",
+      "prioridad": "Alta",
+      "precondiciones": "Cocina activa con 2 cuentas abiertas, una orden con modificaciones y un producto editado.",
+      "pasos": [
+        "Anotar el estado (órdenes, cuentas, productos).",
+        "Forzar la detención de Tacomanda en cocina (`adb shell am force-stop com.axzy.taqueria`).",
+        "Volver a abrirla; el rol Cocina se restaura solo desde las preferencias."
+      ],
+      "esperado": "El monitor muestra las mismas órdenes PENDING, las cuentas con sus pagos y el menú editado; nada se pierde. Cubierto por `OrderStoreTest.los datos sobreviven a reiniciar`. regla n/a.",
+      "cobertura": "ambas",
+      "dispositivo": "cocina",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "PER-PERSISTENCIA-02",
+      "tipo": "PER",
+      "modulo": "Persistencia",
+      "titulo": "Primer arranque sin taqueria.json siembra el menú y crea el archivo",
+      "prioridad": "Alta",
+      "precondiciones": "Datos de la app borrados; cocina sin taqueria.json.",
+      "pasos": [
+        "Borrar datos: `adb shell pm clear com.axzy.taqueria`.",
+        "Abrir Tacomanda y elegir «Cocina».",
+        "Con `run-as com.axzy.taqueria` listar `files/` y leer `taqueria.json`."
+      ],
+      "esperado": "Se crea `taqueria.json` con el menú semilla: 15 productos (10 tacos, Quesadilla/Gringa, Refresco/Horchata/Jamaica) y 5 tipos de modificación (Salsa, Cebolla, Cilantro, Extras combinable, Hielo); sin cuentas ni órdenes; `counterDate=\"\"` y `counterLast=0`. regla n/a.",
+      "cobertura": "e2e",
+      "dispositivo": "cocina",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "PER-PERSISTENCIA-03",
+      "tipo": "PER",
+      "modulo": "Persistencia",
+      "titulo": "Si falta taqueria.json se vuelve a sembrar sin tocar el historial",
+      "prioridad": "Media",
+      "precondiciones": "Cocina activa con historial.jsonl con al menos una cuenta archivada; app detenida.",
+      "pasos": [
+        "Con la app detenida, borrar solo `files/taqueria.json` con `run-as`.",
+        "Abrir la app en Cocina.",
+        "Revisar `files/`."
+      ],
+      "esperado": "Se crea un `taqueria.json` nuevo con el menú semilla y el estado vacío; `historial.jsonl` no se toca y sigue con sus líneas. El menú editado se pierde (no había archivo), pero las ventas históricas se conservan. regla 9.",
+      "cobertura": "e2e",
+      "dispositivo": "cocina",
+      "regla": "regla 9",
+      "estado": "pendiente"
+    },
+    {
+      "id": "PER-PERSISTENCIA-04",
+      "tipo": "PER",
+      "modulo": "Persistencia",
+      "titulo": "Guardado atómico: taqueria.json nunca queda a medias",
+      "prioridad": "Alta",
+      "precondiciones": "Cocina activa; se van a provocar cierres bruscos durante guardados.",
+      "pasos": [
+        "Crear/cobrar órdenes en ráfaga mientras en la Mac se ejecuta varias veces `adb shell am force-stop com.axzy.taqueria` en momentos aleatorios.",
+        "Reabrir la app tras cada corte y verificar que carga sin el respaldo `.corrupt`."
+      ],
+      "esperado": "`commit()` escribe primero `taqueria.json.tmp` y luego hace `renameTo`; tras cualquier corte el `taqueria.json` es siempre un JSON completo y decodificable (puede quedar un `.tmp` huérfano, que no se lee). No aparece `.corrupt-<ts>` por un guardado interrumpido. regla n/a.",
+      "cobertura": "manual",
+      "dispositivo": "cocina",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "PER-HISTORIAL-01",
+      "tipo": "PER",
+      "modulo": "Historial",
+      "titulo": "La cuenta cerrada pasa a historial.jsonl a los 30 s",
+      "prioridad": "Alta",
+      "precondiciones": "Cocina activa; TCP conectado; estado respaldado.",
+      "pasos": [
+        "Crear una orden, cobrarla en efectivo con «Exacto» (queda cerrada) y esperar sin deshacer.",
+        "Esperar ~40 s (archiveClosed corre en el bucle del servidor cada 10 s).",
+        "Con `run-as com.axzy.taqueria cat files/historial.jsonl` leer el archivo."
+      ],
+      "esperado": "La cuenta desaparece del estado activo y aparece una línea JSON con la cuenta y sus órdenes (incluidos los pagos); `historial.jsonl` solo crece, nunca se reescribe. Antes de los 30 s la cuenta sigue en el estado para poder deshacer. Cubierto por `OrderStoreTest.cuenta cerrada pasa al historial despues del periodo de deshacer`. regla 9.",
+      "cobertura": "ambas",
+      "dispositivo": "cocina",
+      "regla": "regla 9",
+      "estado": "pendiente"
+    },
+    {
+      "id": "PER-HISTORIAL-02",
+      "tipo": "PER",
+      "modulo": "Historial",
+      "titulo": "El historial conserva cancelaciones y pagos de una cuenta cancelada",
+      "prioridad": "Alta",
+      "precondiciones": "Cocina activa; TCP conectado.",
+      "pasos": [
+        "Crear una cuenta con 2 asada y pagar $20 parcial.",
+        "Deslizar a la izquierda para cancelar la cuenta y NO deshacer.",
+        "Esperar ~40 s y leer `files/historial.jsonl`."
+      ],
+      "esperado": "La línea del historial incluye `account.cancelledAt` no nulo, el pago de $20 y la orden con `status=CANCELLED` y `cancelledByAccount=true`; el total del historial conserva lo cobrado aunque la orden se haya cancelado. Nada se borra. regla 9 y 10.",
+      "cobertura": "e2e",
+      "dispositivo": "cocina",
+      "regla": "regla 9, regla 10",
+      "estado": "pendiente"
+    },
+    {
+      "id": "PER-HISTORIAL-03",
+      "tipo": "PER",
+      "modulo": "Historial",
+      "titulo": "Una cuenta cancelada sin pagos también se archiva",
+      "prioridad": "Media",
+      "precondiciones": "Cocina activa; cuenta con una orden PENDING (sin pagos).",
+      "pasos": [
+        "Cancelar la cuenta (las órdenes pendientes pasan a CANCELLED y el saldo queda en $0).",
+        "Esperar ~40 s y revisar el estado y `historial.jsonl`."
+      ],
+      "esperado": "La cuenta cumple `isClosed` (sin pendientes ni saldo y con `cancelledAt`), se archiva en historial aunque no tenga pagos, y la línea conserva la orden cancelada. No queda «basura» en Cuentas abiertas. regla 9 y 10.",
+      "cobertura": "e2e",
+      "dispositivo": "cocina",
+      "regla": "regla 9, regla 10",
+      "estado": "pendiente"
+    },
+    {
+      "id": "PER-PERSISTENCIA-05",
+      "tipo": "PER",
+      "modulo": "Persistencia",
+      "titulo": "La mesera no guarda datos de negocio: reabrirla resincroniza",
+      "prioridad": "Alta",
+      "precondiciones": "Mesera conectada con cuentas visibles; cocina en primer plano.",
+      "pasos": [
+        "Cerrar por completo la app de la mesera (`am force-stop`).",
+        "Mientras está cerrada, crear una orden nueva por TCP (o desde el detalle de otra vía).",
+        "Reabrir la mesera."
+      ],
+      "esperado": "Al reabrir, el rol Mesero se restaura y el `WaiterClient` vuelve a conectar y recibe el estado completo de cocina, incluida la orden creada mientras estaba cerrada. En `files/` de la mesera no hay `taqueria.json` ni `historial.jsonl`; solo preferencias (role, manualHost). regla n/a.",
+      "cobertura": "e2e",
+      "dispositivo": "mesera",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "PER-PERSISTENCIA-06",
+      "tipo": "PER",
+      "modulo": "Persistencia",
+      "titulo": "La cache de licencia sobrevive al reinicio y funciona sin internet",
+      "prioridad": "Alta",
+      "precondiciones": "Cocina activada; después se quita internet (modo avión o `adb shell svc wifi disable` + datos).",
+      "pasos": [
+        "Activar la cocina y anotar `validUntil`.",
+        "Cerrar la app, activar modo avión y reabrirla.",
+        "Verificar que entra directo al monitor."
+      ],
+      "esperado": "Al reabrir sin internet la cocina sigue mostrando el monitor (LicenseState.Active hasta `validUntil`) porque la cache está en SharedPreferences (license.xml). Si la cache decía SUSPENDED, sigue bloqueada aunque no haya red. regla n/a.",
+      "cobertura": "e2e",
+      "dispositivo": "cocina",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "PER-PERSISTENCIA-07",
+      "tipo": "PER",
+      "modulo": "Persistencia",
+      "titulo": "Acentos, emoji y notas sobreviven al reinicio",
+      "prioridad": "Media",
+      "precondiciones": "Cocina activa; TCP o UI.",
+      "pasos": [
+        "Crear una orden con `note` «sin picante 🌶️ · niño» y un producto llamado «Volcán ñandú».",
+        "Reiniciar la app de cocina (force-stop y abrir).",
+        "Revisar la orden en cocina y el detalle en la mesera."
+      ],
+      "esperado": "La nota y el nombre se muestran idénticos tras el reinicio; el JSON se guarda en UTF-8 y `AppJson` los decodifica sin perder caracteres. Cocina muestra «⚠ sin picante 🌶️ · niño». regla n/a.",
+      "cobertura": "e2e",
+      "dispositivo": "ambos",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "PER-PERSISTENCIA-08",
+      "tipo": "PER",
+      "modulo": "Persistencia",
+      "titulo": "Una actualización del APK con la misma firma conserva los datos",
+      "prioridad": "Media",
+      "precondiciones": "APK instalada y con datos; APK nueva con la misma llave de firma (debug) y versionCode mayor.",
+      "pasos": [
+        "Instalar encima sin desinstalar: `adb install -r app-debug.apk`.",
+        "Abrir la app."
+      ],
+      "esperado": "Android conserva `files/taqueria.json`, `files/historial.jsonl` y las preferencias; la app abre con el mismo rol, menú y cuentas. Si se desinstala o cambia la firma, Android borra los datos y hay que reactivar la cocina. regla n/a.",
+      "cobertura": "manual",
+      "dispositivo": "cocina",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "RED-CONEXION-01",
+      "tipo": "RED",
+      "modulo": "Conexión",
+      "titulo": "Conexión de mesera a cocina con IP manual y adb forward",
+      "prioridad": "Alta",
+      "precondiciones": "2 emuladores o teléfonos en la misma red; cocina en Cocina; mesera en Mesero.",
+      "pasos": [
+        "En la Mac: `adb -s <cocina> forward tcp:7777 tcp:7777`.",
+        "En la mesera: «⚙» → «IP de cocina (opcional)» = «10.0.2.2» → «Guardar».",
+        "Verificar «● Conectado a cocina» y «● 1 mesera conectada» en cocina."
+      ],
+      "esperado": "La mesera conecta al puerto 7777, recibe el `state` inmediato y queda «● Conectado a cocina»; cocina muestra la IP local y «● 1 mesera conectada». Sin este `adb forward` (o con IP equivocada) la mesera se queda en «● Conectando…». regla n/a.",
+      "cobertura": "e2e",
+      "dispositivo": "ambos",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "RED-CONEXION-02",
+      "tipo": "RED",
+      "modulo": "Conexión",
+      "titulo": "Formato de IP manual: host, host:puerto y puerto alterno",
+      "prioridad": "Media",
+      "precondiciones": "Cocina con servidor en 7777; mesera en la pantalla de conexión.",
+      "pasos": [
+        "Probar «10.0.2.2» (puerto por defecto 7777).",
+        "Probar «10.0.2.2:7777» y luego «10.0.2.2:9999».",
+        "Probar «10.0.2.2:abc» (puerto no numérico)."
+      ],
+      "esperado": "«10.0.2.2» y «10.0.2.2:7777» conectan igual; «10.0.2.2:9999» se queda en «● Conectando…» y reintenta; «10.0.2.2:abc» usa el puerto por defecto 7777 (`toIntOrNull() ?: DEFAULT_PORT`). El campo acepta hasta 40 caracteres. regla n/a.",
+      "cobertura": "e2e",
+      "dispositivo": "mesera",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "RED-RECONEXION-01",
+      "tipo": "RED",
+      "modulo": "Reconexión",
+      "titulo": "Al detener la cocina, la mesera detecta el enlace muerto en ≤25 s",
+      "prioridad": "Alta",
+      "precondiciones": "Mesera «● Conectado a cocina»; cocina en primer plano.",
+      "pasos": [
+        "Forzar la detención de la app de cocina (`am force-stop`).",
+        "Cronometrar cuánto tarda la mesera en dejar de estar «● Conectado a cocina».",
+        "Intentar enviar una orden mientras está caída."
+      ],
+      "esperado": "El socket del mesero tiene `soTimeout = 25 s` (2.5 × ping de 10 s): al no llegar mensajes, la lectura falla, la mesera pasa a «● Buscando cocina en la red…»/«● Conectando…» y los envíos fallan con toast. El cambio es automático, sin tocar «⚙». regla n/a.",
+      "cobertura": "e2e",
+      "dispositivo": "ambos",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "RED-RECONEXION-02",
+      "tipo": "RED",
+      "modulo": "Reconexión",
+      "titulo": "Reconexión automática y resincronización del estado",
+      "prioridad": "Alta",
+      "precondiciones": "Mesera conectada; cocina se detiene y se vuelve a abrir.",
+      "pasos": [
+        "Detener la app de cocina 10 s.",
+        "Volver a abrirla y esperar sin tocar la mesera.",
+        "Comparar cuentas/órdenes antes y después."
+      ],
+      "esperado": "El bucle del `WaiterClient` reintenta cada 1.5 s, pasa por «● Conectando…» y vuelve a «● Conectado a cocina» sin intervención; al conectar recibe el estado completo y cualquier orden creada/cobrada durante el corte aparece en la lista. regla n/a.",
+      "cobertura": "e2e",
+      "dispositivo": "ambos",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "RED-RECONEXION-03",
+      "tipo": "RED",
+      "modulo": "Reconexión",
+      "titulo": "Servidor que acepta pero no envía nada: timeout de 25 s",
+      "prioridad": "Media",
+      "precondiciones": "Mac: `adb forward --remove tcp:7777` y `nc -l 7777` (acepta y no envía); mesera con IP 10.0.2.2.",
+      "pasos": [
+        "Reiniciar la mesera para que conecte al servidor mudo.",
+        "Esperar 25-30 s.",
+        "Intentar una operación."
+      ],
+      "esperado": "La mesera primero queda «● Conectado a cocina» (el socket abrió) pero sin estado; a los 25 s sin mensajes se cierra la sesión, un request en curso falla con «Se perdió la conexión con cocina» y el enlace pasa a «Buscando/Conectando». Al cerrar el `nc` y levantar la cocina real, reconecta. regla n/a.",
+      "cobertura": "e2e",
+      "dispositivo": "mesera",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "RED-OFFLINE-01",
+      "tipo": "RED",
+      "modulo": "Offline",
+      "titulo": "Sin conexión la UI bloquea las operaciones",
+      "prioridad": "Alta",
+      "precondiciones": "Mesera sin cocina (cocina detenida o IP sin servidor).",
+      "pasos": [
+        "Abrir la mesera sin cocina y esperar el intento.",
+        "Mirar «+ Nueva orden», «+ Cuenta» y la barra de las tarjetas.",
+        "Entrar a una cuenta existente y mirar «+ Agregar productos»/«Cobrar»."
+      ],
+      "esperado": "La barra superior muestra «● Buscando cocina en la red…» y el botón principal dice «Sin conexión con cocina» y está deshabilitado; los «+ Cuenta» y los gestos de cancelar/cobrar/entregar también se deshabilitan (`connected=false`). En el resumen de captura el botón dice «Sin conexión» y no se puede enviar. regla n/a.",
+      "cobertura": "e2e",
+      "dispositivo": "mesera",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "RED-OFFLINE-02",
+      "tipo": "RED",
+      "modulo": "Offline",
+      "titulo": "Lo creado durante el corte aparece al reconectar",
+      "prioridad": "Alta",
+      "precondiciones": "Mesera desconectada; cocina activa; TCP desde la Mac.",
+      "pasos": [
+        "Con la mesera sin enlace, crear por TCP una orden en Mesa 8 y cobrar otra cuenta.",
+        "Reconectar la mesera («⚙» → «Guardar»)."
+      ],
+      "esperado": "Al reconectar, la lista de la mesera muestra la Mesa 8 y el estado de pago actualizado, porque al conectar recibe el `state` completo de cocina. La mesera nunca guardó nada local; la fuente de verdad es cocina. regla n/a.",
+      "cobertura": "e2e",
+      "dispositivo": "ambos",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "RED-OFFLINE-03",
+      "tipo": "RED",
+      "modulo": "Offline",
+      "titulo": "Wi-Fi del local sin internet: se mantiene la conexión local",
+      "prioridad": "Alta",
+      "precondiciones": "Cocina y mesera conectadas al mismo Wi-Fi sin salida a internet (o hotspot de cocina sin datos).",
+      "pasos": [
+        "Conectar ambos al Wi-Fi sin internet y aceptar «mantener conexión» si Android avisa.",
+        "Usar la app normalmente (crear, editar, cobrar)."
+      ],
+      "esperado": "La app funciona completa: el TCP local no necesita internet. Las consultas de licencia fallan con «Sin internet…» pero no bloquean si la licencia está activa y vigente. Si la licencia está vencida, la cocina se bloquea aunque haya red local. regla n/a.",
+      "cobertura": "e2e",
+      "dispositivo": "ambos",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "RED-CONEXION-03",
+      "tipo": "RED",
+      "modulo": "Conexión",
+      "titulo": "Dos meseras conectadas a la vez",
+      "prioridad": "Media",
+      "precondiciones": "Cocina activa; una mesera real y un segundo cliente TCP (o el segundo teléfono).",
+      "pasos": [
+        "Abrir la segunda conexión: `nc 127.0.0.1 7777` desde la Mac (con el `adb forward` de cocina).",
+        "Mirar el subtítulo de cocina.",
+        "Hacer un cambio desde la mesera real."
+      ],
+      "esperado": "Cocina muestra «● 2 meseras conectadas»; la segunda conexión recibe el `state` inicial y luego las difusiones de cada cambio; al cerrar el `nc` el contador baja a 1. `clientCount` se actualiza al conectar y desconectar. regla n/a.",
+      "cobertura": "e2e",
+      "dispositivo": "ambos",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "RED-CONEXION-04",
+      "tipo": "RED",
+      "modulo": "Conexión",
+      "titulo": "Cambiar de rol detiene el servidor y libera el puerto 7777",
+      "prioridad": "Media",
+      "precondiciones": "Cocina activa con la mesera conectada.",
+      "pasos": [
+        "En cocina: «⇄» → «Cambiar» → «Mesero».",
+        "Intentar conectar al 7777 (`nc 127.0.0.1 7777`).",
+        "Volver a elegir «Cocina»."
+      ],
+      "esperado": "Al salir de Cocina, `server.stop()` cierra el ServerSocket, desregistra mDNS y desconecta a las meseras (que pasan a «Buscando…»); el `nc` falla o se cierra. Al volver a Cocina el puerto se vuelve a abrir y las meseras reconectan solas. regla n/a.",
+      "cobertura": "e2e",
+      "dispositivo": "ambos",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "RED-PERMISO-01",
+      "tipo": "RED",
+      "modulo": "Permiso",
+      "titulo": "Permiso de red local en Android 17+: denegado y concedido",
+      "prioridad": "Alta",
+      "precondiciones": "Emulador/teléfono con API 37+; app instalada de cero; permiso `ACCESS_LOCAL_NETWORK` sin decidir.",
+      "pasos": [
+        "Abrir la app de cocina de cero y DENEGAR el permiso de red local.",
+        "Verificar el error en el subtítulo de cocina y que la mesera no conecta por mDNS.",
+        "Conceder el permiso en Ajustes de la app; forzar detención y volver a abrir la cocina (o concederlo desde el diálogo de Android para que `restartNetwork()` reinicie la red)."
+      ],
+      "esperado": "Al denegar, la app no se cierra y la cocina muestra el error «Falta el permiso de red local: actívalo en Ajustes de la app»; la mesera no encuentra la cocina por mDNS. Al concederlo y reiniciar la app, `restartNetwork()`/`start()` vuelve a anunciar mDNS y la mesera conecta. Con API <37 el permiso no existe y esta prueba no aplica. regla n/a.",
+      "cobertura": "manual",
+      "dispositivo": "ambos",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "RED-MDNS-01",
+      "tipo": "RED",
+      "modulo": "mDNS",
+      "titulo": "Descubrimiento automático de la cocina por mDNS",
+      "prioridad": "Alta",
+      "precondiciones": "Dos teléfonos físicos en el mismo Wi-Fi (o hotspot); permisos de red local concedidos; IP manual vacía en la mesera.",
+      "pasos": [
+        "Cocina: rol Cocina (anuncia `_taqueria._tcp` como «Taqueria Cocina»).",
+        "Mesera: «⚙» → dejar «IP de cocina (opcional)» vacío → «Guardar».",
+        "Esperar a que aparezca «● Conectado a cocina»."
+      ],
+      "esperado": "La mesera descubre y resuelve el servicio `_taqueria._tcp.` y conecta sin escribir IP; cocina muestra «● 1 mesera conectada». Con el permiso de red local denegado o con multicast filtrado (pantalla apagada) puede fallar y quedar la IP manual de respaldo. NO es ejecutable entre 2 emuladores: el multicast no cruza el NAT de los emuladores; ahí se usa el `adb forward` + IP 10.0.2.2. regla n/a.",
+      "cobertura": "manual",
+      "dispositivo": "ambos",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "RED-CONEXION-05",
+      "tipo": "RED",
+      "modulo": "Conexión",
+      "titulo": "IP equivocada: «Conectando…» y corrección sin reiniciar",
+      "prioridad": "Media",
+      "precondiciones": "Mesera con IP manual incorrecta (p. ej. 10.0.2.99); cocina activa.",
+      "pasos": [
+        "Abrir la mesera y esperar 10 s.",
+        "Mirar el subtítulo y tocar «⚙».",
+        "Corregir a 10.0.2.2 y «Guardar»."
+      ],
+      "esperado": "Con IP equivocada el subtítulo alterna entre «● Conectando…» y «● Buscando cocina en la red…» según falla el `connect(4 s)`; los envíos fallan con toast. Al guardar la IP correcta el cliente se reinicia (`client.start`) y conecta sin cerrar la app. regla n/a.",
+      "cobertura": "e2e",
+      "dispositivo": "mesera",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "LIC-LICENCIA-01",
+      "tipo": "LIC",
+      "modulo": "Licencia",
+      "titulo": "Sin código guardado la cocina no está activada",
+      "prioridad": "Alta",
+      "precondiciones": "Prueba JVM de `LicenseTest`; clase compilada.",
+      "pasos": [
+        "Ejecutar `./gradlew :app:testDebugUnitTest --tests \"com.axzy.taqueria.LicenseTest\"`."
+      ],
+      "esperado": "`sinCodigoNoEstaActivada` pasa: `evaluateLicense(null, ahora)` devuelve `LicenseState.NotActivated`, que lleva a la pantalla «Activa esta cocina». Es la base del bloqueo inicial de cocina. regla n/a.",
+      "cobertura": "unitaria",
+      "dispositivo": "JVM",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "LIC-LICENCIA-02",
+      "tipo": "LIC",
+      "modulo": "Licencia",
+      "titulo": "Activa funciona sin internet hasta su fecha",
+      "prioridad": "Alta",
+      "precondiciones": "Prueba JVM de `LicenseTest` con `validUntil` a 15 días.",
+      "pasos": [
+        "Ejecutar `./gradlew :app:testDebugUnitTest --tests \"com.axzy.taqueria.LicenseTest\"`."
+      ],
+      "esperado": "`activaFuncionaSinInternetHastaSuFecha` pasa: a los 10 días sigue `Active` y a los 16 días devuelve `Locked(EXPIRED)`. La cocina puede operar offline dentro de la vigencia. regla n/a.",
+      "cobertura": "unitaria",
+      "dispositivo": "JVM",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "LIC-LICENCIA-03",
+      "tipo": "LIC",
+      "modulo": "Licencia",
+      "titulo": "Aviso cuando la licencia está por vencer",
+      "prioridad": "Alta",
+      "precondiciones": "Prueba JVM de `LicenseTest`.",
+      "pasos": [
+        "Ejecutar `./gradlew :app:testDebugUnitTest --tests \"com.axzy.taqueria.LicenseTest\"`."
+      ],
+      "esperado": "`avisaCuandoEstaPorVenecer` pasa: a 1 día de avance `expiresSoon=false`; a 13 días de 15 (faltan 2) `expiresSoon=true`. La pantalla de cocina muestra el banner «Conecta este teléfono a internet antes del <fecha>…». regla n/a.",
+      "cobertura": "unitaria",
+      "dispositivo": "JVM",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "LIC-LICENCIA-04",
+      "tipo": "LIC",
+      "modulo": "Licencia",
+      "titulo": "Suspendida sigue bloqueada sin internet",
+      "prioridad": "Alta",
+      "precondiciones": "Prueba JVM de `LicenseTest` con respuesta SUSPENDED.",
+      "pasos": [
+        "Ejecutar `./gradlew :app:testDebugUnitTest --tests \"com.axzy.taqueria.LicenseTest\"`."
+      ],
+      "esperado": "`suspendidaSigueBloqueadaSinInternet` pasa: `Locked(SUSPENDED)` aunque no haya red; la cache conserva la última respuesta y el bloqueo no se cae al perder conexión. regla n/a.",
+      "cobertura": "unitaria",
+      "dispositivo": "JVM",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "LIC-LICENCIA-05",
+      "tipo": "LIC",
+      "modulo": "Licencia",
+      "titulo": "Código revocado bloquea la cocina",
+      "prioridad": "Alta",
+      "precondiciones": "Prueba JVM de `LicenseTest` con `revoked=true`.",
+      "pasos": [
+        "Ejecutar `./gradlew :app:testDebugUnitTest --tests \"com.axzy.taqueria.LicenseTest\"`."
+      ],
+      "esperado": "`revocadaBloquea` pasa: `Locked(REVOKED)`. En la UI el título es «Teléfono no autorizado», el cuerpo pide un código nuevo y el botón es «Escribir otro código» (no «Reintentar»). regla n/a.",
+      "cobertura": "unitaria",
+      "dispositivo": "JVM",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "LIC-LICENCIA-06",
+      "tipo": "LIC",
+      "modulo": "Licencia",
+      "titulo": "Atrasar el reloj del teléfono no alarga la licencia",
+      "prioridad": "Alta",
+      "precondiciones": "Prueba JVM de `LicenseTest` con `maxSeenMs` adelantado.",
+      "pasos": [
+        "Ejecutar `./gradlew :app:testDebugUnitTest --tests \"com.axzy.taqueria.LicenseTest\"`."
+      ],
+      "esperado": "`atrasarElRelojNoAlargaLaLicencia` pasa: con `maxSeenMs` a +20 días, `effectiveNow` usa ese máximo y devuelve `Locked(EXPIRED)` aunque el teléfono marque antes. Cambiar la hora del sistema no da licencia extra. regla n/a.",
+      "cobertura": "unitaria",
+      "dispositivo": "JVM",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "LIC-LICENCIA-07",
+      "tipo": "LIC",
+      "modulo": "Licencia",
+      "titulo": "Si el teléfono va atrasado se usa la hora del servidor",
+      "prioridad": "Alta",
+      "precondiciones": "Prueba JVM de `LicenseTest` con teléfono 30 días atrás.",
+      "pasos": [
+        "Ejecutar `./gradlew :app:testDebugUnitTest --tests \"com.axzy.taqueria.LicenseTest\"`."
+      ],
+      "esperado": "`usaLaHoraDelServidorSiElTelefonoVaAtrasado` pasa: con `clockOffsetMs = server - phone`, a los 10 días sigue activa y a los 16 vence; el offset se recalcula en cada respuesta (`withResponse`). regla n/a.",
+      "cobertura": "unitaria",
+      "dispositivo": "JVM",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "LIC-LICENCIA-08",
+      "tipo": "LIC",
+      "modulo": "Licencia",
+      "titulo": "Pantalla de bloqueo por suspensión con «Reintentar»",
+      "prioridad": "Alta",
+      "precondiciones": "Cocina activada (mock responde ACTIVE); luego el mock cambia a `status:\"SUSPENDED\"` con `tenant.name`; app cerrada y reabierta.",
+      "pasos": [
+        "Cambiar la respuesta del mock a SUSPENDED.",
+        "Cerrar y abrir Tacomanda en Cocina (o tocar «Reintentar» si ya está bloqueada)."
+      ],
+      "esperado": "Se muestra «🔒 Cuenta suspendida», el texto «La cuenta de <tenant> está suspendida. Comunícate con tu proveedor; en cuanto la reactive, toca Reintentar con internet.», el aviso «Las órdenes y el menú están guardados; no se pierde nada.» y «Reintentar». El monitor no se muestra. regla n/a.",
+      "cobertura": "e2e",
+      "dispositivo": "cocina",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "LIC-LICENCIA-09",
+      "tipo": "LIC",
+      "modulo": "Licencia",
+      "titulo": "Pantalla de bloqueo por vencimiento sin conexión",
+      "prioridad": "Alta",
+      "precondiciones": "Cocina activada con `validUntil` ya pasado (mock) o cache vencida; sin necesidad de red después.",
+      "pasos": [
+        "Abrir la app en Cocina.",
+        "Tocar «Reintentar» sin internet."
+      ],
+      "esperado": "Se muestra «🔒 Falta confirmar la cuenta» con el texto de conectarse a internet y «Reintentar»; al tocarlo sin red aparece el error «Sin internet. Conecta este teléfono a internet e intenta otra vez.» y sigue bloqueada. regla n/a.",
+      "cobertura": "e2e",
+      "dispositivo": "cocina",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "LIC-LICENCIA-10",
+      "tipo": "LIC",
+      "modulo": "Licencia",
+      "titulo": "Código revocado (401 en GET /license) y «Escribir otro código»",
+      "prioridad": "Alta",
+      "precondiciones": "Cocina activada; el mock responde 401 en `GET /license`; app cerrada y reabierta.",
+      "pasos": [
+        "Abrir la cocina para que consulte la licencia.",
+        "Verificar la pantalla.",
+        "Tocar «Escribir otro código»."
+      ],
+      "esperado": "Se muestra «🔒 Teléfono no autorizado» con «El código de este teléfono ya no es válido. Pide uno nuevo a tu proveedor.» y el botón «Escribir otro código» (no Reintentar). Al tocarlo se borra la cache (prefs `cache`) pero se CONSERVA la URL del servidor que trajo el QR (prefs `apiBase`) y se vuelve a la pantalla de activación. regla n/a.",
+      "cobertura": "e2e",
+      "dispositivo": "cocina",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "LIC-LICENCIA-11",
+      "tipo": "LIC",
+      "modulo": "Licencia",
+      "titulo": "Con la cocina bloqueada, el servidor rechaza a las meseras",
+      "prioridad": "Alta",
+      "precondiciones": "Cocina bloqueada (SUSPENDED/EXPIRED/REVOKED) con el servidor TCP todavía escuchando; mesera conectada; TCP conectado.",
+      "pasos": [
+        "Desde la mesera intentar crear una orden.",
+        "Por TCP enviar un `create` válido y un `pay`."
+      ],
+      "esperado": "El servidor responde `error` = «La cuenta de la taquería está suspendida. Revisa el teléfono de cocina.» (`LOCKED_MESSAGE`) a cualquier mensaje; la mesera muestra ese texto en un toast y no se crea orden ni pago. El estado no cambia. regla n/a.",
+      "cobertura": "e2e",
+      "dispositivo": "ambos",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "LIC-LICENCIA-12",
+      "tipo": "LIC",
+      "modulo": "Licencia",
+      "titulo": "Al reactivar, las órdenes y el menú siguen intactos",
+      "prioridad": "Alta",
+      "precondiciones": "Cocina bloqueada con órdenes abiertas y menú editado guardados.",
+      "pasos": [
+        "Con el mock de vuelta en ACTIVE, tocar «Reintentar» o reabrir la app con internet.",
+        "Comparar el monitor y la lista de la mesera con lo anotado antes del bloqueo.",
+        "Crear una orden nueva."
+      ],
+      "esperado": "La cocina vuelve al monitor con las mismas órdenes, cuentas y menú; la mesera reconecta y puede seguir operando. El bloqueo nunca borra `taqueria.json`. regla n/a.",
+      "cobertura": "e2e",
+      "dispositivo": "ambos",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "LIC-LICENCIA-13",
+      "tipo": "LIC",
+      "modulo": "Licencia",
+      "titulo": "Refresco de licencia al abrir, al validar la red y cada 6 h",
+      "prioridad": "Media",
+      "precondiciones": "Mock de Axzy Central con log de peticiones (`GET /license` con `Authorization: Bearer <token>`); cocina activada.",
+      "pasos": [
+        "Cerrar y abrir la app: debe verse un GET /license en el log del mock.",
+        "Con red validada, cambia la conectividad (Wi-Fi/datos) y espera a que Android valide la red: debe dispararse un refresh si pasaron >30 min de la última consulta.",
+        "Dejar la app abierta >6 h (o simularlo) y revisar el refresh periódico."
+      ],
+      "esperado": "El mock registra GET /license al abrir (`start()` llama `refresh()`), al detectar una red con `NET_CAPABILITY_VALIDATED` (si `locked` o pasaron >30 min), y cada 6 h (`PERIODIC_CHECK_MS`); la UI muestra «Consultando…» mientras corre. regla n/a.",
+      "cobertura": "manual",
+      "dispositivo": "cocina",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "LIC-LICENCIA-14",
+      "tipo": "LIC",
+      "modulo": "Licencia",
+      "titulo": "«Escribir otro código» conserva la URL del servidor del QR",
+      "prioridad": "Media",
+      "precondiciones": "Cocina activada por QR contra un servidor mock alterno; luego el código se revoca (401).",
+      "pasos": [
+        "Provocar el bloqueo REVOKED (mock 401) y tocar «Escribir otro código».",
+        "Escribir un código nuevo a mano y tocar «Activar».",
+        "Revisar el log del mock alterno."
+      ],
+      "esperado": "La activación manual usa la URL guardada del QR (`prefs apiBase`) y no la compilada: el mock alterno recibe el `POST /activate`; la pantalla no pide volver a escanear. Si la URL del QR estuviera corrupta, se usaría la compilada. regla n/a.",
+      "cobertura": "e2e",
+      "dispositivo": "cocina",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "LIC-QR-01",
+      "tipo": "LIC",
+      "modulo": "QR",
+      "titulo": "QR del contrato con servidor y producto",
+      "prioridad": "Alta",
+      "precondiciones": "Prueba JVM de `QrPayloadTest`.",
+      "pasos": [
+        "Ejecutar `./gradlew :app:testDebugUnitTest --tests \"com.axzy.taqueria.QrPayloadTest\"`."
+      ],
+      "esperado": "`jsonDelContratoConServidorYProducto` pasa: `{\"v\":1,\"u\":\"https://central-api.axzy.dev/api/v1\",\"c\":\"axc_abc123\",\"p\":\"TAQUERIA\"}` produce código `axc_abc123`, `apiUrl` exacta y `product=TAQUERIA`. regla n/a.",
+      "cobertura": "unitaria",
+      "dispositivo": "JVM",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "LIC-QR-02",
+      "tipo": "LIC",
+      "modulo": "QR",
+      "titulo": "QR sin URL usa el servidor compilado",
+      "prioridad": "Alta",
+      "precondiciones": "Prueba JVM de `QrPayloadTest`.",
+      "pasos": [
+        "Ejecutar la clase `QrPayloadTest`."
+      ],
+      "esperado": "`jsonSinUrlUsaElServidorCompilado` pasa: `{\"v\":1,\"c\":\"axc_abc123\",\"p\":\"TAQUERIA\"}` deja `apiUrl=null`; LicenseManager usará `BuildConfig.LICENSE_API_URL`. regla n/a.",
+      "cobertura": "unitaria",
+      "dispositivo": "JVM",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "LIC-QR-03",
+      "tipo": "LIC",
+      "modulo": "QR",
+      "titulo": "QR sin producto es válido",
+      "prioridad": "Media",
+      "precondiciones": "Prueba JVM de `QrPayloadTest`.",
+      "pasos": [
+        "Ejecutar la clase `QrPayloadTest`."
+      ],
+      "esperado": "`jsonSinProductoEsValido` pasa: `{\"v\":1,\"u\":\"http://10.0.2.2:4100/api/v1\",\"c\":\"axc_abc123\"}` es válido con `product=null` (el campo `p` es opcional). regla n/a.",
+      "cobertura": "unitaria",
+      "dispositivo": "JVM",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "LIC-QR-04",
+      "tipo": "LIC",
+      "modulo": "QR",
+      "titulo": "QR con llaves extra las ignora",
+      "prioridad": "Baja",
+      "precondiciones": "Prueba JVM de `QrPayloadTest`.",
+      "pasos": [
+        "Ejecutar la clase `QrPayloadTest`."
+      ],
+      "esperado": "`jsonConLlavesExtraLasIgnora` pasa: con `\"extra\":\"lo que sea\"` el QR sigue siendo válido (`Json { ignoreUnknownKeys=true }`). Permite que la Central agregue campos sin romper versiones viejas. regla n/a.",
+      "cobertura": "unitaria",
+      "dispositivo": "JVM",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "LIC-QR-05",
+      "tipo": "LIC",
+      "modulo": "QR",
+      "titulo": "La URL del QR pierde la diagonal final",
+      "prioridad": "Media",
+      "precondiciones": "Prueba JVM de `QrPayloadTest`.",
+      "pasos": [
+        "Ejecutar la clase `QrPayloadTest`."
+      ],
+      "esperado": "`quitaLaDiagonalFinalDeLaUrl` pasa: `.../api/v1/` se normaliza a `.../api/v1`; luego LicenseManager concatena `/activate` y `/license` sin dobles diagonales. regla n/a.",
+      "cobertura": "unitaria",
+      "dispositivo": "JVM",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "LIC-QR-06",
+      "tipo": "LIC",
+      "modulo": "QR",
+      "titulo": "QR de otro producto se rechaza con mensaje claro",
+      "prioridad": "Alta",
+      "precondiciones": "Prueba JVM de `QrPayloadTest`.",
+      "pasos": [
+        "Ejecutar la clase `QrPayloadTest`."
+      ],
+      "esperado": "`productoAjenoDaMensajeClaro` pasa: con `p=PANADERIA` el mensaje contiene «PANADERIA» y la palabra «producto»; no se activa. regla n/a.",
+      "cobertura": "unitaria",
+      "dispositivo": "JVM",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "LIC-QR-07",
+      "tipo": "LIC",
+      "modulo": "QR",
+      "titulo": "QR de otra versión o sin versión se rechaza",
+      "prioridad": "Media",
+      "precondiciones": "Prueba JVM de `QrPayloadTest`.",
+      "pasos": [
+        "Ejecutar la clase `QrPayloadTest`."
+      ],
+      "esperado": "`versionDistintaSeRechaza` y `versionFaltanteSeRechaza` pasan: `v=2` pide actualizar la app; sin `v` y con `c` avisa «A este QR le falta la versión. Pide un QR nuevo a tu proveedor.»; sin `v` y sin `c` se rechaza como QR ajeno. regla n/a.",
+      "cobertura": "unitaria",
+      "dispositivo": "JVM",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "LIC-QR-08",
+      "tipo": "LIC",
+      "modulo": "QR",
+      "titulo": "URL inválida en el QR",
+      "prioridad": "Media",
+      "precondiciones": "Prueba JVM de `QrPayloadTest`.",
+      "pasos": [
+        "Ejecutar la clase `QrPayloadTest`."
+      ],
+      "esperado": "`urlInvalidaSeRechaza` pasa con `ftp://…`, texto sin esquema y `https://` sin host: el mensaje contiene «inválida». Solo se aceptan http(s) con host y hasta 500 caracteres. regla n/a.",
+      "cobertura": "unitaria",
+      "dispositivo": "JVM",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "LIC-QR-09",
+      "tipo": "LIC",
+      "modulo": "QR",
+      "titulo": "Código suelto axc_ se acepta y se recortan espacios",
+      "prioridad": "Media",
+      "precondiciones": "Prueba JVM de `QrPayloadTest`.",
+      "pasos": [
+        "Ejecutar la clase `QrPayloadTest`."
+      ],
+      "esperado": "`codigoSueltoAxcSeAcepta` y `codigoSueltoRecortaEspacios` pasan: `axc_9f8e7d6c5b4a` es válido sin URL ni producto, y `  axc_abc  ` se recorta. Es el respaldo impreso solo con el código. regla n/a.",
+      "cobertura": "unitaria",
+      "dispositivo": "JVM",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "LIC-QR-10",
+      "tipo": "LIC",
+      "modulo": "QR",
+      "titulo": "Basura, texto vacío y `axc_` suelto se rechazan",
+      "prioridad": "Media",
+      "precondiciones": "Prueba JVM de `QrPayloadTest`.",
+      "pasos": [
+        "Ejecutar la clase `QrPayloadTest`."
+      ],
+      "esperado": "`basuraSeRechaza` pasa: «hola mundo», JSON ajeno, `{`, una URL suelta y `axc_` dan «no es de Axzy Central»; la cadena vacía da «El QR está vacío.» No se llama a la red. regla n/a.",
+      "cobertura": "unitaria",
+      "dispositivo": "JVM",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "LIC-QR-11",
+      "tipo": "LIC",
+      "modulo": "QR",
+      "titulo": "Código vacío dentro del JSON se rechaza",
+      "prioridad": "Baja",
+      "precondiciones": "Prueba JVM de `QrPayloadTest`.",
+      "pasos": [
+        "Ejecutar la clase `QrPayloadTest`."
+      ],
+      "esperado": "`codigoVacioEnJsonSeRechaza` pasa: `{\"v\":1,\"u\":\"…\",\"c\":\"  \"}` da «El QR no trae un código de activación válido.» El código se recorta antes de validar. regla n/a.",
+      "cobertura": "unitaria",
+      "dispositivo": "JVM",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "LIC-QR-12",
+      "tipo": "LIC",
+      "modulo": "QR",
+      "titulo": "Escanear un QR válido activa la cocina",
+      "prioridad": "Alta",
+      "precondiciones": "Teléfono de cocina con cámara (físico, o emulador con webcam); QR generado con `{\"v\":1,\"u\":\"https://<mock>/api/v1\",\"c\":\"axc_…\",\"p\":\"TAQUERIA\"}`; mock accesible desde el teléfono.",
+      "pasos": [
+        "Cocina sin activar → «Escanear QR de la Central» → permitir cámara.",
+        "Apuntar al QR y esperar la vibración/beep.",
+        "Ver el resultado de la activación."
+      ],
+      "esperado": "Al leer el QR la cámara se detiene, vibra y pita; el código se coloca en el campo y se llama a `activate(code, apiUrl)`; con respuesta 2xx se abre el monitor y se guarda la cache. Si el QR es inválido se muestra el mensaje del parser y no se activa. Nota: en emuladores la cámara virtual no lee un QR real; usar cámara física/webcam o probar el respaldo manual del parser. regla n/a.",
+      "cobertura": "manual",
+      "dispositivo": "cocina",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "LIC-QR-13",
+      "tipo": "LIC",
+      "modulo": "QR",
+      "titulo": "QR con URL http en build debug activa contra el mock local",
+      "prioridad": "Media",
+      "precondiciones": "Build debug (permite cleartext); mock en `http://10.0.2.2:4100/api/v1`; QR generado con esa `u` y `p=TAQUERIA`.",
+      "pasos": [
+        "Activar la cocina escaneando el QR del mock.",
+        "Revisar el log del mock y las prefs de la app.",
+        "Cerrar y abrir la cocina."
+      ],
+      "esperado": "El `POST /activate` llega al mock con el código y el modelo del teléfono; la URL `apiBase` queda guardada y el `GET /license` posterior usa esa misma URL (no la compilada). Al reabrir sin QR sigue usándose el mock. En release, una URL http sería rechazada por la política de cleartext de Android. Requiere escanear el QR con cámara (física/webcam): en un AVD sin cámara real no es ejecutable; usar el respaldo manual no permite fijar `u`.",
+      "cobertura": "e2e",
+      "dispositivo": "cocina",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "UI-GESTOS-01",
+      "tipo": "UI",
+      "modulo": "Gestos",
+      "titulo": "Umbral de deslizamiento de 1/3 del ancho",
+      "prioridad": "Alta",
+      "precondiciones": "Mesera con una cuenta abierta y enlace conectado; ancho de la tarjeta ~360 dp.",
+      "pasos": [
+        "Deslizar la tarjeta hacia la derecha un 20 % del ancho y soltar.",
+        "Repetir deslizando un 40 % del ancho.",
+        "Repetir hacia la izquierda con 20 % y 40 %."
+      ],
+      "esperado": "Por debajo de 1/3 la tarjeta regresa a su lugar y NO ejecuta nada (el fondo se ve semi-transparente, alpha 0.55); al pasar 1/3 el fondo se pinta sólido (alpha 1) y al soltar ejecuta la acción. La misma regla aplica a izquierda (cancelar) y derecha (cobrar/entregar/devolver).",
+      "cobertura": "e2e",
+      "dispositivo": "mesera",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "UI-GESTOS-02",
+      "tipo": "UI",
+      "modulo": "Gestos",
+      "titulo": "Etiquetas del gesto según el estado de la cuenta",
+      "prioridad": "Alta",
+      "precondiciones": "Mesera con cuatro cuentas: con saldo, pagada en cocina, con saldo negativo y cancelada.",
+      "pasos": [
+        "Deslizar hacia la izquierda una cuenta abierta y mirar el fondo.",
+        "Deslizar hacia la derecha la cuenta con saldo.",
+        "Repetir con la pagada pero aún en cocina y con la de saldo negativo."
+      ],
+      "esperado": "Izquierda muestra «Cancelar cuenta  ✕» sobre rojo; derecha muestra «💵  Cobrar» con saldo >0, «✓  Entregar» cuando el saldo es 0 y hay pendientes, «💵  Devolver» con saldo <0, y en una cuenta cancelada el gesto de cancelar está deshabilitado.",
+      "cobertura": "e2e",
+      "dispositivo": "mesera",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "UI-GESTOS-03",
+      "tipo": "UI",
+      "modulo": "Gestos",
+      "titulo": "Tocar abre el detalle y el scroll vertical no dispara el gesto",
+      "prioridad": "Alta",
+      "precondiciones": "Mesera con varias cuentas y un detalle de cuenta; conectados.",
+      "pasos": [
+        "Tocar (sin deslizar) una tarjeta.",
+        "Verificar que abre el detalle «Mesa X · Cuenta N».",
+        "Volver con «←» y hacer scroll vertical sobre la lista de cuentas."
+      ],
+      "esperado": "El toque abre el detalle y «←» regresa a «Cuentas abiertas». El `draggable` es solo horizontal (`Orientation.Horizontal`), así que el scroll vertical de la lista funciona sin activar cancelar/cobrar. Un deslizamiento diagonal corto no ejecuta la acción.",
+      "cobertura": "e2e",
+      "dispositivo": "mesera",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "UI-DESHACER-01",
+      "tipo": "UI",
+      "modulo": "Deshacer",
+      "titulo": "La barra de deshacer dura 6 s y trunca el mensaje a una línea",
+      "prioridad": "Alta",
+      "precondiciones": "Mesera conectada; realizar una acción con deshacer (cancelar/cobrar/entregar).",
+      "pasos": [
+        "Provocar una acción con deshacer y cronometrar la barra.",
+        "Observar el mensaje con un nombre largo (mesa personalizada de 20 caracteres)."
+      ],
+      "esperado": "La barra desaparece exactamente ~6 s después (`delay(6_000)`), el mensaje se muestra en una sola línea con «…» si no cabe (`maxLines=1`, `TextOverflow.Ellipsis`) y «Deshacer» queda siempre visible a la derecha. Tocar «Deshacer» cierra la barra y ejecuta la acción.",
+      "cobertura": "e2e",
+      "dispositivo": "mesera",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "UI-ROTACION-01",
+      "tipo": "UI",
+      "modulo": "Rotación",
+      "titulo": "Rotar durante la captura: se pierde la pantalla de captura (comportamiento actual)",
+      "prioridad": "Alta",
+      "precondiciones": "Mesera con una orden a medio capturar (2 asada) en la pantalla de productos; rotación automática activada.",
+      "pasos": [
+        "Girar el teléfono/emulador a horizontal.",
+        "Observar la pantalla resultante.",
+        "Intentar retomar la captura; luego tocar «+ Nueva orden»."
+      ],
+      "esperado": "La Activity se recrea y `page` (remember, no rememberSaveable) vuelve a `Page.Home`: se ve «Cuentas abiertas» aunque el borrador sigue en memoria (`App.draft`). No hay ruta para volver a la captura y tocar «+ Nueva orden» llama a `draft.start(\"\", null)`, que limpia el borrador. Es un riesgo de UX a documentar; el estado de negocio en cocina no se afecta. (Si el giro ocurre en el editor de grupos, igualmente se pierde la pantalla.)",
+      "cobertura": "e2e",
+      "dispositivo": "mesera",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "UI-ROTACION-02",
+      "tipo": "UI",
+      "modulo": "Rotación",
+      "titulo": "Rotar en cocina conserva la pestaña del menú y no afecta el monitor",
+      "prioridad": "Media",
+      "precondiciones": "Cocina activa; menú abierto en la pestaña «Modificaciones» (y también probar con el monitor).",
+      "pasos": [
+        "Girar la cocina a horizontal y volver a vertical con el menú abierto.",
+        "Repetir estando en el monitor."
+      ],
+      "esperado": "La pestaña del menú se conserva (`rememberSaveable` en AdminScreen) y los datos del menú no cambian. En el monitor, las órdenes siguen iguales y el ticket se reacomoda a las columnas disponibles sin perder la hora ni la espera.",
+      "cobertura": "e2e",
+      "dispositivo": "cocina",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "UI-DENSIDAD-01",
+      "tipo": "UI",
+      "modulo": "Densidad",
+      "titulo": "Escala de fuente 1.5× y tamaño de pantalla grande",
+      "prioridad": "Media",
+      "precondiciones": "Emulador con «Tamaño de fuente» y «Tamaño de pantalla» al máximo (Ajustes de Android).",
+      "pasos": [
+        "Abrir la mesera y revisar lista de cuentas, rejilla de productos y diálogo de cobro.",
+        "Abrir la cocina y revisar un ticket.",
+        "Revisar que ningún texto crítico (saldo, cambio, «Enviar a cocina») quede cortado."
+      ],
+      "esperado": "Los textos largos usan elipsis en una línea (botones, chips, títulos) sin desbordar; los controles mantienen 52 dp de alto y las filas de la cuadrícula igualan su altura (`GridRow`). El mensaje de un botón crítico puede acortarse con «…», pero sigue siendo legible y la app no crashea por overflow.",
+      "cobertura": "manual",
+      "dispositivo": "ambos",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "UI-TAMANOS-01",
+      "tipo": "UI",
+      "modulo": "Tamaños",
+      "titulo": "Columnas de la cuadrícula según el ancho del teléfono o tablet",
+      "prioridad": "Media",
+      "precondiciones": "Un teléfono (~360 dp de ancho) y una tablet (~800 dp); app instalada en ambos.",
+      "pasos": [
+        "En el teléfono abrir la rejilla de productos y contar columnas.",
+        "En la tablet abrir la rejilla y el monitor de cocina y contar columnas.",
+        "Comprobar que no hay celdas desalineadas ni huecos raros."
+      ],
+      "esperado": "Los productos usan `columnsFor(ancho-32dp, 104dp, 3..6)`: el teléfono muestra 3 columnas y la tablet hasta 6. La cocina usa `columnsFor(ancho-32dp, 180dp, 1..6)`: teléfono 1-2 tickets por fila y tablet varias. Las filas incompletas dejan celdas vacías sin romper la cuadrícula.",
+      "cobertura": "manual",
+      "dispositivo": "ambos",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "UI-ACCESIBILIDAD-01",
+      "tipo": "UI",
+      "modulo": "Accesibilidad",
+      "titulo": "TalkBack y lectores de pantalla en las pantallas principales",
+      "prioridad": "Media",
+      "precondiciones": "Android con TalkBack activado en mesera y cocina.",
+      "pasos": [
+        "Recorrer con TalkBack la lista de cuentas, la rejilla de productos y el diálogo de cobro.",
+        "Leer un ticket de cocina.",
+        "Intentar cancelar/cobrar con TalkBack."
+      ],
+      "esperado": "Los botones con texto se leen correctamente («+ Nueva Orden», «Revisar · 2 · $40», «Registrar $40.00»). Los íconos decorativos (`FoodIcon` con emoji) no tienen `contentDescription` y se leen como emoji o se omiten; los gestos de deslizar NO están expuestos como acciones accesibles, así que un usuario de TalkBack no puede cancelar/cobrar/entregar desde la tarjeta (solo desde el detalle). Es una brecha conocida de accesibilidad a documentar.",
+      "cobertura": "manual",
+      "dispositivo": "ambos",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "UI-NAVEGACION-01",
+      "tipo": "UI",
+      "modulo": "Navegación",
+      "titulo": "BackHandler y flujo de pasos de la captura",
+      "prioridad": "Alta",
+      "precondiciones": "Mesera conectada; una captura nueva en curso.",
+      "pasos": [
+        "En captura, tocar «←» desde PRODUCTOS (sin productos): vuelve a la selección de mesa.",
+        "Con productos, «←» abre «¿Descartar esta orden?».",
+        "Desde el detalle tocar «←» y luego el botón físico Atrás.",
+        "En cocina abrir «📋» y usar Atrás."
+      ],
+      "esperado": "El botón atrás de la app y el gesto/botón del sistema siguen la misma jerarquía: PRODUCTOS→(si hay cambios) diálogo de descarte→MESA→cerrar; resumen→productos; detalle→lista; menú de cocina→monitor. En la pantalla de rol, Atrás sale de la app sin romper nada.",
+      "cobertura": "e2e",
+      "dispositivo": "ambos",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "UI-PANTALLA-01",
+      "tipo": "UI",
+      "modulo": "Pantalla",
+      "titulo": "La cocina mantiene la pantalla encendida y no se solapa con barras del sistema",
+      "prioridad": "Media",
+      "precondiciones": "Cocina activa; mesera activa.",
+      "pasos": [
+        "Dejar la cocina inactiva más de 1 min (sin tocar) y verificar que no se apaga.",
+        "Ir a la mesera y esperar el tiempo de apagado normal.",
+        "Revisar que títulos y botones no queden bajo la barra de estado/gestos."
+      ],
+      "esperado": "La cocina fija `keepScreenOn=true` mientras muestra el monitor (y lo libera al salir); la mesera puede atenuarse normalmente. Ambas usan `safeDrawingPadding()`/edge-to-edge, así que contenido y botones no quedan tapados por notch, barra de estado ni barra de gestos.",
+      "cobertura": "manual",
+      "dispositivo": "ambos",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "UI-TEMA-01",
+      "tipo": "UI",
+      "modulo": "Tema",
+      "titulo": "Tema claro fijo y contraste de estados",
+      "prioridad": "Baja",
+      "precondiciones": "Android en modo oscuro del sistema; app en ambos roles.",
+      "pasos": [
+        "Poner Android en modo oscuro y abrir mesera y cocina.",
+        "Revisar textos, chips de estado y colores de espera."
+      ],
+      "esperado": "La app mantiene el tema claro (`lightColorScheme` con acento #3F8F6F) sin importar el modo del sistema; los estados usan color + texto («En cocina · 0:42», «ESPERA 4:59»), por lo que el estado no depende solo del color. El contraste del texto sobre tarjetas blancas es legible.",
+      "cobertura": "manual",
+      "dispositivo": "ambos",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "SEG-AUTENTICACION-01",
+      "tipo": "SEG",
+      "modulo": "Seguridad",
+      "titulo": "Sin autenticación: cualquier equipo de la red puede crear órdenes",
+      "prioridad": "Alta",
+      "precondiciones": "Cocina activa con el puerto 7777 accesible en la LAN (o forward); otra computadora en la misma red.",
+      "pasos": [
+        "Desde la Mac conectarse con `nc <ip-cocina> 7777`.",
+        "Enviar un `create` válido con ids reales del catálogo.",
+        "Revisar si la orden apareció en cocina."
+      ],
+      "esperado": "El servidor acepta el mensaje sin pedir credenciales y la orden se crea (respuesta `reply` + difusión de `state`). Es una limitación conocida del diseño: no hay autenticación; la mitigación documentada es usar un Wi-Fi/hotspot con contraseña que no tengan los clientes. La matriz lo verifica para que no pase inadvertido. regla n/a.",
+      "cobertura": "e2e",
+      "dispositivo": "ambos",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "SEG-AUTENTICACION-02",
+      "tipo": "SEG",
+      "modulo": "Seguridad",
+      "titulo": "Sin autenticación: cualquier cliente puede cancelar o anular pagos",
+      "prioridad": "Alta",
+      "precondiciones": "Cuenta con pago y orden; otro equipo en la red local.",
+      "pasos": [
+        "Por TCP enviar `cancelAccount` de la cuenta.",
+        "Por TCP enviar `voidPayment` del pago.",
+        "Verificar el estado en la mesera."
+      ],
+      "esperado": "Ambas operaciones se aceptan sin credenciales: la cuenta queda cancelada y el pago anulado, visibles en la UI de la mesera. No hay roles ni tokens en el protocolo; cualquiera en la red puede operar. Documentar como riesgo y recomendar red con contraseña. regla n/a.",
+      "cobertura": "e2e",
+      "dispositivo": "ambos",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "SEG-RESPALDO-01",
+      "tipo": "SEG",
+      "modulo": "Seguridad",
+      "titulo": "allowBackup=false: los datos de la app no salen en respaldos",
+      "prioridad": "Media",
+      "precondiciones": "Dispositivo con depuración; app con datos (cuentas, menú).",
+      "pasos": [
+        "Ejecutar `adb backup -noapk com.axzy.taqueria` (o `bmgr backupnow`).",
+        "Revisar el archivo resultante / la salida del comando.",
+        "Revisar `dumpsys package com.axzy.taqueria | grep -i allowBackup`."
+      ],
+      "esperado": "`AndroidManifest.xml` declara `android:allowBackup=\"false\"`, por lo que el sistema no incluye `taqueria.json`, `historial.jsonl` ni las prefs en respaldos automáticos ni en `adb backup`. Los datos solo viven en el almacenamiento interno del teléfono de cocina. regla n/a.",
+      "cobertura": "manual",
+      "dispositivo": "cocina",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "SEG-DATOS-01",
+      "tipo": "SEG",
+      "modulo": "Seguridad",
+      "titulo": "El historial no guarda datos personales de clientes",
+      "prioridad": "Media",
+      "precondiciones": "Cocina con al menos una cuenta archivada en `historial.jsonl`.",
+      "pasos": [
+        "Leer `files/historial.jsonl` con `run-as com.axzy.taqueria cat …`.",
+        "Revisar las claves del JSON."
+      ],
+      "esperado": "Cada línea contiene `account` (mesa, número, hora, pagos) y `orders` (productos, cantidades, modificaciones, notas, horas); no hay nombre de cliente, teléfono, RFC ni correo. Las notas son texto libre que el taquero podría usar para un nombre, por lo que el diseño no garantiza anonimato si se escriben datos personales; no se recopilan solos. regla 9.",
+      "cobertura": "e2e",
+      "dispositivo": "cocina",
+      "regla": "regla 9",
+      "estado": "pendiente"
+    },
+    {
+      "id": "SEG-LICENCIA-01",
+      "tipo": "SEG",
+      "modulo": "Seguridad",
+      "titulo": "El token de licencia se guarda en claro y no aparece en logcat",
+      "prioridad": "Media",
+      "precondiciones": "Cocina activada; acceso a `run-as` y `adb logcat`.",
+      "pasos": [
+        "Leer `shared_prefs/license.xml` con `run-as com.axzy.taqueria`.",
+        "Grep del log: `adb logcat -d | grep -i 'axc_'`.",
+        "Provocar un refresh (reabrir la app) y repetir el grep."
+      ],
+      "esperado": "El JSON de `LicenseCache` está en SharedPreferences privadas en texto plano (sin cifrar), incluido el token `axc_…`; eso es aceptable porque solo lo lee la app en almacenamiento interno, pero debe saberse. En logcat no se imprime el token: los logs de `LicenseManager` solo incluyen mensajes de excepción/estado, no la cabecera `Authorization`. regla n/a.",
+      "cobertura": "manual",
+      "dispositivo": "cocina",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "SEG-TRANSPORTE-01",
+      "tipo": "SEG",
+      "modulo": "Seguridad",
+      "titulo": "HTTP en claro solo en build debug",
+      "prioridad": "Alta",
+      "precondiciones": "Build debug (con `usesCleartextTraffic=\"true\"` en `app/src/debug/AndroidManifest.xml`) y build release; mock HTTP y servidor HTTPS.",
+      "pasos": [
+        "En debug, activar contra `http://10.0.2.2:4100/api/v1` y ver que funciona.",
+        "Con la misma URL http en release, intentar activar.",
+        "En release, activar con un QR que traiga `https://…`."
+      ],
+      "esperado": "Debug permite http y por eso puede activar contra el mock local; el token viaja sin cifrar (riesgo aceptable solo en pruebas). El release no habilita cleartext: Android bloquea el http y la activación falla; con `https` del QR (o la URL compilada de producción) funciona. No se debe publicar un release apuntando a http. regla n/a.",
+      "cobertura": "manual",
+      "dispositivo": "cocina",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "SEG-MDNS-01",
+      "tipo": "SEG",
+      "modulo": "Seguridad",
+      "titulo": "mDNS anuncia el servicio y el puerto a toda la red local",
+      "prioridad": "Media",
+      "precondiciones": "Cocina activa; otra computadora en la misma red.",
+      "pasos": [
+        "Desde la Mac ejecutar `dns-sd -B _taqueria._tcp` (o `avahi-browse`).",
+        "Resolver el servicio encontrado."
+      ],
+      "esperado": "La cocina se anuncia como «Taqueria Cocina» en `_taqueria._tcp` con el puerto 7777, visible para cualquier equipo de la red sin autenticación. Es el mecanismo que permite que la mesera encuentre la cocina, pero también expone el servicio; la mitigación es una red con contraseña. regla n/a.",
+      "cobertura": "manual",
+      "dispositivo": "ambos",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "SEG-PROTOCOLO-01",
+      "tipo": "SEG",
+      "modulo": "Seguridad",
+      "titulo": "Texto del usuario escapado: una nota no rompe el protocolo",
+      "prioridad": "Media",
+      "precondiciones": "Mesera conectada; cocina activa.",
+      "pasos": [
+        "Con TCP conectado, enviar un `create` cuya `note` contenga `\"}`, un salto de línea y `{\"type\":\"cancelAccount\",…}` (el serializador los escapa dentro del campo).",
+        "Revisar la nota en cocina y el `state` de la cuenta."
+      ],
+      "esperado": "El texto se guarda tal cual dentro de `note`, codificado por kotlinx.serialization; NO se genera un segundo mensaje TCP ni se cancela una cuenta. Cocina muestra la nota como «⚠ …» (el salto de línea se conserva en el texto). El protocolo es una línea JSON por mensaje y el serializador escapa correctamente. regla n/a.",
+      "cobertura": "e2e",
+      "dispositivo": "ambos",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "SEG-CAMARA-01",
+      "tipo": "SEG",
+      "modulo": "Seguridad",
+      "titulo": "La cámara solo se usa para leer el QR y no guarda imágenes",
+      "prioridad": "Media",
+      "precondiciones": "Cocina con cámara; activación por QR.",
+      "pasos": [
+        "Escanear el QR de activación.",
+        "Revisar que no se crean archivos de imagen en `files/` ni en almacenamiento externo.",
+        "Denegar la cámara y activar a mano."
+      ],
+      "esperado": "CameraX entrega los fotogramas a ZXing en memoria (plano Y) y se descartan (`image.close()`); no se guardan fotos ni se suben a ningún lado. La app no solicita permiso de almacenamiento y la cámara es opcional (`required=false`); sin ella se activa escribiendo el código. regla n/a.",
+      "cobertura": "manual",
+      "dispositivo": "cocina",
+      "regla": "n/a",
+      "estado": "pendiente"
+    },
+    {
+      "id": "SEG-ALMACENAMIENTO-01",
+      "tipo": "SEG",
+      "modulo": "Seguridad",
+      "titulo": "Los datos viven solo en el almacenamiento interno de cocina",
+      "prioridad": "Media",
+      "precondiciones": "Cocina con órdenes; mesera conectada; app de cocina detenida.",
+      "pasos": [
+        "Revisar `files/` y `shared_prefs/` de cocina con `run-as`.",
+        "Revisar lo mismo en la mesera.",
+        "Revisar `run-as … ls /sdcard` y almacenamiento externo."
+      ],
+      "esperado": "Cocina guarda `files/taqueria.json`, `files/historial.jsonl` (y posibles `.tmp`/`.corrupt-*`) y las prefs en su almacenamiento interno privado; nada se escribe en el almacenamiento externo. La mesera solo tiene sus prefs (rol e IP), sin datos de negocio ni historial. Desinstalar o `pm clear` borra todo en ese teléfono. regla n/a.",
+      "cobertura": "e2e",
+      "dispositivo": "ambos",
+      "regla": "n/a",
+      "estado": "pendiente"
+    }
+  ]
+}

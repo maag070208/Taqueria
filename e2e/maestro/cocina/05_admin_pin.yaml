@@ -1,0 +1,54 @@
+# El taquero no ve Ventas. El admin crea su PIN, entra, sale, y un PIN equivocado no pasa.
+appId: com.axzy.taqueria
+name: Cocina · PIN de admin
+tags: [cocina, admin]
+---
+- launchApp
+- runFlow: ../comun/cerrar_avisos.yaml
+- tapOn: "Abrir menú"
+- assertVisible: "Taquero"
+# La versión instalada se ve al pie del menú.
+- assertVisible: "Tacomanda v\\d+\\.\\d+\\.\\d+ \\(\\d+\\)"
+- assertNotVisible: "Ventas"
+- assertNotVisible: "Cambiar rol del teléfono"
+- tapOn: "Entrar como admin"
+- assertVisible: "Crea el PIN de admin"
+- tapOn: "PIN nuevo"
+- inputText: "2468"
+- tapOn: "Repite el PIN"
+- inputText: "1357"
+- hideKeyboard
+- tapOn: "Guardar"
+- assertVisible: "Los PIN no coinciden"
+- tapOn: "Repite el PIN"
+- inputText: "2468"
+- hideKeyboard
+- tapOn: "Guardar"
+# Admin: entra directo a Ventas y tiene las opciones de dueño.
+- assertVisible: "Lo vendido y lo cobrado en este teléfono"
+- tapOn: "Abrir menú"
+- assertVisible: "Admin"
+- assertVisible: "Menú y precios"
+- assertVisible: "Cambiar rol del teléfono"
+- tapOn: "Salir de admin"
+- assertVisible: "Cocina · .*"
+# PIN equivocado.
+- tapOn: "Abrir menú"
+- tapOn: "Entrar como admin"
+- assertVisible: "Entrar como admin"
+- tapOn: "PIN"
+- inputText: "0000"
+- hideKeyboard
+- tapOn: "Entrar"
+- assertVisible: "PIN incorrecto · 4 intentos más"
+- tapOn: "PIN"
+- inputText: "2468"
+- hideKeyboard
+- tapOn: "Entrar"
+- assertVisible: "Lo vendido y lo cobrado en este teléfono"
+# Al cerrar y abrir la app vuelve a ser taquero.
+- stopApp
+- launchApp
+- tapOn: "Abrir menú"
+- assertVisible: "Taquero"
+- assertNotVisible: "Ventas"

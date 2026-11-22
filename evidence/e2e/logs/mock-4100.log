@@ -1,0 +1,7 @@
+13:27:43 4100 POST /api/v1/activate auth=- mode=ok
+13:28:26 4100 GET /api/v1/license auth=Bearer axc_mock_ok_123 mode=suspended
+13:28:39 4100 GET /api/v1/license auth=Bearer axc_mock_ok_123 mode=ok
+13:28:44 4100 GET /api/v1/license auth=Bearer axc_mock_ok_123 mode=expired
+13:30:12 4100 POST /api/v1/activate auth=- mode=invalid
+13:30:24 4100 POST /api/v1/activate auth=- mode=error500
+13:30:37 4100 POST /api/v1/activate auth=- mode=badjson

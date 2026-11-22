@@ -1,0 +1,14 @@
+# El taquero marca Cabeza como agotada desde Disponibilidad (sin poder editar precios).
+appId: com.axzy.taqueria
+name: Cocina · agotar producto
+tags: [cocina, menu]
+---
+- launchApp
+- runFlow: ../comun/cerrar_avisos.yaml
+- tapOn: "Abrir menú"
+- assertVisible: "Taquero"
+- tapOn: "Disponibilidad"
+- assertVisible: "Todo disponible"
+- assertNotVisible: "\\+ Agregar producto"
+- tapOn: "Disponible Tacos Cabeza"
+- assertVisible: "1 agotado"

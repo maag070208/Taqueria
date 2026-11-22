@@ -35,10 +35,21 @@ data class LicenseResponse(
     val nextDueDate: String? = null,
     val validUntil: String,
     val serverTime: String,
+    /** Lo que incluye el plan; una Central sin este campo = ilimitado. */
+    val limits: PlanLimits = PlanLimits(),
+    val latestApp: LatestApp? = null,
 )
 
 @Serializable
 data class NameRef(val name: String)
+
+/** null = ilimitado. */
+@Serializable
+data class PlanLimits(val kitchens: Int? = null, val waiters: Int? = null)
+
+/** Última versión que publicó el proveedor en la Central. */
+@Serializable
+data class LatestApp(val versionCode: Long, val versionName: String, val url: String? = null, val notes: String? = null)
 
 // ---------------- Alta del dispositivo (POST /activate) ----------------
 
@@ -72,6 +83,11 @@ data class LicenseCache(
     /** Hora más reciente que se ha visto: atrasar el reloj del teléfono no alarga la licencia. */
     val maxSeenMs: Long = 0,
     val lastCheckMs: Long = 0,
+    /** Meseras a la vez que incluye el plan (null = ilimitadas). */
+    val waiterLimit: Int? = null,
+    /** Teléfonos de cocina que incluye el plan, contando la principal (null = ilimitados). */
+    val kitchenLimit: Int? = null,
+    val latestApp: LatestApp? = null,
 ) {
     fun effectiveNow(phoneNowMs: Long) = maxOf(phoneNowMs + clockOffsetMs, maxSeenMs)
 
@@ -86,6 +102,9 @@ data class LicenseCache(
             clockOffsetMs = server - phoneNowMs,
             maxSeenMs = maxOf(maxSeenMs, server),
             lastCheckMs = phoneNowMs,
+            waiterLimit = r.limits.waiters,
+            kitchenLimit = r.limits.kitchens,
+            latestApp = r.latestApp,
         )
     }
 }
@@ -125,7 +144,7 @@ fun evaluateLicense(cache: LicenseCache?, phoneNowMs: Long): LicenseState {
  * La dirección del servidor puede venir dentro del QR de activación; cuando
  * viene, se guarda en prefs y manda sobre [buildApiUrl] en `activate()` y `refresh()`.
  */
-class LicenseManager(context: Context, private val buildApiUrl: String) {
+class LicenseManager(context: Context, private val buildApiUrl: String, private val appVersion: String = "") {
     private val tag = "License"
     private val appContext = context.applicationContext
     private val prefs = appContext.getSharedPreferences("license", Context.MODE_PRIVATE)
@@ -133,10 +152,20 @@ class LicenseManager(context: Context, private val buildApiUrl: String) {
     private var cache: LicenseCache? = load()
     private var scope: CoroutineScope? = null
     private var callback: ConnectivityManager.NetworkCallback? = null
+    private val installedVersionCode = appContext.packageManager.getPackageInfo(appContext.packageName, 0).longVersionCode
 
     var state by mutableStateOf(evaluateLicense(cache, System.currentTimeMillis()))
         private set
     var checking by mutableStateOf(false)
+        private set
+
+    /** Meseras a la vez que permite el plan; lo lee el servidor de cocina (null = ilimitadas). */
+    val waiterLimit: Int? get() = cache?.takeIf { !it.revoked }?.waiterLimit
+    /** Pantallas de cocina extra que acepta la principal: las cocinas del plan menos ella (null = ilimitadas). */
+    val screenLimit: Int? get() = cache?.takeIf { !it.revoked }?.kitchenLimit?.let { maxOf(0, it - 1) }
+
+    /** Versión nueva publicada en la Central, si es mayor que la instalada. */
+    var update by mutableStateOf(cache?.latestApp?.takeIf { it.versionCode > installedVersionCode })
         private set
 
     /** Lo lee el servidor de cocina desde sus hilos. */
@@ -196,6 +225,10 @@ class LicenseManager(context: Context, private val buildApiUrl: String) {
         if (base.isBlank()) return NO_SERVER
         return when (val r = postActivate(base, token)) {
             is Fetch.Ok -> {
+                // El servidor que aceptó el código es el que se sigue consultando, aunque
+                // después se instale una versión compilada contra otro: si no, ese otro no
+                // conoce el código, responde 401 y la cocina se bloquea como revocada.
+                prefs.edit().putString(KEY_API, base).apply()
                 save(LicenseCache(token).withResponse(r.body, System.currentTimeMillis()))
                 null
             }
@@ -208,10 +241,21 @@ class LicenseManager(context: Context, private val buildApiUrl: String) {
     suspend fun refresh(): String? {
         val current = cache ?: return null
         return when (val r = fetch(current.token)) {
-            is Fetch.Ok -> { save(current.withResponse(r.body, System.currentTimeMillis())); null }
+            is Fetch.Ok -> {
+                // Licencias activadas antes de guardar el servidor: se fija el que respondió.
+                if (!prefs.contains(KEY_API)) prefs.edit().putString(KEY_API, resolveApiUrl()).apply()
+                save(current.withResponse(r.body, System.currentTimeMillis()))
+                null
+            }
             Fetch.Unauthorized -> { save(current.copy(revoked = true, lastCheckMs = System.currentTimeMillis())); null }
             is Fetch.Failed -> r.message
         }
+    }
+
+    /** Servidor y código para reportar a la Central (ventas). Null sin activar, revocada o sin servidor. */
+    fun credentials(): CentralCredentials? {
+        val c = cache?.takeIf { !it.revoked } ?: return null
+        return resolveApiUrl().takeIf { it.isNotBlank() }?.let { CentralCredentials(it, c.token) }
     }
 
     /** Quita el código guardado para escribir otro. Conserva el servidor que trajo el QR. */
@@ -251,6 +295,7 @@ class LicenseManager(context: Context, private val buildApiUrl: String) {
                     conn.readTimeout = TIMEOUT_MS
                     conn.setRequestProperty("Authorization", "Bearer $token")
                     conn.setRequestProperty("Accept", "application/json")
+                    if (appVersion.isNotEmpty()) conn.setRequestProperty("X-App-Version", appVersion)
                     when (val code = conn.responseCode) {
                         200 -> Fetch.Ok(AppJson.decodeFromString<LicenseResponse>(conn.inputStream.bufferedReader().use { it.readText() }))
                         401 -> Fetch.Unauthorized
@@ -322,8 +367,9 @@ class LicenseManager(context: Context, private val buildApiUrl: String) {
     private fun publish() {
         val next = evaluateLicense(cache, System.currentTimeMillis())
         locked = next !is LicenseState.Active
+        val newer = cache?.latestApp?.takeIf { it.versionCode > installedVersionCode }
         // El estado de Compose se escribe desde el hilo principal.
-        android.os.Handler(android.os.Looper.getMainLooper()).post { state = next }
+        android.os.Handler(android.os.Looper.getMainLooper()).post { state = next; update = newer }
     }
 
     private fun load(): LicenseCache? = prefs.getString(KEY, null)?.let {

@@ -1,5 +1,10 @@
 package com.axzy.taqueria.ui
 
+import androidx.annotation.DrawableRes
+import androidx.compose.foundation.Image
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.res.painterResource
+import com.axzy.taqueria.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -33,12 +38,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.PlatformTextStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.LineHeightStyle
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.axzy.taqueria.App
 import com.axzy.taqueria.Role
 import kotlinx.coroutines.delay
 
@@ -132,26 +145,54 @@ fun SectionTitle(text: String, modifier: Modifier = Modifier) {
     Text(text, fontSize = 18.sp, fontWeight = FontWeight.Bold, modifier = modifier)
 }
 
-/** Botón cuadrado de barra superior (ícono o texto corto). */
+/**
+ * Texto centrado de verdad dentro de su caja: sin el relleno de fuente de Android y con la
+ * altura de línea recortada arriba y abajo. Sin esto los emojis y símbolos (←, −, +) quedan
+ * corridos hacia abajo o a un lado en botones y círculos.
+ */
+val centeredText = TextStyle(
+    platformStyle = PlatformTextStyle(includeFontPadding = false),
+    lineHeightStyle = LineHeightStyle(LineHeightStyle.Alignment.Center, LineHeightStyle.Trim.Both),
+)
+
+/** Ícono o símbolo de una sola línea, centrado en su caja. */
 @Composable
-fun SquareButton(label: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun Glyph(text: String, size: TextUnit, modifier: Modifier = Modifier, color: Color = Color.Unspecified, weight: FontWeight? = null) {
+    Text(
+        text, modifier = modifier, fontSize = size, lineHeight = size, color = color, fontWeight = weight,
+        textAlign = TextAlign.Center, maxLines = 1, style = centeredText,
+    )
+}
+
+/** Ícono de acción de la app (res/drawable/ic_*, generados por design/iconos/generar_ui.py), pintado del color dado. */
+@Composable
+fun UiIcon(@DrawableRes icon: Int, size: Dp = 22.dp, tint: Color = Palette.text, modifier: Modifier = Modifier) {
+    Image(painterResource(icon), contentDescription = null, colorFilter = ColorFilter.tint(tint), modifier = modifier.size(size))
+}
+
+/** Botón cuadrado de barra superior. */
+@Composable
+fun SquareButton(@DrawableRes icon: Int, onClick: () -> Unit, modifier: Modifier = Modifier, description: String? = null) {
     Box(
-        modifier.size(44.dp).background(Palette.card, Ui.smallShape).border(1.dp, Palette.line, Ui.smallShape).clickable(onClick = onClick),
+        modifier.size(44.dp).background(Palette.card, Ui.smallShape).border(1.dp, Palette.line, Ui.smallShape)
+            .clickable(onClick = onClick, onClickLabel = description)
+            .then(if (description != null) Modifier.semantics { contentDescription = description } else Modifier),
         contentAlignment = Alignment.Center,
-    ) { Text(label, fontSize = 18.sp) }
+    ) { UiIcon(icon) }
 }
 
 @Composable
 fun TopBar(
     title: String, subtitle: String? = null, subtitleColor: Color = Palette.muted,
-    onBack: (() -> Unit)? = null, actions: @Composable RowScope.() -> Unit = {},
+    onBack: (() -> Unit)? = null, onMenu: (() -> Unit)? = null, actions: @Composable RowScope.() -> Unit = {},
 ) {
     Row(
         Modifier.fillMaxWidth().padding(horizontal = Ui.pad, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        if (onBack != null) SquareButton("←", onClick = onBack, modifier = Modifier.padding(end = 4.dp))
+        if (onBack != null) SquareButton(R.drawable.ic_back, onClick = onBack, modifier = Modifier.padding(end = 4.dp), description = "Regresar")
+        if (onMenu != null) SquareButton(R.drawable.ic_menu, onClick = onMenu, modifier = Modifier.padding(end = 4.dp), description = "Abrir menú")
         Column(Modifier.weight(1f)) {
             if (subtitle != null) Text(subtitle, color = subtitleColor, fontSize = 13.sp, maxLines = 1)
             Text(title, fontSize = 24.sp, fontWeight = FontWeight.Bold, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
@@ -160,11 +201,11 @@ fun TopBar(
     }
 }
 
-/** Ícono del producto dentro de un círculo verde claro, como foto del platillo. */
+/** Ilustración del set (res/drawable-nodpi/ico_*) dentro de un círculo verde claro. */
 @Composable
-fun FoodIcon(emoji: String, size: Dp) {
+fun Illustration(@DrawableRes art: Int, size: Dp) {
     Box(Modifier.size(size).background(Palette.soft, RoundedCornerShape(50)), contentAlignment = Alignment.Center) {
-        Text(emoji, fontSize = (size.value * 0.5f).sp)
+        Image(painterResource(art), contentDescription = null, modifier = Modifier.size(size * 0.78f))
     }
 }
 
@@ -174,28 +215,42 @@ fun RoleScreen(onPick: (Role) -> Unit) {
         Modifier.fillMaxSize().safeDrawingPadding().padding(Ui.pad),
         verticalArrangement = Arrangement.Center,
     ) {
-        Text("🌮", fontSize = 56.sp)
+        Image(painterResource(R.drawable.ico_taco_generico), contentDescription = null, modifier = Modifier.size(72.dp))
         Text("Tacomanda", fontSize = 34.sp, fontWeight = FontWeight.Black, modifier = Modifier.padding(top = 8.dp))
         Text("¿Qué hará este teléfono?", color = Palette.muted, fontSize = 17.sp, modifier = Modifier.padding(top = 4.dp, bottom = 24.dp))
-        GridRow(listOf(Role.KITCHEN, Role.WAITER), 2) { role ->
-            val (icon, title, body) = when (role) {
-                Role.KITCHEN -> Triple("👨‍🍳", "Cocina", "Ve las órdenes y su tiempo. Guarda el menú.")
-                Role.WAITER -> Triple("📝", "Mesero", "Toma las órdenes de las mesas.")
-            }
-            Column(
-                Modifier.fillMaxWidth().aspectRatio(0.8f).background(Palette.card, Ui.shape)
-                    .border(1.dp, Palette.line, Ui.shape).clickable { onPick(role) }.padding(Ui.pad),
-            ) {
-                FoodIcon(icon, 64.dp)
-                Spacer(Modifier.weight(1f))
-                Text(title, fontSize = 22.sp, fontWeight = FontWeight.Bold)
-                Text(body, color = Palette.muted, fontSize = 14.sp, minLines = 3, maxLines = 3, modifier = Modifier.padding(top = 4.dp))
+        // Una tarjeta por renglón: con tres roles, la cuadrícula cortaba el texto en teléfonos.
+        Column(verticalArrangement = Arrangement.spacedBy(Ui.gap)) {
+            listOf(Role.KITCHEN, Role.WAITER, Role.SCREEN).forEach { role ->
+                val (icon, title, body) = when (role) {
+                    Role.KITCHEN -> Triple(R.drawable.ico_rol_taquero, "Cocina", "La cocina principal: recibe las órdenes. El admin entra con PIN a ventas y menú.")
+                    Role.WAITER -> Triple(R.drawable.ico_rol_mesero, "Mesero", "Toma las órdenes de las mesas.")
+                    Role.SCREEN -> Triple(R.drawable.ico_rol_taquero, "Pantalla de cocina", "Otra pantalla conectada a la cocina: ve todas las órdenes o solo su estación.")
+                }
+                Row(
+                    Modifier.fillMaxWidth().background(Palette.card, Ui.shape)
+                        .border(1.dp, Palette.line, Ui.shape).clickable { onPick(role) }.padding(Ui.pad),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Illustration(icon, 56.dp)
+                    Column(Modifier.padding(start = Ui.pad)) {
+                        Text(title, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                        Text(body, color = Palette.muted, fontSize = 14.sp, modifier = Modifier.padding(top = 2.dp))
+                    }
+                }
             }
         }
         Text(
-            "Cocina y mesero deben estar en el mismo WiFi o en el hotspot del teléfono de cocina. No se necesita internet.",
+            "Todos deben estar en el mismo WiFi o en la zona del teléfono de cocina. No se necesita internet.",
             color = Palette.muted, fontSize = 13.sp, textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth().padding(top = 24.dp),
         )
+        VersionText(Modifier.fillMaxWidth().padding(top = 12.dp), TextAlign.Center)
     }
+}
+
+/** "Tacomanda v1.1.0 (4)", para saber qué versión tiene cada teléfono. */
+@Composable
+fun VersionText(modifier: Modifier = Modifier, align: TextAlign? = null) {
+    val app = LocalContext.current.applicationContext as? App ?: return
+    Text("Tacomanda v${app.versionLabel}", color = Palette.muted, fontSize = 12.sp, textAlign = align, modifier = modifier)
 }

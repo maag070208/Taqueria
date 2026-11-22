@@ -1,0 +1,343 @@
+{
+ "products": [
+  {
+   "id": "b4c9f18e-ea49-473e-9aac-bf0b4a2f493f",
+   "name": "Asada",
+   "priceCents": 2000,
+   "category": "Tacos",
+   "active": true,
+   "emoji": "",
+   "modifierGroupIds": [
+    "b05b0429-3786-4a4e-8055-4dd228128b8c",
+    "f3f4ff39-c567-4517-bc2f-ac0d890ba278",
+    "9a38c6ec-86af-4e56-af30-f4c7326579e9",
+    "d634babe-bf8f-4cb6-a315-eef22395e42a"
+   ]
+  },
+  {
+   "id": "2593e54d-8cc0-4ed1-adf0-48ca6e0fbedb",
+   "name": "Pastor",
+   "priceCents": 1800,
+   "category": "Tacos",
+   "active": true,
+   "emoji": "",
+   "modifierGroupIds": [
+    "b05b0429-3786-4a4e-8055-4dd228128b8c",
+    "f3f4ff39-c567-4517-bc2f-ac0d890ba278",
+    "9a38c6ec-86af-4e56-af30-f4c7326579e9",
+    "d634babe-bf8f-4cb6-a315-eef22395e42a"
+   ]
+  },
+  {
+   "id": "d15751be-f629-4289-9770-5169f4ff3d84",
+   "name": "Adobada",
+   "priceCents": 1800,
+   "category": "Tacos",
+   "active": true,
+   "emoji": "",
+   "modifierGroupIds": [
+    "b05b0429-3786-4a4e-8055-4dd228128b8c",
+    "f3f4ff39-c567-4517-bc2f-ac0d890ba278",
+    "9a38c6ec-86af-4e56-af30-f4c7326579e9",
+    "d634babe-bf8f-4cb6-a315-eef22395e42a"
+   ]
+  },
+  {
+   "id": "d5986c89-363a-412b-88e7-b2320b901697",
+   "name": "Chorizo",
+   "priceCents": 1800,
+   "category": "Tacos",
+   "active": true,
+   "emoji": "",
+   "modifierGroupIds": [
+    "b05b0429-3786-4a4e-8055-4dd228128b8c",
+    "f3f4ff39-c567-4517-bc2f-ac0d890ba278",
+    "9a38c6ec-86af-4e56-af30-f4c7326579e9",
+    "d634babe-bf8f-4cb6-a315-eef22395e42a"
+   ]
+  },
+  {
+   "id": "580ca9fb-4d86-404a-94da-85bcd2bbc688",
+   "name": "Suadero",
+   "priceCents": 1800,
+   "category": "Tacos",
+   "active": true,
+   "emoji": "",
+   "modifierGroupIds": [
+    "b05b0429-3786-4a4e-8055-4dd228128b8c",
+    "f3f4ff39-c567-4517-bc2f-ac0d890ba278",
+    "9a38c6ec-86af-4e56-af30-f4c7326579e9",
+    "d634babe-bf8f-4cb6-a315-eef22395e42a"
+   ]
+  },
+  {
+   "id": "9433f221-079e-4409-aebc-417e720fadb4",
+   "name": "Bistec",
+   "priceCents": 2000,
+   "category": "Tacos",
+   "active": true,
+   "emoji": "",
+   "modifierGroupIds": [
+    "b05b0429-3786-4a4e-8055-4dd228128b8c",
+    "f3f4ff39-c567-4517-bc2f-ac0d890ba278",
+    "9a38c6ec-86af-4e56-af30-f4c7326579e9",
+    "d634babe-bf8f-4cb6-a315-eef22395e42a"
+   ]
+  },
+  {
+   "id": "976677df-3cd4-44c0-b1f7-c0a8b0f87e5b",
+   "name": "Campechano",
+   "priceCents": 2000,
+   "category": "Tacos",
+   "active": true,
+   "emoji": "",
+   "modifierGroupIds": [
+    "b05b0429-3786-4a4e-8055-4dd228128b8c",
+    "f3f4ff39-c567-4517-bc2f-ac0d890ba278",
+    "9a38c6ec-86af-4e56-af30-f4c7326579e9",
+    "d634babe-bf8f-4cb6-a315-eef22395e42a"
+   ]
+  },
+  {
+   "id": "12c98a93-fd8c-421e-b5f3-6a1380c14c69",
+   "name": "Longaniza",
+   "priceCents": 1800,
+   "category": "Tacos",
+   "active": true,
+   "emoji": "",
+   "modifierGroupIds": [
+    "b05b0429-3786-4a4e-8055-4dd228128b8c",
+    "f3f4ff39-c567-4517-bc2f-ac0d890ba278",
+    "9a38c6ec-86af-4e56-af30-f4c7326579e9",
+    "d634babe-bf8f-4cb6-a315-eef22395e42a"
+   ]
+  },
+  {
+   "id": "b82b47da-665c-4ea6-b2b3-80ba4fe4877c",
+   "name": "Tripa",
+   "priceCents": 2200,
+   "category": "Tacos",
+   "active": true,
+   "emoji": "",
+   "modifierGroupIds": [
+    "b05b0429-3786-4a4e-8055-4dd228128b8c",
+    "f3f4ff39-c567-4517-bc2f-ac0d890ba278",
+    "9a38c6ec-86af-4e56-af30-f4c7326579e9",
+    "d634babe-bf8f-4cb6-a315-eef22395e42a"
+   ]
+  },
+  {
+   "id": "56fcca5c-6fd3-4387-ba7d-571eaee0b054",
+   "name": "Cabeza",
+   "priceCents": 2000,
+   "category": "Tacos",
+   "active": true,
+   "emoji": "",
+   "modifierGroupIds": [
+    "b05b0429-3786-4a4e-8055-4dd228128b8c",
+    "f3f4ff39-c567-4517-bc2f-ac0d890ba278",
+    "9a38c6ec-86af-4e56-af30-f4c7326579e9",
+    "d634babe-bf8f-4cb6-a315-eef22395e42a"
+   ]
+  },
+  {
+   "id": "09414370-6d2b-4a7c-ae9c-2e03ddcd539c",
+   "name": "Quesadilla",
+   "priceCents": 4500,
+   "category": "Especiales",
+   "active": true,
+   "emoji": "🧀",
+   "modifierGroupIds": [
+    "b05b0429-3786-4a4e-8055-4dd228128b8c",
+    "f3f4ff39-c567-4517-bc2f-ac0d890ba278"
+   ]
+  },
+  {
+   "id": "02cba27a-cd5f-4f9b-85f3-b4f815b609c2",
+   "name": "Gringa",
+   "priceCents": 5500,
+   "category": "Especiales",
+   "active": true,
+   "emoji": "🫓",
+   "modifierGroupIds": [
+    "b05b0429-3786-4a4e-8055-4dd228128b8c",
+    "f3f4ff39-c567-4517-bc2f-ac0d890ba278"
+   ]
+  },
+  {
+   "id": "456550a3-0cb2-4f70-9728-8177caca380b",
+   "name": "Refresco",
+   "priceCents": 3000,
+   "category": "Bebidas",
+   "active": true,
+   "emoji": "🥤",
+   "modifierGroupIds": [
+    "82721738-0be4-416f-8b40-2ac56b9e81e9"
+   ]
+  },
+  {
+   "id": "1b924d7e-ebde-40de-9c79-8c2cd76fefdc",
+   "name": "Agua de horchata",
+   "priceCents": 3000,
+   "category": "Bebidas",
+   "active": true,
+   "emoji": "🥛",
+   "modifierGroupIds": [
+    "82721738-0be4-416f-8b40-2ac56b9e81e9"
+   ]
+  },
+  {
+   "id": "d45223b8-199c-462c-975f-7d05c43837e7",
+   "name": "Agua de jamaica",
+   "priceCents": 3000,
+   "category": "Bebidas",
+   "active": true,
+   "emoji": "🍹",
+   "modifierGroupIds": [
+    "82721738-0be4-416f-8b40-2ac56b9e81e9"
+   ]
+  }
+ ],
+ "modifierGroups": [
+  {
+   "id": "b05b0429-3786-4a4e-8055-4dd228128b8c",
+   "name": "Salsa",
+   "options": [
+    "Con salsa",
+    "Sin salsa",
+    "Salsa aparte"
+   ],
+   "exclusive": true
+  },
+  {
+   "id": "f3f4ff39-c567-4517-bc2f-ac0d890ba278",
+   "name": "Cebolla",
+   "options": [
+    "Con cebolla",
+    "Sin cebolla",
+    "Cebolla aparte"
+   ],
+   "exclusive": true
+  },
+  {
+   "id": "9a38c6ec-86af-4e56-af30-f4c7326579e9",
+   "name": "Cilantro",
+   "options": [
+    "Con cilantro",
+    "Sin cilantro"
+   ],
+   "exclusive": true
+  },
+  {
+   "id": "d634babe-bf8f-4cb6-a315-eef22395e42a",
+   "name": "Extras",
+   "options": [
+    "Bien dorado",
+    "Con queso",
+    "Doble tortilla"
+   ],
+   "exclusive": false
+  },
+  {
+   "id": "82721738-0be4-416f-8b40-2ac56b9e81e9",
+   "name": "Hielo",
+   "options": [
+    "Con hielo",
+    "Sin hielo"
+   ],
+   "exclusive": true
+  }
+ ],
+ "accounts": [
+  {
+   "id": "86a8887f-0b09-40f2-839f-1693ef29da39",
+   "table": "4",
+   "number": 1,
+   "createdAt": 1795292683595,
+   "payments": [],
+   "cancelledAt": null,
+   "closedAt": null
+  },
+  {
+   "id": "bfb14c7a-1607-4f08-b9a6-5eb6255bb382",
+   "table": "4",
+   "number": 2,
+   "createdAt": 1795292765509,
+   "payments": [],
+   "cancelledAt": null,
+   "closedAt": null
+  }
+ ],
+ "orders": [
+  {
+   "id": "7117d529-89aa-4db8-a948-c4249fc46b1c",
+   "number": 1,
+   "accountId": "86a8887f-0b09-40f2-839f-1693ef29da39",
+   "table": "4",
+   "accountNumber": 1,
+   "lines": [
+    {
+     "productId": "b4c9f18e-ea49-473e-9aac-bf0b4a2f493f",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 2,
+     "mods": [
+      "Con cebolla",
+      "Bien dorado",
+      "Con queso"
+     ],
+     "note": ""
+    },
+    {
+     "productId": "b4c9f18e-ea49-473e-9aac-bf0b4a2f493f",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 2,
+     "mods": [
+      "Sin cebolla"
+     ],
+     "note": ""
+    }
+   ],
+   "status": "PENDING",
+   "createdAt": 1795292683595,
+   "deliveredAt": null,
+   "cancelledAt": null,
+   "cancelledByAccount": false,
+   "deliveredByPayment": null,
+   "revisions": [],
+   "editedAt": null,
+   "clientKey": "d20758e6-af7d-4cb2-9f3c-f0bb752338e5"
+  },
+  {
+   "id": "21f72c8f-7976-4e09-b3c7-1bc9e74891f2",
+   "number": 2,
+   "accountId": "bfb14c7a-1607-4f08-b9a6-5eb6255bb382",
+   "table": "4",
+   "accountNumber": 2,
+   "lines": [
+    {
+     "productId": "456550a3-0cb2-4f70-9728-8177caca380b",
+     "name": "Refresco",
+     "priceCents": 3000,
+     "qty": 1,
+     "mods": [
+      "Con hielo"
+     ],
+     "note": ""
+    }
+   ],
+   "status": "PENDING",
+   "createdAt": 1795292765509,
+   "deliveredAt": null,
+   "cancelledAt": null,
+   "cancelledByAccount": false,
+   "deliveredByPayment": null,
+   "revisions": [],
+   "editedAt": null,
+   "clientKey": "07f9db81-bec8-4d71-b58f-e864bfa721d2"
+  }
+ ],
+ "counterDate": "2026-11-21",
+ "counterLast": 2
+}

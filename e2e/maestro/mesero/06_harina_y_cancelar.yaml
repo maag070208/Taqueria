@@ -1,0 +1,35 @@
+# El mesero ya ve la harina a $90, pide una y luego cancela la cuenta deslizando; Deshacer la regresa.
+appId: com.axzy.taqueria
+name: Mesero · harina nueva y cancelar cuenta
+tags: [mesero, orden, cuenta]
+---
+- launchApp
+- runFlow: ../comun/cerrar_avisos.yaml
+- extendedWaitUntil:
+    visible: ".*Conectado a cocina"
+    timeout: 20000
+- tapOn: "\\+ Nueva orden"
+- tapOn: "8"
+- tapOn: "Tacos.*"
+- tapOn: "Asada.*"
+- assertVisible: "Harina \\$90"
+- tapOn: "Harina \\$90"
+- tapOn: "Listo · 1 · \\$90.00"
+- tapOn: "Revisar · 1 · \\$90.00"
+- assertVisible: "Taco Asada · Harina"
+- tapOn: "Enviar a cocina · \\$90.00"
+- extendedWaitUntil:
+    visible: ".*Debe \\$90.00.*"
+    timeout: 10000
+# Cancelar deslizando la cuenta a la izquierda (desde el importe, a la derecha).
+- swipe:
+    from:
+      text: ".*Debe \\$90.00.*"
+    direction: LEFT
+    duration: 600
+- assertVisible: "Mesa 8 · Cuenta 1 cancelada"
+- tapOn: "Deshacer"
+- extendedWaitUntil:
+    visible: ".*Debe \\$90.00.*"
+    timeout: 10000
+- assertVisible: "En cocina.*"

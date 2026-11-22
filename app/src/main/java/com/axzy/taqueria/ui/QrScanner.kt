@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.LifecycleOwner
+import com.axzy.taqueria.R
 import com.axzy.taqueria.Alerts
 import com.google.zxing.BinaryBitmap
 import com.google.zxing.PlanarYUVLuminanceSource
@@ -69,7 +70,13 @@ import java.util.concurrent.atomic.AtomicBoolean
  * el código a mano ([onCancel]).
  */
 @Composable
-fun QrScannerScreen(onDetected: (String) -> Unit, onCancel: () -> Unit) {
+fun QrScannerScreen(
+    onDetected: (String) -> Unit,
+    onCancel: () -> Unit,
+    title: String = "Escanear QR de la Central",
+    hint: String = "Apunta la cámara al QR que muestra la Central.\nEl QR ya trae la dirección del servidor.",
+    fallbackLabel: String = "Escribir el código a mano",
+) {
     val context = LocalContext.current
     var granted by remember { mutableStateOf(context.hasCameraPermission()) }
     var asked by remember { mutableStateOf(false) }
@@ -84,48 +91,48 @@ fun QrScannerScreen(onDetected: (String) -> Unit, onCancel: () -> Unit) {
         when {
             granted -> {
                 CameraPreview(onDetected = onDetected)
-                ScannerFrame(onCancel = onCancel)
+                ScannerFrame(title = title, hint = hint, onCancel = onCancel)
             }
-            asked -> CameraPermissionDenied(onCancel = onCancel, onOpenSettings = context::openAppSettings)
+            asked -> CameraPermissionDenied(fallbackLabel = fallbackLabel, onCancel = onCancel, onOpenSettings = context::openAppSettings)
             else -> Column(
                 Modifier.fillMaxSize().safeDrawingPadding().padding(Ui.pad),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text("Pidiendo permiso de cámara…", color = Color.White, fontSize = 16.sp)
-                TextButton(onClick = onCancel) { Text("Escribir el código a mano", color = Color.White) }
+                TextButton(onClick = onCancel) { Text(fallbackLabel, color = Color.White) }
             }
         }
     }
 }
 
 @Composable
-private fun ScannerFrame(onCancel: () -> Unit) {
+private fun ScannerFrame(title: String, hint: String, onCancel: () -> Unit) {
     Column(
         Modifier.fillMaxSize().safeDrawingPadding().padding(Ui.pad),
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-            Text("Escanear QR de la Central", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            Text(title, color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
             TextButton(onClick = onCancel) { Text("Cerrar", color = Color.White) }
         }
         Box(Modifier.size(260.dp).border(3.dp, Palette.primary, RoundedCornerShape(24.dp)))
         Text(
-            "Apunta la cámara al QR que muestra la Central.\nEl QR ya trae la dirección del servidor.",
+            hint,
             color = Color.White.copy(alpha = 0.85f), fontSize = 14.sp, textAlign = TextAlign.Center, modifier = Modifier.padding(bottom = 8.dp),
         )
     }
 }
 
 @Composable
-private fun CameraPermissionDenied(onCancel: () -> Unit, onOpenSettings: () -> Unit) {
+private fun CameraPermissionDenied(fallbackLabel: String, onCancel: () -> Unit, onOpenSettings: () -> Unit) {
     Column(
         Modifier.fillMaxSize().safeDrawingPadding().padding(Ui.pad),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text("📷", fontSize = 52.sp)
+        UiIcon(R.drawable.ic_camera, 56.dp, Color.White)
         Text(
             "Sin permiso de cámara", fontSize = 24.sp, fontWeight = FontWeight.Black,
             color = Color.White, modifier = Modifier.padding(top = 8.dp),
@@ -135,7 +142,7 @@ private fun CameraPermissionDenied(onCancel: () -> Unit, onOpenSettings: () -> U
             color = Color.White.copy(alpha = 0.8f), fontSize = 15.sp, textAlign = TextAlign.Center,
             modifier = Modifier.padding(top = 4.dp, bottom = 8.dp),
         )
-        ActionButton("Escribir el código a mano", Palette.primary, Color.White, Modifier.fillMaxWidth()) { onCancel() }
+        ActionButton(fallbackLabel, Palette.primary, Color.White, Modifier.fillMaxWidth()) { onCancel() }
         TextButton(onClick = onOpenSettings) { Text("Abrir ajustes de la app", color = Color.White) }
     }
 }

@@ -1,0 +1,169 @@
+{
+  "generado": "2026-11-21T13:31:05-0800",
+  "casos": [
+    {
+      "id": "LIC-LICENCIA-08",
+      "titulo": "Pantalla de bloqueo por suspensión con «Reintentar»",
+      "tipo": "LIC",
+      "dispositivo": "cocina",
+      "esperado": "La cocina muestra «Cuenta suspendida» con Reintentar y no opera",
+      "obtenido": "Se mostró «Cuenta suspendida» y Reintentar",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/51-licencia-suspendida.png"
+      ],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "LIC-LICENCIA-11",
+      "titulo": "Con la cocina bloqueada, el servidor rechaza a las meseras",
+      "tipo": "LIC",
+      "dispositivo": "cocina",
+      "esperado": "Un create por TCP recibe el mensaje de cuenta suspendida",
+      "obtenido": "Respuesta del servidor: 'La cuenta de la taquería está suspendida. Revisa el teléfono de cocina.'",
+      "estado": "PASA",
+      "evidencia": [],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "LIC-LICENCIA-12",
+      "titulo": "Al reactivar, las órdenes y el menú siguen intactos",
+      "tipo": "LIC",
+      "dispositivo": "cocina",
+      "esperado": "Tras Reintentar con licencia activa vuelve el monitor y conserva las órdenes",
+      "obtenido": "Monitor de vuelta: True; órdenes conservadas: 1",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/52-licencia-reactivada.png"
+      ],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "LIC-LICENCIA-09",
+      "titulo": "Pantalla de bloqueo por vencimiento sin conexión",
+      "tipo": "LIC",
+      "dispositivo": "cocina",
+      "esperado": "La cocina muestra «Falta confirmar la cuenta»",
+      "obtenido": "Se mostró el bloqueo por vencimiento",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/53-licencia-vencida.png"
+      ],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "LIC-LICENCIA-10",
+      "titulo": "Código revocado (401 en GET /license) y «Escribir otro código»",
+      "tipo": "LIC",
+      "dispositivo": "cocina",
+      "esperado": "La cocina muestra «Teléfono no autorizado» y el botón «Escribir otro código»",
+      "obtenido": "Revocada: True; botón presente: True",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/54-licencia-revocada.png"
+      ],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "LIC-LICENCIA-14",
+      "titulo": "«Escribir otro código» conserva la URL del servidor del QR",
+      "tipo": "LIC",
+      "dispositivo": "cocina",
+      "esperado": "Tras revocar y pulsar Escribir otro código, la activación usa apiBase guardada (:4101)",
+      "obtenido": "Pantalla de activación: True; monitor: True; petición vista en mock :4101: True",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/55-licencia-url-conservada.png"
+      ],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "BOR-LICENCIA-02",
+      "titulo": "Aviso de vencimiento justo en los 3 días",
+      "tipo": "BOR",
+      "dispositivo": "cocina",
+      "esperado": "Con validUntil a 2 días la cocina muestra el aviso de conectar a internet",
+      "obtenido": "Se mostró el aviso de vencimiento próximo",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/56-licencia-por-vencer.png"
+      ],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "ERR-LICENCIA-01",
+      "titulo": "Activación con código inválido o revocado (401)",
+      "tipo": "ERR",
+      "dispositivo": "cocina",
+      "esperado": "Error «Código inválido o revocado. Pide uno nuevo a tu proveedor.»",
+      "obtenido": "Mensaje mostrado",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/57-error-activacion-401.png"
+      ],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "ERR-LICENCIA-03",
+      "titulo": "El servidor de licencias responde 500",
+      "tipo": "ERR",
+      "dispositivo": "cocina",
+      "esperado": "Mensaje «El servidor respondió 500. Intenta más tarde.»",
+      "obtenido": "Mensaje mostrado",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/58-error-activacion-500.png"
+      ],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "ERR-LICENCIA-04",
+      "titulo": "Respuesta de licencia que no es JSON válido",
+      "tipo": "ERR",
+      "dispositivo": "cocina",
+      "esperado": "Mensaje «No se pudo leer la respuesta del servidor.»",
+      "obtenido": "Mensaje mostrado",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/59-error-activacion-json.png"
+      ],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "ERR-LICENCIA-02",
+      "titulo": "Activación sin internet",
+      "tipo": "ERR",
+      "dispositivo": "cocina",
+      "esperado": "Mensaje «Sin internet. Conecta este teléfono a internet e intenta otra vez.»",
+      "obtenido": "Mensaje mostrado",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/60-error-activacion-sin-internet.png"
+      ],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "PER-PERSISTENCIA-06",
+      "titulo": "La cache de licencia sobrevive al reinicio y funciona sin internet",
+      "tipo": "PER",
+      "dispositivo": "cocina",
+      "esperado": "Con la licencia restaurada y sin mock, la cocina arranca activa",
+      "obtenido": "Monitor activo tras restaurar cache: True",
+      "estado": "PASA",
+      "evidencia": [],
+      "datos": [],
+      "notas": ""
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+# Avisos del sistema que a veces salen en emuladores recién arrancados ("X isn't responding").
+# Casi siempre es el launcher de Android trabado por la carga de la Mac: se cierra (Android lo
+# vuelve a abrir) en lugar de esperar, porque al esperar el aviso regresa.
+appId: com.axzy.taqueria
+---
+- repeat:
+    times: 3
+    while:
+      visible: ".*isn't responding.*"
+    commands:
+      - tapOn: "Close app"
+      - waitForAnimationToEnd

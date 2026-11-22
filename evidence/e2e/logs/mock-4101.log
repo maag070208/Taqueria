@@ -1,0 +1,3 @@
+13:28:55 4101 GET /api/v1/license auth=Bearer axc_mock_ok_123 mode=invalid
+13:29:30 4101 POST /api/v1/activate auth=- mode=ok
+13:29:38 4101 GET /api/v1/license auth=Bearer axc_qr_url_4101 mode=soon

@@ -35,6 +35,16 @@ class KitchenServer(
     private val store: OrderStore,
     /** Licencia bloqueada (suspendida, revocada o vencida): no se acepta nada de los meseros. */
     private val isLocked: () -> Boolean = { false },
+    /** 0 = el sistema elige uno libre (pruebas e2e); ver [localPort]. */
+    private val port: Int = DEFAULT_PORT,
+    /** Meseras a la vez que incluye el plan (null = ilimitadas). */
+    private val waiterLimit: () -> Int? = { null },
+    /** Pantallas de cocina extra a la vez (null = ilimitadas). */
+    private val screenLimit: () -> Int? = { null },
+    /** Versión nueva publicada en la Central, para avisarle también a las meseras. */
+    private val latestApp: () -> LatestApp? = { null },
+    /** Fallas que reporta una mesera; la cocina las sube a la Central. */
+    private val onWaiterErrors: (List<AppErrorReport>) -> Unit = {},
 ) {
     private val tag = "KitchenServer"
     private var scope: CoroutineScope? = null
@@ -42,10 +52,16 @@ class KitchenServer(
     private var nsdListener: NsdManager.RegistrationListener? = null
     private val clients: MutableSet<Connection> = ConcurrentHashMap.newKeySet()
 
+    /** Meseras conectadas (las pantallas de cocina extra van aparte, en [screenCount]). */
     private val _clientCount = MutableStateFlow(0)
     val clientCount = _clientCount.asStateFlow()
+    private val _screenCount = MutableStateFlow(0)
+    val screenCount = _screenCount.asStateFlow()
     private val _error = MutableStateFlow<String?>(null)
     val error = _error.asStateFlow()
+    /** Puerto en que quedó escuchando; nulo mientras no abre. */
+    private val _localPort = MutableStateFlow<Int?>(null)
+    val localPort = _localPort.asStateFlow()
 
     fun start() {
         if (scope != null) return
@@ -67,6 +83,7 @@ class KitchenServer(
         scope = null
         runCatching { serverSocket?.close() }
         serverSocket = null
+        _localPort.value = null
         clients.forEach { it.close() }
         unregisterNsd()
     }
@@ -75,13 +92,14 @@ class KitchenServer(
         val socket = try {
             ServerSocket().apply {
                 reuseAddress = true
-                bind(InetSocketAddress(DEFAULT_PORT))
+                bind(InetSocketAddress(port))
             }
         } catch (e: IOException) {
-            _error.value = "No se pudo abrir el puerto $DEFAULT_PORT: ${e.message}"
+            _error.value = "No se pudo abrir el puerto $port: ${e.message}"
             return
         }
         serverSocket = socket
+        _localPort.value = socket.localPort
         _error.value = null
         registerNsd(socket.localPort)
         while (scope?.isActive == true) {
@@ -93,40 +111,53 @@ class KitchenServer(
     private fun serve(socket: Socket) {
         val conn = Connection(socket)
         clients += conn
-        _clientCount.value = clients.size
+        recount()
         try {
             conn.send(stateMsg())
             while (true) {
                 val line = socket.readLineLimited(conn.reader, MAX_REQUEST_CHARS) ?: break
-                val reply = handle(line)
+                val reply = handle(line, conn)
                 if (reply != null) conn.send(AppJson.encodeToString<ServerMsg>(reply))
+                if (conn.rejected) break
             }
         } catch (e: IOException) {
             Log.i(tag, "Mesero desconectado: ${e.message}")
         } finally {
             conn.close()
             clients -= conn
-            _clientCount.value = clients.size
+            recount()
         }
     }
 
-    private fun handle(line: String): ServerMsg.Reply? {
+    private fun handle(line: String, conn: Connection): ServerMsg.Reply? {
         val msg = try {
             AppJson.decodeFromString<ClientMsg>(line)
         } catch (e: Exception) {
             Log.w(tag, "Mensaje inválido", e)
             return null
         }
+        when (msg) {
+            is ClientMsg.Hello -> return hello(msg, conn)
+            is ClientMsg.ReportErrors -> {
+                runCatching { onWaiterErrors(msg.errors.take(20).map { it.copy(source = "mesero") }) }
+                return ServerMsg.Reply(msg.reqId)
+            }
+            else -> Unit
+        }
+        // Con límite de meseras solo se atiende a quien se identificó (una app de mesera vieja no).
+        if (conn.waiterId == null && waiterLimit() != null) return ServerMsg.Reply(msg.reqId, error = OLD_WAITER_MESSAGE)
+        if (conn.screen) return ServerMsg.Reply(msg.reqId, error = "Las pantallas de cocina solo muestran las órdenes.")
         if (isLocked()) return ServerMsg.Reply(msg.reqId, error = LOCKED_MESSAGE)
         return try {
             when (msg) {
                 is ClientMsg.CreateOrder -> ServerMsg.Reply(msg.reqId, order = store.createOrder(msg))
-                is ClientMsg.EditOrder -> ServerMsg.Reply(msg.reqId, order = store.editOrder(msg.orderId, msg.lines))
+                is ClientMsg.EditOrder -> ServerMsg.Reply(msg.reqId, order = store.editOrder(msg.orderId, msg.lines, msg.extras))
                 is ClientMsg.SetOrderStatus -> ServerMsg.Reply(msg.reqId, order = store.setOrderStatus(msg.orderId, msg.status))
                 is ClientMsg.CancelAccount -> ServerMsg.Reply(msg.reqId).also { store.cancelAccount(msg.accountId) }
                 is ClientMsg.RestoreAccount -> ServerMsg.Reply(msg.reqId).also { store.restoreAccount(msg.accountId) }
                 is ClientMsg.AddPayment -> ServerMsg.Reply(msg.reqId, paymentId = store.addPayment(msg))
                 is ClientMsg.VoidPayment -> ServerMsg.Reply(msg.reqId).also { store.voidPayment(msg.accountId, msg.paymentId) }
+                is ClientMsg.Hello, is ClientMsg.ReportErrors -> null
             }
         } catch (e: ValidationException) {
             ServerMsg.Reply(msg.reqId, error = e.message)
@@ -136,7 +167,32 @@ class KitchenServer(
         }
     }
 
-    private fun stateMsg() = AppJson.encodeToString<ServerMsg>(ServerMsg.State(store.state.value, System.currentTimeMillis()))
+    /**
+     * Registra a la mesera. Si el mismo teléfono ya tenía una conexión (se cayó la
+     * red y volvió) se suelta la vieja; si el plan ya está lleno se rechaza.
+     */
+    private fun hello(msg: ClientMsg.Hello, conn: Connection): ServerMsg.Reply = synchronized(clients) {
+        val id = msg.waiterId.take(64)
+        clients.filter { it !== conn && it.waiterId == id }.forEach { it.close() }
+        // Meseras y pantallas de cocina se cuentan cada una contra su límite.
+        val limit = if (msg.screen) screenLimit() else waiterLimit()
+        val others = clients.mapNotNull { c -> c.waiterId.takeIf { c !== conn && !c.closed && c.screen == msg.screen && it != id } }.distinct().size
+        if (limit != null && others >= limit) {
+            conn.rejected = true
+            return ServerMsg.Reply(msg.reqId, error = if (msg.screen) screenLimitMessage(limit) else waiterLimitMessage(limit))
+        }
+        conn.screen = msg.screen
+        conn.waiterId = id
+        recount()
+        ServerMsg.Reply(msg.reqId)
+    }
+
+    private fun recount() {
+        _clientCount.value = clients.count { !it.screen }
+        _screenCount.value = clients.count { it.screen }
+    }
+
+    private fun stateMsg() = AppJson.encodeToString<ServerMsg>(ServerMsg.State(store.state.value, System.currentTimeMillis(), latestApp()))
 
     private fun broadcast(line: String) {
         for (c in clients) {
@@ -153,7 +209,8 @@ class KitchenServer(
             override fun onUnregistrationFailed(info: NsdServiceInfo, code: Int) {}
         }
         val info = NsdServiceInfo().apply {
-            serviceName = "Taqueria Cocina"
+            // Con varias cocinas independientes en la misma red, el nombre ayuda a distinguirlas.
+            serviceName = "Taqueria ${store.state.value.kitchenName.ifBlank { "Cocina" }}".take(60)
             serviceType = SERVICE_TYPE
             this.port = port
         }
@@ -172,6 +229,13 @@ class KitchenServer(
     }
 
     private class Connection(val socket: Socket) {
+        /** Teléfono de la mesera, cuando ya mandó [ClientMsg.Hello]. */
+        @Volatile var waiterId: String? = null
+        /** Se rechazó por el límite del plan: se cierra después de avisarle. */
+        @Volatile var rejected = false
+        /** Pantalla de cocina extra: solo recibe el estado. */
+        @Volatile var screen = false
+        @Volatile var closed = false
         val reader = BufferedReader(InputStreamReader(socket.getInputStream(), Charsets.UTF_8))
         private val writer = BufferedWriter(OutputStreamWriter(socket.getOutputStream(), Charsets.UTF_8))
 
@@ -182,12 +246,18 @@ class KitchenServer(
             writer.flush()
         }
 
-        fun close() = runCatching { socket.close() }
+        fun close() = runCatching { closed = true; socket.close() }
     }
 
     companion object {
         const val PING_MS = 10_000L
         const val LOCKED_MESSAGE = "La cuenta de la taquería está suspendida. Revisa el teléfono de cocina."
+        const val OLD_WAITER_MESSAGE = "Actualiza la app de este teléfono para conectarte a cocina."
+        fun screenLimitMessage(limit: Int) =
+            if (limit == 0) "El plan incluye solo la cocina principal. Para más pantallas de cocina, mejora el plan."
+            else "El plan incluye ${if (limit == 1) "1 pantalla" else "$limit pantallas"} de cocina extra y ya están conectadas."
+        fun waiterLimitMessage(limit: Int) =
+            "El plan incluye ${if (limit == 1) "1 mesera" else "$limit meseras"} a la vez y ya están conectadas. Desconecta otro teléfono o mejora el plan."
         private const val MAX_REQUEST_CHARS = 64 * 1024
 
         /** IPs del teléfono en la red local, para conectar a mano si mDNS no funciona. */

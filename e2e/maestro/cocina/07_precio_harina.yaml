@@ -1,0 +1,22 @@
+# El admin cambia el precio de Asada en harina a $90; el taquero no podría.
+appId: com.axzy.taqueria
+name: Cocina · admin cambia precio de harina
+tags: [cocina, admin, menu]
+---
+- launchApp
+- runFlow: ../comun/cerrar_avisos.yaml
+- runFlow: ../comun/entrar_admin.yaml
+- tapOn: "Abrir menú"
+- tapOn: "Menú y precios"
+- assertVisible: "Menú"
+- assertVisible: "Asada"
+# El primero con este precio es Asada (es la primera carne de Tacos).
+- tapOn: "Maíz \\$35.00 · Harina \\$100.00"
+- tapOn: "100(\\.00)?"
+- eraseText: 10
+- inputText: "90"
+- hideKeyboard
+- tapOn: "Guardar"
+- assertVisible: "Maíz \\$35.00 · Harina \\$90.00"
+- tapOn: "Abrir menú"
+- tapOn: "Salir de admin"

@@ -1,0 +1,32 @@
+# Mesero nuevo: elegir el rol y conectarse a la cocina con la IP a mano.
+# KITCHEN_HOST: dirección de la cocina vista desde este teléfono (en emulador, 10.0.2.2:<forward>).
+appId: com.axzy.taqueria
+name: Mesero · conectar
+tags: [mesero, setup]
+env:
+  KITCHEN_HOST: 10.0.2.2:7790
+---
+- launchApp:
+    clearState: true
+    permissions:
+      all: allow
+- runFlow: ../comun/cerrar_avisos.yaml
+- extendedWaitUntil:
+    visible: "Mesero.*"
+    timeout: 15000
+- runFlow: ../comun/cerrar_avisos.yaml
+- tapOn: "Mesero.*"
+- assertVisible: "Cuentas abiertas"
+- tapOn: "Abrir menú"
+- assertVisible: "Mesero"
+# Ya no se repite la opción del QR: está dentro de Conexión.
+- assertNotVisible: "Escanear QR de cocina"
+- tapOn: "Conexión con cocina"
+- tapOn: "IP de cocina (opcional)"
+- inputText: ${KITCHEN_HOST}
+- hideKeyboard
+- tapOn: "Guardar"
+- extendedWaitUntil:
+    visible: ".*Conectado a cocina"
+    timeout: 20000
+- assertVisible: "No hay mesas abiertas"

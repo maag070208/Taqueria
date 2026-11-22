@@ -90,7 +90,7 @@ fun AccountScreen(
                 }
             }
             item(key = "h-orders") { SectionTitle("Órdenes", Modifier.padding(top = 4.dp)) }
-            items(orders, key = { it.id }) { o -> OrderCard(ctx, o, now, connected, onEdit = { onEditOrder(o) }) }
+            items(orders, key = { it.id }) { o -> OrderCard(ctx, state, o, now, connected, onEdit = { onEditOrder(o) }) }
             if (acc.payments.isNotEmpty()) {
                 item(key = "h-pay") { SectionTitle("Pagos", Modifier.padding(top = 4.dp)) }
                 items(acc.payments, key = { it.id }) { p ->
@@ -124,7 +124,7 @@ fun AccountScreen(
                         when {
                             balance > 0 -> "Cobrar ${money(balance)}"
                             balance < 0 -> "Devolver ${money(-balance)}"
-                            deliverOnly -> "Entregar ✓"
+                            deliverOnly -> "Entregar"
                             else -> "Sin saldo"
                         },
                         if (deliverOnly) Palette.ok else Palette.primary, Color.White, Modifier.fillMaxWidth().height(60.dp),
@@ -147,7 +147,7 @@ private fun MoneyRow(label: String, cents: Long, strong: Boolean = false, color:
 }
 
 @Composable
-private fun OrderCard(ctx: WaiterCtx, o: Order, now: Long, connected: Boolean, onEdit: () -> Unit) {
+private fun OrderCard(ctx: WaiterCtx, state: AppState, o: Order, now: Long, connected: Boolean, onEdit: () -> Unit) {
     val pending = o.status == OrderStatus.PENDING
     Column(
         Modifier.fillMaxWidth().background(Palette.card, Ui.shape).border(1.dp, Palette.line, Ui.shape).padding(Ui.pad),
@@ -171,11 +171,17 @@ private fun OrderCard(ctx: WaiterCtx, o: Order, now: Long, connected: Boolean, o
             Row(verticalAlignment = Alignment.Top) {
                 QtyBox(l.qty)
                 Column(Modifier.weight(1f).padding(start = 10.dp)) {
-                    Text(l.name, fontWeight = FontWeight.SemiBold, textDecoration = if (o.status == OrderStatus.CANCELLED) TextDecoration.LineThrough else null)
+                    Text(
+                        (if (o.persons.size > 1) "P${l.person} · " else "") + state.labelOf(l),
+                        fontWeight = FontWeight.SemiBold, textDecoration = if (o.status == OrderStatus.CANCELLED) TextDecoration.LineThrough else null,
+                    )
                     if (l.prep.isNotEmpty()) Text(l.prep, color = Palette.muted, fontSize = 14.sp)
                 }
                 Text(money(l.subtotalCents), color = Palette.muted)
             }
+        }
+        o.extras.forEach { e ->
+            Text("Extras${if (o.persons.size > 1) " P${e.person}" else ""}: ${e.items.joinToString(", ")}", color = Palette.muted, fontSize = 14.sp)
         }
         if (pending) {
             GridRow(listOf(0, 1, 2), 3) { i ->

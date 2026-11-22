@@ -1,0 +1,4 @@
+<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<map>
+    <string name="cache">{&quot;token&quot;:&quot;axc_50iS_jUhExR2qLC8GfWDGR44CVtD6nNK6SoU4dWWLOw&quot;,&quot;status&quot;:&quot;ACTIVE&quot;,&quot;revoked&quot;:false,&quot;tenantName&quot;:&quot;Taquería El Fogón&quot;,&quot;nextDueDate&quot;:&quot;2026-11-21&quot;,&quot;validUntilMs&quot;:1795651200000,&quot;clockOffsetMs&quot;:86,&quot;maxSeenMs&quot;:1795296396371,&quot;lastCheckMs&quot;:1795290008367}</string>
+</map>

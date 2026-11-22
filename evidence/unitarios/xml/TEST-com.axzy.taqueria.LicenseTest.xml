@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.axzy.taqueria.LicenseTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-21T20:20:41.372Z" hostname="MacBook-Pro-de-Martin.local" time="0.01">
+  <properties/>
+  <testcase name="atrasarElRelojNoAlargaLaLicencia" classname="com.axzy.taqueria.LicenseTest" time="0.006"/>
+  <testcase name="avisaCuandoEstaPorVencer" classname="com.axzy.taqueria.LicenseTest" time="0.001"/>
+  <testcase name="sinCodigoNoEstaActivada" classname="com.axzy.taqueria.LicenseTest" time="0.0"/>
+  <testcase name="suspendidaSigueBloqueadaSinInternet" classname="com.axzy.taqueria.LicenseTest" time="0.0"/>
+  <testcase name="revocadaBloquea" classname="com.axzy.taqueria.LicenseTest" time="0.0"/>
+  <testcase name="activaFuncionaSinInternetHastaSuFecha" classname="com.axzy.taqueria.LicenseTest" time="0.0"/>
+  <testcase name="usaLaHoraDelServidorSiElTelefonoVaAtrasado" classname="com.axzy.taqueria.LicenseTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

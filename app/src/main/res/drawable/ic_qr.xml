@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generado por design/iconos/generar_ui.py; no editar a mano. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
+    <path android:pathData="M4,4h6v6H4zM14,4h6v6h-6zM4,14h6v6H4z" android:strokeColor="#FF000000" android:strokeWidth="2" android:strokeLineCap="round" android:strokeLineJoin="round" android:fillColor="#00000000"/>
+    <path android:pathData="M14,14h2.5v2.5H14zM17.5,17.5H20V20h-2.5zM14,18h2v2h-2zM18,14h2v2h-2z" android:fillColor="#FF000000"/>
+    <path android:pathData="M6.2,6.2h1.6v1.6H6.2zM16.2,6.2h1.6v1.6h-1.6zM6.2,16.2h1.6v1.6H6.2z" android:fillColor="#FF000000"/>
+</vector>
