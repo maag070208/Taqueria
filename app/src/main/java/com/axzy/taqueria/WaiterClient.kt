@@ -88,12 +88,14 @@ class WaiterClient(private val context: Context) {
         failPending("Desconectado")
     }
 
-    suspend fun createOrder(clientKey: String, table: String, accountId: String?, lines: List<LineRequest>): Order =
-        request { ClientMsg.CreateOrder(it, clientKey, table, accountId, lines) }.order
+    suspend fun createOrder(
+        clientKey: String, table: String, accountId: String?, lines: List<LineRequest>, extras: List<PersonExtras> = emptyList(),
+    ): Order =
+        request { ClientMsg.CreateOrder(it, clientKey, table, accountId, lines, extras) }.order
             ?: throw IOException("Respuesta inválida de cocina")
 
-    suspend fun editOrder(orderId: String, lines: List<LineRequest>): Order =
-        request { ClientMsg.EditOrder(it, orderId, lines) }.order ?: throw IOException("Respuesta inválida de cocina")
+    suspend fun editOrder(orderId: String, lines: List<LineRequest>, extras: List<PersonExtras> = emptyList()): Order =
+        request { ClientMsg.EditOrder(it, orderId, lines, extras) }.order ?: throw IOException("Respuesta inválida de cocina")
 
     suspend fun setOrderStatus(orderId: String, status: OrderStatus) {
         request { ClientMsg.SetOrderStatus(it, orderId, status) }

@@ -27,6 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.axzy.taqueria.R
 import com.axzy.taqueria.LicenseManager
 import com.axzy.taqueria.LicenseState
 import com.axzy.taqueria.LockReason
@@ -76,7 +77,7 @@ private fun ActivationScreen(license: LicenseManager, onExit: () -> Unit) {
     }
 
     Centered {
-        Text("🔑", fontSize = 56.sp)
+        Illustration(R.drawable.ico_rol_admin, 88.dp)
         Text("Activa esta cocina", fontSize = 28.sp, fontWeight = FontWeight.Black, modifier = Modifier.padding(top = 8.dp))
         Text(
             "En Axzy Central abre el detalle de la taquería y toca «Generar QR de activación». Escanéalo con este teléfono: el QR ya trae el servidor. Solo esta vez necesitas internet; después la app funciona sin él.",
@@ -118,7 +119,7 @@ private fun LockedScreen(license: LicenseManager, state: LicenseState.Locked, on
         LockReason.EXPIRED -> "Falta confirmar la cuenta" to "Hace mucho que este teléfono no se conecta. Conéctalo a internet (WiFi con internet o datos) y toca Reintentar."
     }
     Centered {
-        Text("🔒", fontSize = 56.sp)
+        Illustration(R.drawable.ico_candado, 88.dp)
         Text(title, fontSize = 28.sp, fontWeight = FontWeight.Black, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 8.dp))
         Text(body, color = Palette.muted, fontSize = 15.sp, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 4.dp))
         Text("Las órdenes y el menú están guardados; no se pierde nada.", color = Palette.muted, fontSize = 13.sp, textAlign = TextAlign.Center)

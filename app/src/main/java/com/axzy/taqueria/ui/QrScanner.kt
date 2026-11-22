@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.LifecycleOwner
+import com.axzy.taqueria.R
 import com.axzy.taqueria.Alerts
 import com.google.zxing.BinaryBitmap
 import com.google.zxing.PlanarYUVLuminanceSource
@@ -131,7 +132,7 @@ private fun CameraPermissionDenied(fallbackLabel: String, onCancel: () -> Unit, 
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text("📷", fontSize = 52.sp)
+        UiIcon(R.drawable.ic_camera, 56.dp, Color.White)
         Text(
             "Sin permiso de cámara", fontSize = 24.sp, fontWeight = FontWeight.Black,
             color = Color.White, modifier = Modifier.padding(top = 8.dp),

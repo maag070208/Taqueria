@@ -42,13 +42,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.axzy.taqueria.Account
 import com.axzy.taqueria.App
+import com.axzy.taqueria.R
+import com.axzy.taqueria.Staff
 import com.axzy.taqueria.AppState
 import com.axzy.taqueria.ConnectionQr
 import com.axzy.taqueria.Link
 import com.axzy.taqueria.OrderStatus
 import com.axzy.taqueria.PayStatus
 import com.axzy.taqueria.elapsedText
+import com.axzy.taqueria.isTakeout
 import com.axzy.taqueria.money
+import androidx.compose.runtime.saveable.rememberSaveable
 import com.axzy.taqueria.tableLabel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -120,35 +124,45 @@ fun WaiterScreen(app: App, onExit: () -> Unit) {
             },
             onCancel = { scanning = false },
             title = "Escanear QR de cocina",
-            hint = "Apunta la cámara al QR que muestra la cocina (📲). Se guarda la dirección automáticamente.",
+            hint = "Apunta la cámara al QR que muestra la cocina (menú → Conectar meseras). Se guarda la dirección automáticamente.",
             fallbackLabel = "Cancelar",
         )
         return
     }
 
-    Column(Modifier.fillMaxSize().safeDrawingPadding()) {
-        Box(Modifier.weight(1f)) {
-            when (val p = page) {
-                Page.Home -> Home(
-                    ctx, state,
-                    onNewOrder = { app.draft.start("", null); page = Page.Capture(pickTable = true) },
-                    onNewAccount = { table -> app.draft.start(table, null); page = Page.Capture(pickTable = false) },
-                    onOpen = { page = Page.AccountDetail(it) },
-                    onSettings = { showSettings = true },
-                )
-                is Page.Capture -> CaptureScreen(ctx, state, pickTable = p.pickTable, onClose = { page = Page.Home })
-                is Page.AccountDetail -> {
-                    BackHandler { page = Page.Home }
-                    AccountScreen(
-                        ctx, state, p.id,
-                        onBack = { page = Page.Home },
-                        onAddProducts = { acc -> app.draft.start(acc.table, acc.id); page = Page.Capture(pickTable = false) },
-                        onEditOrder = { order -> app.draft.startEdit(order); page = Page.Capture(pickTable = false) },
+    val drawer = rememberDrawerControl()
+    val groups = listOf(
+        listOf(
+            DrawerItem(R.drawable.ic_receipt, "Cuentas abiertas", selected = true) {},
+            DrawerItem(R.drawable.ic_wifi, "Conexión con cocina") { showSettings = true },
+        ),
+        listOf(DrawerItem(R.drawable.ic_swap, "Cambiar rol del teléfono", onClick = onExit)),
+    )
+    AppDrawer(drawer, Staff.MESERO, "Teléfono de mesero", groups) {
+        Column(Modifier.fillMaxSize().safeDrawingPadding()) {
+            Box(Modifier.weight(1f)) {
+                when (val p = page) {
+                    Page.Home -> Home(
+                        ctx, state,
+                        onNewOrder = { app.draft.start("", null); page = Page.Capture(pickTable = true) },
+                        onNewAccount = { table -> app.draft.start(table, null); page = Page.Capture(pickTable = false) },
+                        onOpen = { page = Page.AccountDetail(it) },
+                        onMenu = drawer::open,
                     )
+                    is Page.Capture -> CaptureScreen(ctx, state, pickTable = p.pickTable, onClose = { page = Page.Home })
+                    is Page.AccountDetail -> {
+                        BackHandler { page = Page.Home }
+                        AccountScreen(
+                            ctx, state, p.id,
+                            onBack = { page = Page.Home },
+                            onAddProducts = { acc -> app.draft.start(acc.table, acc.id); page = Page.Capture(pickTable = false) },
+                            onEditOrder = { order -> app.draft.startEdit(order); page = Page.Capture(pickTable = false) },
+                        )
+                    }
                 }
             }
+            UndoBar(undo) { item -> ctx.run({ item.undo() }, onOk = { ctx.toast("Listo, se deshizo") }) }
         }
-        UndoBar(undo) { item -> ctx.run({ item.undo() }, onOk = { ctx.toast("Listo, se deshizo") }) }
     }
 
     if (showSettings) {
@@ -157,7 +171,6 @@ fun WaiterScreen(app: App, onExit: () -> Unit) {
             onDismiss = { showSettings = false },
             onSave = { showSettings = false; app.updateManualHost(it) },
             onScanQr = { showSettings = false; scanning = true },
-            onChangeRole = { showSettings = false; onExit() },
         )
     }
 }
@@ -165,7 +178,7 @@ fun WaiterScreen(app: App, onExit: () -> Unit) {
 @Composable
 private fun Home(
     ctx: WaiterCtx, state: AppState,
-    onNewOrder: () -> Unit, onNewAccount: (String) -> Unit, onOpen: (String) -> Unit, onSettings: () -> Unit,
+    onNewOrder: () -> Unit, onNewAccount: (String) -> Unit, onOpen: (String) -> Unit, onMenu: () -> Unit,
 ) {
     val link by ctx.client.link.collectAsState()
     val now = rememberNow() + ctx.client.clockOffset
@@ -179,18 +192,25 @@ private fun Home(
         Link.Searching -> Palette.late to "● Buscando cocina en la red…"
     }
 
+    // Para llevar va en su propia pestaña: son clientes de paso, no mesas.
+    var takeoutTab by rememberSaveable { mutableStateOf(false) }
+    val open = state.openAccounts()
+    val takeoutCount = open.count { isTakeout(it.table) }
     // Mesas ordenadas por su cuenta más antigua; dentro, cuentas por número.
-    val tables = state.openAccounts().groupBy { it.table }.entries
+    val tables = open.filter { isTakeout(it.table) == takeoutTab }.groupBy { it.table }.entries
         .sortedBy { (_, accs) -> accs.minOf { it.createdAt } }
 
     Column(Modifier.fillMaxSize()) {
-        TopBar(title = "Cuentas abiertas", subtitle = linkText, subtitleColor = linkColor) {
-            SquareButton("⚙", onClick = onSettings)
-        }
+        TopBar(title = "Cuentas abiertas", subtitle = linkText, subtitleColor = linkColor, onMenu = onMenu)
+        Segmented(
+            listOf("Mesas · ${open.size - takeoutCount}", "Para llevar · $takeoutCount"),
+            if (takeoutTab) 1 else 0, { takeoutTab = it == 1 },
+            Modifier.padding(start = Ui.pad, end = Ui.pad, bottom = Ui.gap),
+        )
         if (tables.isEmpty()) {
             Column(Modifier.weight(1f).fillMaxWidth(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-                FoodIcon("🌮", 88.dp)
-                Text("No hay cuentas abiertas", color = Palette.muted, fontSize = 17.sp, modifier = Modifier.padding(top = 12.dp))
+                Illustration(if (takeoutTab) R.drawable.ico_bolsa_llevar else R.drawable.ico_taco_generico, 88.dp)
+                Text(if (takeoutTab) "No hay pedidos para llevar" else "No hay mesas abiertas", color = Palette.muted, fontSize = 17.sp, modifier = Modifier.padding(top = 12.dp))
             }
         } else {
             LazyColumn(
@@ -205,7 +225,7 @@ private fun Home(
                     item(key = "t-$table") {
                         Row(Modifier.fillMaxWidth().padding(top = 4.dp), verticalAlignment = Alignment.CenterVertically) {
                             SectionTitle(tableLabel(table), Modifier.weight(1f))
-                            ActionButton("+ Cuenta", Palette.card, Palette.primary, Modifier.width(120.dp), enabled = connected) {
+                            ActionButton(if (isTakeout(table)) "+ Pedido" else "+ Cuenta", Palette.card, Palette.primary, Modifier.width(120.dp), enabled = connected) {
                                 onNewAccount(table)
                             }
                         }
@@ -228,11 +248,11 @@ private fun Home(
                                 }
                             } else null,
                             rightLabel = when {
-                                balance < 0 && pending -> "✓  Entregar o devolver"
-                                balance < 0 -> "💵  Devolver"
-                                pending && balance > 0 -> "✓  Entregar o cobrar"
-                                pending -> "✓  Entregar"
-                                else -> "💵  Cobrar"
+                                balance < 0 && pending -> "Entregar o devolver"
+                                balance < 0 -> "Devolver"
+                                pending && balance > 0 -> "Entregar o cobrar"
+                                pending -> "Entregar"
+                                else -> "Cobrar"
                             },
                             onSwipeRight = if (connected && hasActions) {
                                 { actions = acc }
@@ -246,9 +266,13 @@ private fun Home(
         }
         Box(Modifier.fillMaxWidth().background(Palette.card).padding(Ui.pad)) {
             ActionButton(
-                if (connected) "+ Nueva orden" else "Sin conexión con cocina",
-                Palette.primary, Color.White, Modifier.fillMaxWidth().height(60.dp), enabled = connected, onClick = onNewOrder,
-            )
+                when {
+                    !connected -> "Sin conexión con cocina"
+                    takeoutTab -> "+ Pedido para llevar"
+                    else -> "+ Nueva orden"
+                },
+                Palette.primary, Color.White, Modifier.fillMaxWidth().height(60.dp), enabled = connected,
+            ) { if (takeoutTab) onNewAccount(com.axzy.taqueria.TAKEOUT) else onNewOrder() }
         }
     }
 
@@ -292,12 +316,12 @@ private fun AccountActionsDialog(
                     fontWeight = FontWeight.Bold,
                 )
                 if (pendingOrders > 0) {
-                    ActionButton("✓  Entregar (sale de cocina)", Palette.ok, Color.White, Modifier.fillMaxWidth(), onClick = onEntregar)
+                    ActionButton("Entregar (sale de cocina)", Palette.ok, Color.White, Modifier.fillMaxWidth(), icon = R.drawable.ic_check, onClick = onEntregar)
                 }
                 if (balance != 0L) {
                     ActionButton(
-                        if (balance > 0) "💵  Cobrar ${money(balance)}" else "💵  Devolver ${money(-balance)}",
-                        Palette.primary, Color.White, Modifier.fillMaxWidth(), onClick = onCobrar,
+                        if (balance > 0) "Cobrar ${money(balance)}" else "Devolver ${money(-balance)}",
+                        Palette.primary, Color.White, Modifier.fillMaxWidth(), icon = R.drawable.ic_cash, onClick = onCobrar,
                     )
                 }
             }
@@ -354,7 +378,7 @@ fun payColor(p: PayStatus) = when (p) {
 }
 
 @Composable
-private fun SettingsDialog(current: String, onDismiss: () -> Unit, onSave: (String) -> Unit, onScanQr: () -> Unit, onChangeRole: () -> Unit) {
+private fun SettingsDialog(current: String, onDismiss: () -> Unit, onSave: (String) -> Unit, onScanQr: () -> Unit) {
     var host by remember { mutableStateOf(current) }
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -362,10 +386,9 @@ private fun SettingsDialog(current: String, onDismiss: () -> Unit, onSave: (Stri
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text("Déjalo vacío para encontrar la cocina automáticamente. Si no la encuentra, escribe la IP que aparece arriba en la pantalla de cocina.", color = Palette.muted)
-                ActionButton("📷  Escanear QR de cocina", Palette.primary, Color.White, Modifier.fillMaxWidth(), onClick = onScanQr)
+                ActionButton("Escanear QR de cocina", Palette.primary, Color.White, Modifier.fillMaxWidth(), icon = R.drawable.ic_camera, onClick = onScanQr)
                 Text("O escribe la IP a mano:", color = Palette.muted, fontSize = 13.sp)
                 OutlinedTextField(host, { host = it.take(40) }, label = { Text("IP de cocina (opcional)") }, singleLine = true, shape = Ui.smallShape, placeholder = { Text("192.168.1.20") })
-                TextButton(onClick = onChangeRole) { Text("Cambiar rol de este teléfono") }
             }
         },
         confirmButton = { TextButton(onClick = { onSave(host) }) { Text("Guardar") } },

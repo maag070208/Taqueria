@@ -1,6 +1,8 @@
 package com.axzy.taqueria.ui
 
+import androidx.annotation.DrawableRes
 import androidx.compose.animation.core.animate
+import com.axzy.taqueria.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -31,6 +33,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -65,7 +68,7 @@ fun isCritical(elapsedMs: Long) = elapsedMs / 60_000 >= CRITICAL_MIN
 @Composable
 fun ActionButton(
     label: String, container: Color, content: Color, modifier: Modifier = Modifier,
-    enabled: Boolean = true, onClick: () -> Unit,
+    enabled: Boolean = true, @DrawableRes icon: Int? = null, onClick: () -> Unit,
 ) {
     val bg = if (enabled) container else Palette.line
     Box(
@@ -75,7 +78,11 @@ fun ActionButton(
             .padding(horizontal = 8.dp),
         contentAlignment = Alignment.Center,
     ) {
-        Text(label, color = if (enabled) content else Palette.muted, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        val fg = if (enabled) content else Palette.muted
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            if (icon != null) UiIcon(icon, 20.dp, fg, Modifier.padding(end = 8.dp))
+            Text(label, color = fg, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        }
     }
 }
 
@@ -100,20 +107,21 @@ fun OptionChip(label: String, selected: Boolean, modifier: Modifier = Modifier, 
 
 /** − cantidad + con botones grandes y cuadrados. */
 @Composable
-fun Stepper(value: Int, onChange: (Int) -> Unit) {
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        StepButton("−") { onChange(value - 1) }
-        Text("$value", fontSize = 22.sp, fontWeight = FontWeight.Black, textAlign = TextAlign.Center, modifier = Modifier.width(36.dp))
-        StepButton("+") { onChange(value + 1) }
+fun Stepper(value: Int, small: Boolean = false, onChange: (Int) -> Unit) {
+    val size = if (small) 36.dp else 44.dp
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(if (small) 4.dp else 8.dp)) {
+        StepButton("−", size) { onChange(value - 1) }
+        Glyph("$value", if (small) 18.sp else 22.sp, Modifier.width(if (small) 28.dp else 36.dp), weight = FontWeight.Black)
+        StepButton("+", size) { onChange(value + 1) }
     }
 }
 
 @Composable
-private fun StepButton(label: String, onClick: () -> Unit) {
+private fun StepButton(label: String, size: androidx.compose.ui.unit.Dp, onClick: () -> Unit) {
     Box(
-        Modifier.size(44.dp).background(Palette.soft, Ui.smallShape).clickable(onClick = onClick),
+        Modifier.size(size).background(Palette.soft, Ui.smallShape).clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
-    ) { Text(label, fontSize = 22.sp, fontWeight = FontWeight.Black, color = Palette.primaryDark) }
+    ) { Glyph(label, 22.sp, color = Palette.primaryDark, weight = FontWeight.Black) }
 }
 
 @Composable
@@ -151,6 +159,7 @@ fun Segmented(labels: List<String>, selected: Int, onSelect: (Int) -> Unit, modi
 fun SwipeCard(
     leftLabel: String, onSwipeLeft: (() -> Unit)?,
     rightLabel: String, onSwipeRight: (() -> Unit)?,
+    shape: Shape = Ui.shape,
     content: @Composable () -> Unit,
 ) {
     var dx by remember { mutableFloatStateOf(0f) }
@@ -162,14 +171,14 @@ fun SwipeCard(
             val armed = abs(dx) >= threshold
             Box(
                 Modifier.matchParentSize()
-                    .background((if (right) Palette.ok else Palette.late).copy(alpha = if (armed) 1f else 0.55f), Ui.shape)
+                    .background((if (right) Palette.ok else Palette.late).copy(alpha = if (armed) 1f else 0.55f), shape)
                     .padding(horizontal = 24.dp),
                 contentAlignment = if (right) Alignment.CenterStart else Alignment.CenterEnd,
             ) {
-                Text(
-                    if (right) rightLabel else "$leftLabel  ✕",
-                    color = Color.White, fontWeight = FontWeight.Black, fontSize = 18.sp,
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    UiIcon(if (right) R.drawable.ic_check else R.drawable.ic_close, 20.dp, Color.White, Modifier.padding(end = 8.dp))
+                    Text(if (right) rightLabel else leftLabel, color = Color.White, fontWeight = FontWeight.Black, fontSize = 18.sp)
+                }
             }
         }
         Box(

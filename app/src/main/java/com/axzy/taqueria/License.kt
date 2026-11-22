@@ -196,6 +196,10 @@ class LicenseManager(context: Context, private val buildApiUrl: String) {
         if (base.isBlank()) return NO_SERVER
         return when (val r = postActivate(base, token)) {
             is Fetch.Ok -> {
+                // El servidor que aceptó el código es el que se sigue consultando, aunque
+                // después se instale una versión compilada contra otro: si no, ese otro no
+                // conoce el código, responde 401 y la cocina se bloquea como revocada.
+                prefs.edit().putString(KEY_API, base).apply()
                 save(LicenseCache(token).withResponse(r.body, System.currentTimeMillis()))
                 null
             }
@@ -208,7 +212,12 @@ class LicenseManager(context: Context, private val buildApiUrl: String) {
     suspend fun refresh(): String? {
         val current = cache ?: return null
         return when (val r = fetch(current.token)) {
-            is Fetch.Ok -> { save(current.withResponse(r.body, System.currentTimeMillis())); null }
+            is Fetch.Ok -> {
+                // Licencias activadas antes de guardar el servidor: se fija el que respondió.
+                if (!prefs.contains(KEY_API)) prefs.edit().putString(KEY_API, resolveApiUrl()).apply()
+                save(current.withResponse(r.body, System.currentTimeMillis()))
+                null
+            }
             Fetch.Unauthorized -> { save(current.copy(revoked = true, lastCheckMs = System.currentTimeMillis())); null }
             is Fetch.Failed -> r.message
         }

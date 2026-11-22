@@ -56,7 +56,7 @@ fun ConnectionQrDialog(ips: List<String>, port: Int, onDismiss: () -> Unit) {
                     Text("Conecta esta cocina al WiFi o activa el hotspot para mostrar el QR.", textAlign = TextAlign.Center)
                 }
                 Text(
-                    "En la mesera: ⚙ → Conexión → «Escanear QR de cocina».",
+                    "En la mesera: menú → «Escanear QR de cocina».",
                     color = Palette.muted, fontSize = 14.sp, textAlign = TextAlign.Center,
                 )
                 if (selected.isNotBlank()) {

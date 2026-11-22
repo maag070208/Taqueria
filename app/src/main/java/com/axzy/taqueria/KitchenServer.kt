@@ -121,7 +121,7 @@ class KitchenServer(
         return try {
             when (msg) {
                 is ClientMsg.CreateOrder -> ServerMsg.Reply(msg.reqId, order = store.createOrder(msg))
-                is ClientMsg.EditOrder -> ServerMsg.Reply(msg.reqId, order = store.editOrder(msg.orderId, msg.lines))
+                is ClientMsg.EditOrder -> ServerMsg.Reply(msg.reqId, order = store.editOrder(msg.orderId, msg.lines, msg.extras))
                 is ClientMsg.SetOrderStatus -> ServerMsg.Reply(msg.reqId, order = store.setOrderStatus(msg.orderId, msg.status))
                 is ClientMsg.CancelAccount -> ServerMsg.Reply(msg.reqId).also { store.cancelAccount(msg.accountId) }
                 is ClientMsg.RestoreAccount -> ServerMsg.Reply(msg.reqId).also { store.restoreAccount(msg.accountId) }

@@ -1,5 +1,10 @@
 package com.axzy.taqueria.ui
 
+import androidx.annotation.DrawableRes
+import androidx.compose.foundation.Image
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.res.painterResource
+import com.axzy.taqueria.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -34,9 +39,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.PlatformTextStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.axzy.taqueria.Role
@@ -132,26 +141,53 @@ fun SectionTitle(text: String, modifier: Modifier = Modifier) {
     Text(text, fontSize = 18.sp, fontWeight = FontWeight.Bold, modifier = modifier)
 }
 
-/** Botón cuadrado de barra superior (ícono o texto corto). */
+/**
+ * Texto centrado de verdad dentro de su caja: sin el relleno de fuente de Android y con la
+ * altura de línea recortada arriba y abajo. Sin esto los emojis y símbolos (←, −, +) quedan
+ * corridos hacia abajo o a un lado en botones y círculos.
+ */
+val centeredText = TextStyle(
+    platformStyle = PlatformTextStyle(includeFontPadding = false),
+    lineHeightStyle = LineHeightStyle(LineHeightStyle.Alignment.Center, LineHeightStyle.Trim.Both),
+)
+
+/** Ícono o símbolo de una sola línea, centrado en su caja. */
 @Composable
-fun SquareButton(label: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun Glyph(text: String, size: TextUnit, modifier: Modifier = Modifier, color: Color = Color.Unspecified, weight: FontWeight? = null) {
+    Text(
+        text, modifier = modifier, fontSize = size, lineHeight = size, color = color, fontWeight = weight,
+        textAlign = TextAlign.Center, maxLines = 1, style = centeredText,
+    )
+}
+
+/** Ícono de acción de la app (res/drawable/ic_*, generados por design/iconos/generar_ui.py), pintado del color dado. */
+@Composable
+fun UiIcon(@DrawableRes icon: Int, size: Dp = 22.dp, tint: Color = Palette.text, modifier: Modifier = Modifier) {
+    Image(painterResource(icon), contentDescription = null, colorFilter = ColorFilter.tint(tint), modifier = modifier.size(size))
+}
+
+/** Botón cuadrado de barra superior. */
+@Composable
+fun SquareButton(@DrawableRes icon: Int, onClick: () -> Unit, modifier: Modifier = Modifier, description: String? = null) {
     Box(
-        modifier.size(44.dp).background(Palette.card, Ui.smallShape).border(1.dp, Palette.line, Ui.smallShape).clickable(onClick = onClick),
+        modifier.size(44.dp).background(Palette.card, Ui.smallShape).border(1.dp, Palette.line, Ui.smallShape)
+            .clickable(onClick = onClick, onClickLabel = description),
         contentAlignment = Alignment.Center,
-    ) { Text(label, fontSize = 18.sp) }
+    ) { UiIcon(icon) }
 }
 
 @Composable
 fun TopBar(
     title: String, subtitle: String? = null, subtitleColor: Color = Palette.muted,
-    onBack: (() -> Unit)? = null, actions: @Composable RowScope.() -> Unit = {},
+    onBack: (() -> Unit)? = null, onMenu: (() -> Unit)? = null, actions: @Composable RowScope.() -> Unit = {},
 ) {
     Row(
         Modifier.fillMaxWidth().padding(horizontal = Ui.pad, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        if (onBack != null) SquareButton("←", onClick = onBack, modifier = Modifier.padding(end = 4.dp))
+        if (onBack != null) SquareButton(R.drawable.ic_back, onClick = onBack, modifier = Modifier.padding(end = 4.dp), description = "Regresar")
+        if (onMenu != null) SquareButton(R.drawable.ic_menu, onClick = onMenu, modifier = Modifier.padding(end = 4.dp), description = "Abrir menú")
         Column(Modifier.weight(1f)) {
             if (subtitle != null) Text(subtitle, color = subtitleColor, fontSize = 13.sp, maxLines = 1)
             Text(title, fontSize = 24.sp, fontWeight = FontWeight.Bold, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
@@ -160,11 +196,11 @@ fun TopBar(
     }
 }
 
-/** Ícono del producto dentro de un círculo verde claro, como foto del platillo. */
+/** Ilustración del set (res/drawable-nodpi/ico_*) dentro de un círculo verde claro. */
 @Composable
-fun FoodIcon(emoji: String, size: Dp) {
+fun Illustration(@DrawableRes art: Int, size: Dp) {
     Box(Modifier.size(size).background(Palette.soft, RoundedCornerShape(50)), contentAlignment = Alignment.Center) {
-        Text(emoji, fontSize = (size.value * 0.5f).sp)
+        Image(painterResource(art), contentDescription = null, modifier = Modifier.size(size * 0.78f))
     }
 }
 
@@ -174,19 +210,19 @@ fun RoleScreen(onPick: (Role) -> Unit) {
         Modifier.fillMaxSize().safeDrawingPadding().padding(Ui.pad),
         verticalArrangement = Arrangement.Center,
     ) {
-        Text("🌮", fontSize = 56.sp)
+        Image(painterResource(R.drawable.ico_taco_generico), contentDescription = null, modifier = Modifier.size(72.dp))
         Text("Tacomanda", fontSize = 34.sp, fontWeight = FontWeight.Black, modifier = Modifier.padding(top = 8.dp))
         Text("¿Qué hará este teléfono?", color = Palette.muted, fontSize = 17.sp, modifier = Modifier.padding(top = 4.dp, bottom = 24.dp))
         GridRow(listOf(Role.KITCHEN, Role.WAITER), 2) { role ->
             val (icon, title, body) = when (role) {
-                Role.KITCHEN -> Triple("👨‍🍳", "Cocina", "Ve las órdenes y su tiempo. Guarda el menú.")
-                Role.WAITER -> Triple("📝", "Mesero", "Toma las órdenes de las mesas.")
+                Role.KITCHEN -> Triple(R.drawable.ico_rol_taquero, "Cocina", "El taquero ve las órdenes. El admin entra con PIN a ventas y menú.")
+                Role.WAITER -> Triple(R.drawable.ico_rol_mesero, "Mesero", "Toma las órdenes de las mesas.")
             }
             Column(
                 Modifier.fillMaxWidth().aspectRatio(0.8f).background(Palette.card, Ui.shape)
                     .border(1.dp, Palette.line, Ui.shape).clickable { onPick(role) }.padding(Ui.pad),
             ) {
-                FoodIcon(icon, 64.dp)
+                Illustration(icon, 64.dp)
                 Spacer(Modifier.weight(1f))
                 Text(title, fontSize = 22.sp, fontWeight = FontWeight.Bold)
                 Text(body, color = Palette.muted, fontSize = 14.sp, minLines = 3, maxLines = 3, modifier = Modifier.padding(top = 4.dp))

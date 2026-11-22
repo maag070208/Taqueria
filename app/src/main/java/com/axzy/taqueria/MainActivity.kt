@@ -29,6 +29,12 @@ class MainActivity : ComponentActivity() {
         const val LOCAL_NETWORK = "android.permission.ACCESS_LOCAL_NETWORK"
     }
 
+    /** Si el admin deja la app (o se apaga la pantalla), cocina vuelve a taquero. */
+    override fun onStop() {
+        super.onStop()
+        app.lockAdmin()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge(
@@ -42,7 +48,7 @@ class MainActivity : ComponentActivity() {
                 when (app.role) {
                     null -> RoleScreen(onPick = app::applyRole)
                     Role.KITCHEN -> LicenseGate(app.license, onExit = { app.applyRole(null) }) { notice ->
-                        KitchenScreen(app.store, app.server, notice, onExit = { app.applyRole(null) })
+                        KitchenScreen(app, notice)
                     }
                     Role.WAITER -> WaiterScreen(app, onExit = { app.applyRole(null) })
                 }

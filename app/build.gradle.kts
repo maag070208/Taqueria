@@ -26,7 +26,9 @@ android {
     }
 
     // API de Axzy Central (licencia de la taquería): -Ptaqueria.apiUrl=https://…/api/v1
-    val apiUrl = project.findProperty("taqueria.apiUrl") as String?
+    // providers.gradleProperty (no findProperty) para que la caché de configuración note el -P;
+    // si no, un APK puede salir con la URL de la compilación anterior.
+    val apiUrl = providers.gradleProperty("taqueria.apiUrl").orNull
     buildTypes {
         debug {
             // Emulador → API local de la Mac.
