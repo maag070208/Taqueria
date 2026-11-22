@@ -1,0 +1,43 @@
+Starting a Gradle Daemon, 1 busy and 1 stopped Daemons could not be reused, use --status for details
+Reusing configuration cache.
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths
+> Task :app:createDebugCompatibleScreenManifests
+> Task :app:generateDebugResources
+> Task :app:generateDebugBuildConfig
+> Task :app:javaPreCompileDebugUnitTest
+> Task :app:extractDeepLinksDebug
+> Task :app:javaPreCompileDebug
+> Task :app:packageDebugResources
+> Task :app:processDebugNavigationResources
+> Task :app:compileDebugNavigationResources
+> Task :app:checkDebugAarMetadata
+> Task :app:parseDebugLocalResources
+> Task :app:generateDebugRFile
+> Task :app:processDebugMainManifest
+> Task :app:processDebugManifest
+> Task :app:processDebugManifestForPackage
+> Task :app:mergeDebugResources
+> Task :app:processDebugResources
+
+> Task :app:compileDebugKotlin
+w: file:///Users/axzy/DEV/AXZY/Taqueria/app/src/main/java/com/axzy/taqueria/OrderStore.kt:195:23 Return in function with expression body and without explicit return type. Use block body '{...}' or add an explicit return type. This will become an error in language version 2.5. See https://youtrack.jetbrains.com/issue/KTLC-288.
+w: file:///Users/axzy/DEV/AXZY/Taqueria/app/src/main/java/com/axzy/taqueria/OrderStore.kt:217:29 Return in function with expression body and without explicit return type. Use block body '{...}' or add an explicit return type. This will become an error in language version 2.5. See https://youtrack.jetbrains.com/issue/KTLC-288.
+w: file:///Users/axzy/DEV/AXZY/Taqueria/app/src/main/java/com/axzy/taqueria/OrderStore.kt:255:48 Return in function with expression body and without explicit return type. Use block body '{...}' or add an explicit return type. This will become an error in language version 2.5. See https://youtrack.jetbrains.com/issue/KTLC-288.
+
+> Task :app:processDebugJavaRes
+> Task :app:compileDebugJavaWithJavac
+> Task :app:bundleDebugClassesToRuntimeJar
+> Task :app:bundleDebugClassesToCompileJar
+> Task :app:compileDebugUnitTestKotlin
+> Task :app:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :app:processDebugUnitTestJavaRes
+> Task :app:testDebugUnitTest
+
+[Incubating] Problems report is available at: file:///Users/axzy/DEV/AXZY/Taqueria/build/reports/problems/problems-report.html
+
+BUILD SUCCESSFUL in 32s
+26 actionable tasks: 26 executed
+Configuration cache entry reused.

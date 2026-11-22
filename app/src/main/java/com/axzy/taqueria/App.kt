@@ -33,6 +33,8 @@ class App : Application() {
         private set
     var manualHost by mutableStateOf("")
         private set
+    /** Evita tocar `server`/`store` en el teléfono de mesera: solo la cocina guarda datos. */
+    private var serverStarted = false
 
     override fun onCreate() {
         super.onCreate()
@@ -43,13 +45,21 @@ class App : Application() {
     fun applyRole(next: Role?) {
         prefs.edit().putString("role", next?.name).apply()
         role = next
-        if (next == Role.KITCHEN) { license.start(); server.start() } else { server.stop(); license.stop() }
+        if (next == Role.KITCHEN) {
+            license.start()
+            server.start()
+            serverStarted = true
+        } else {
+            // En mesera no se instancia el servidor (ni su OrderStore): no se guardan datos de negocio.
+            if (serverStarted) { server.stop(); serverStarted = false }
+            license.stop()
+        }
         if (next == Role.WAITER) client.start(manualHost) else client.stop()
     }
 
     /** Reinicia servidor/cliente, p. ej. después de conceder el permiso de red local. */
     fun restartNetwork() {
-        server.stop()
+        if (serverStarted) { server.stop(); serverStarted = false }
         applyRole(role)
     }
 

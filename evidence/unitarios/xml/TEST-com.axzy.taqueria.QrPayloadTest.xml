@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.axzy.taqueria.QrPayloadTest" tests="13" skipped="0" failures="0" errors="0" timestamp="2026-11-21T20:20:41.557Z" hostname="MacBook-Pro-de-Martin.local" time="0.036">
+  <properties/>
+  <testcase name="jsonConLlavesExtraLasIgnora" classname="com.axzy.taqueria.QrPayloadTest" time="0.02"/>
+  <testcase name="versionFaltanteSeRechaza" classname="com.axzy.taqueria.QrPayloadTest" time="0.005"/>
+  <testcase name="jsonSinUrlUsaElServidorCompilado" classname="com.axzy.taqueria.QrPayloadTest" time="0.001"/>
+  <testcase name="codigoSueltoRecortaEspacios" classname="com.axzy.taqueria.QrPayloadTest" time="0.0"/>
+  <testcase name="quitaLaDiagonalFinalDeLaUrl" classname="com.axzy.taqueria.QrPayloadTest" time="0.003"/>
+  <testcase name="jsonDelContratoConServidorYProducto" classname="com.axzy.taqueria.QrPayloadTest" time="0.0"/>
+  <testcase name="codigoSueltoAxcSeAcepta" classname="com.axzy.taqueria.QrPayloadTest" time="0.0"/>
+  <testcase name="productoAjenoDaMensajeClaro" classname="com.axzy.taqueria.QrPayloadTest" time="0.0"/>
+  <testcase name="codigoVacioEnJsonSeRechaza" classname="com.axzy.taqueria.QrPayloadTest" time="0.0"/>
+  <testcase name="jsonSinProductoEsValido" classname="com.axzy.taqueria.QrPayloadTest" time="0.001"/>
+  <testcase name="versionDistintaSeRechaza" classname="com.axzy.taqueria.QrPayloadTest" time="0.0"/>
+  <testcase name="basuraSeRechaza" classname="com.axzy.taqueria.QrPayloadTest" time="0.005"/>
+  <testcase name="urlInvalidaSeRechaza" classname="com.axzy.taqueria.QrPayloadTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

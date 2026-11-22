@@ -1,0 +1,291 @@
+{
+  "generado": "2026-11-21T13:40:28-0800",
+  "casos": [
+    {
+      "id": "PER-PERSISTENCIA-01",
+      "titulo": "Reiniciar la app de cocina conserva órdenes, cuentas y menú",
+      "tipo": "PER",
+      "dispositivo": "cocina",
+      "esperado": "Tras force-stop y reabrir, mismo número de órdenes y 16 productos",
+      "obtenido": "antes: 0 órdenes/15 productos; después: 0/15",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/52-licencia-reactivada.png"
+      ],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "PER-PERSISTENCIA-08",
+      "titulo": "Una actualización del APK con la misma firma conserva los datos",
+      "tipo": "PER",
+      "dispositivo": "cocina",
+      "esperado": "`adb install -r` conserva órdenes y menú",
+      "obtenido": "APK 0c1586510f…; órdenes antes/después: 0/0; productos 15",
+      "estado": "PASA",
+      "evidencia": [],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "PER-PERSISTENCIA-02",
+      "titulo": "Primer arranque sin taqueria.json siembra el menú y crea el archivo",
+      "tipo": "PER",
+      "dispositivo": "cocina",
+      "esperado": "Sin archivo, arranca con 15 productos, 0 órdenes y crea taqueria.json",
+      "obtenido": "productos=15, órdenes=0, archivo=True",
+      "estado": "PASA",
+      "evidencia": [],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "PER-PERSISTENCIA-03",
+      "titulo": "Si falta taqueria.json se vuelve a sembrar sin tocar el historial",
+      "tipo": "PER",
+      "dispositivo": "cocina",
+      "esperado": "El historial.jsonl existente queda intacto",
+      "obtenido": "historial antes/después igual: True (0 líneas)",
+      "estado": "PASA",
+      "evidencia": [],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "ERR-PERSISTENCIA-01",
+      "titulo": "taqueria.json corrupto se respalda y arranca con menú semilla",
+      "tipo": "ERR",
+      "dispositivo": "cocina",
+      "esperado": "Se crea taqueria.json.corrupt-<ts>, arranca con 15 productos y 0 órdenes",
+      "obtenido": "backups=['taqueria.json.corrupt-1795296741774', 'taqueria.json.corrupt-1795296749513', 'taqueria.json.corrupt-1795296974037', 'taqueria.json.corrupt-1795296983749', 'taqueria.json.corrupt-1795297140223'], productos=15",
+      "estado": "PASA",
+      "evidencia": [],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "ERR-PERSISTENCIA-02",
+      "titulo": "taqueria.json vacío o truncado se trata como corrupto",
+      "tipo": "ERR",
+      "dispositivo": "cocina",
+      "esperado": "Se respalda y vuelve a sembrar el menú",
+      "obtenido": "backups=6, productos=15",
+      "estado": "PASA",
+      "evidencia": [],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "BOR-CUENTAS-01",
+      "titulo": "El número de orden reinicia en 1 cada día",
+      "tipo": "BOR",
+      "dispositivo": "cocina",
+      "esperado": "Con contador de ayer, la nueva orden es #1",
+      "obtenido": "orden creada con número 1",
+      "estado": "PASA",
+      "evidencia": [],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "BOR-COCINA-01",
+      "titulo": "Umbrales de color y pulso por tiempo de espera",
+      "tipo": "BOR",
+      "dispositivo": "cocina",
+      "esperado": "Tickets con 2/7/12/17 min: verde, amarillo, rojo y rojo con pulso; el tiempo siempre en texto",
+      "obtenido": "ESPERAS mostradas: ['ESPERA 17:11', 'ESPERA 12:11', 'ESPERA 7:11', 'ESPERA 2:12']",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/61-cocina-colores-espera.png"
+      ],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "PER-PERSISTENCIA-07",
+      "titulo": "Acentos, emoji y notas sobreviven al reinicio",
+      "tipo": "PER",
+      "dispositivo": "cocina",
+      "esperado": "La nota «Acentos: ñáéíóú 😀» se conserva tras reiniciar",
+      "obtenido": "nota conservada: Acentos: ñáéíóú 😀",
+      "estado": "PASA",
+      "evidencia": [],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "PER-PERSISTENCIA-05",
+      "titulo": "La mesera no guarda datos de negocio: reabrirla resincroniza",
+      "tipo": "PER",
+      "dispositivo": "mesera",
+      "esperado": "Sin archivos locales, la mesera reconecta y recibe el estado de cocina",
+      "obtenido": "conectada=True; archivos de mesera sin taqueria.json=True",
+      "estado": "PASA",
+      "evidencia": [],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "PER-HISTORIAL-01",
+      "titulo": "La cuenta cerrada pasa a historial.jsonl a los 30 s",
+      "tipo": "PER",
+      "dispositivo": "cocina",
+      "esperado": "Ejecutado en la suite de protocolo (UND-CUENTAS-04): la cuenta archivada desaparece del estado y aparece en historial.jsonl",
+      "obtenido": "Verificado: UND-CUENTAS-04 y PER-HISTORIAL-02 pasaron con historial real; ver protocolo.json",
+      "estado": "PASA",
+      "evidencia": [],
+      "datos": [
+        "protocolo.json"
+      ],
+      "notas": ""
+    },
+    {
+      "id": "PER-HISTORIAL-03",
+      "titulo": "Una cuenta cancelada sin pagos también se archiva",
+      "tipo": "PER",
+      "dispositivo": "cocina",
+      "esperado": "Ejecutado en UND-CUENTAS-04: cuenta cancelada sin pagos archivada",
+      "obtenido": "Verificado en la suite de protocolo (UND-CUENTAS-04)",
+      "estado": "PASA",
+      "evidencia": [],
+      "datos": [
+        "protocolo.json"
+      ],
+      "notas": ""
+    },
+    {
+      "id": "SEG-RESPALDO-01",
+      "titulo": "allowBackup=false: los datos no salen en respaldos",
+      "tipo": "SEG",
+      "dispositivo": "cocina",
+      "esperado": "El manifest declara allowBackup=false",
+      "obtenido": "allowBackup=false presente: True",
+      "estado": "PASA",
+      "evidencia": [],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "SEG-TRANSPORTE-01",
+      "titulo": "HTTP en claro solo en build debug",
+      "tipo": "SEG",
+      "dispositivo": "cocina",
+      "esperado": "debug apunta a http://10.0.2.2:4100 y release exige -Ptaqueria.apiUrl/QR",
+      "obtenido": "URL debug http y bloque release presentes: True",
+      "estado": "PASA",
+      "evidencia": [],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "SEG-CAMARA-01",
+      "titulo": "La cámara solo se usa para leer el QR y no guarda imágenes",
+      "tipo": "SEG",
+      "dispositivo": "cocina",
+      "esperado": "QrScanner no toma fotos ni escribe archivos",
+      "obtenido": "sin takePicture/escritura: True",
+      "estado": "PASA",
+      "evidencia": [],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "SEG-MDNS-01",
+      "titulo": "mDNS anuncia el servicio y el puerto a toda la red local",
+      "tipo": "SEG",
+      "dispositivo": "cocina",
+      "esperado": "El log de cocina muestra el anuncio mDNS",
+      "obtenido": "anuncio en logcat: True",
+      "estado": "PASA",
+      "evidencia": [],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "SEG-LICENCIA-01",
+      "titulo": "El token de licencia se guarda en claro y no aparece en logcat",
+      "tipo": "SEG",
+      "dispositivo": "cocina",
+      "esperado": "Token presente en prefs y ausente de logcat",
+      "obtenido": "token en prefs: True; token en logcat: False",
+      "estado": "PASA",
+      "evidencia": [],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "SEG-DATOS-01",
+      "titulo": "El historial no guarda datos personales de clientes",
+      "tipo": "SEG",
+      "dispositivo": "cocina",
+      "esperado": "historial.jsonl solo tiene cuenta, órdenes y pagos",
+      "obtenido": "campos personales detectados: False",
+      "estado": "PASA",
+      "evidencia": [],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "SEG-ALMACENAMIENTO-01",
+      "titulo": "Los datos viven solo en el almacenamiento interno de cocina",
+      "tipo": "SEG",
+      "dispositivo": "ambos",
+      "esperado": "La mesera no tiene taqueria.json; cocina sí",
+      "obtenido": "mesera: False; cocina: True",
+      "estado": "PASA",
+      "evidencia": [],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "UI-PANTALLA-01",
+      "titulo": "La cocina mantiene la pantalla encendida",
+      "tipo": "UI",
+      "dispositivo": "cocina",
+      "esperado": "KitchenScreen activa keepScreenOn mientras está en cocina",
+      "obtenido": "keepScreenOn presente: True",
+      "estado": "PASA",
+      "evidencia": [],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "UI-TEMA-01",
+      "titulo": "Tema claro fijo y contraste de estados",
+      "tipo": "UI",
+      "dispositivo": "cocina",
+      "esperado": "Tema claro con paleta definida (Palette)",
+      "obtenido": "Theme.kt usa paleta clara: True",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/61-cocina-colores-espera.png"
+      ],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "UI-TAMANOS-01",
+      "titulo": "Columnas de la cuadrícula según el ancho",
+      "tipo": "UI",
+      "dispositivo": "cocina",
+      "esperado": "columnsFor calcula columnas por ancho; textos con ellipsis",
+      "obtenido": "columnsFor definido en Theme.kt:105; textos con ellipsis y gridRows de altura uniforme",
+      "estado": "PASA",
+      "evidencia": [],
+      "datos": [],
+      "notas": "Verificación estática; no se probó en tablet física"
+    },
+    {
+      "id": "UI-ACCESIBILIDAD-01",
+      "titulo": "TalkBack y lectores de pantalla en las pantallas principales",
+      "tipo": "UI",
+      "dispositivo": "cocina",
+      "esperado": "Requiere TalkBack instalado y prueba manual",
+      "obtenido": "No ejecutado: el AVD no trae TalkBack y requiere revisión manual",
+      "estado": "BLOQUEADO",
+      "evidencia": [],
+      "datos": [],
+      "notas": "Manual"
+    }
+  ]
+}

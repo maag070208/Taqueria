@@ -40,11 +40,11 @@ class OrderStoreTest {
     }
 
     @Test fun `grupos identicos se unen y las modificaciones combinables se aceptan`() {
-        val pastor = product("Pastor").id
+        val adobada = product("Adobada").id
         val o = order("7", null,
-            LineRequest(pastor, 1, listOf("Sin salsa", "Cebolla aparte")),
-            LineRequest(pastor, 1, listOf("Cebolla aparte", "Sin salsa")),
-            LineRequest(pastor, 2, listOf("Bien dorado", "Con queso")))
+            LineRequest(adobada, 1, listOf("Sin salsa", "Cebolla aparte")),
+            LineRequest(adobada, 1, listOf("Cebolla aparte", "Sin salsa")),
+            LineRequest(adobada, 2, listOf("Bien dorado", "Con queso")))
         assertEquals(listOf(2, 2), o.lines.map { it.qty })
         assertEquals(listOf("Sin salsa", "Cebolla aparte"), o.lines[0].mods)
     }
@@ -147,9 +147,9 @@ class OrderStoreTest {
         val asada = product("Asada").id
         val o = order("4", null, LineRequest(asada, 4))
         val edited = store.editOrder(o.id, listOf(
-            LineRequest(asada, 2), LineRequest(product("Adobada").id, 1), LineRequest(product("Chorizo").id, 1),
+            LineRequest(asada, 2), LineRequest(product("Adobada").id, 1), LineRequest(product("Suadero").id, 1),
         ))
-        assertEquals(listOf("Asada" to 2, "Adobada" to 1, "Chorizo" to 1), edited.lines.map { it.name to it.qty })
+        assertEquals(listOf("Asada" to 2, "Adobada" to 1, "Suadero" to 1), edited.lines.map { it.name to it.qty })
         assertEquals(listOf(listOf(4)), edited.revisions.map { rev -> rev.map { it.qty } })
         assertNotNull(edited.editedAt)
         assertEquals(1, store.state.value.orders.size)
@@ -174,9 +174,9 @@ class OrderStoreTest {
         assertThrows(ValidationException::class.java) {
             store.addPayment(ClientMsg.AddPayment(++req, "x", o.accountId, total, PayMethod.CASH, receivedCents = total - 1))
         }
-        val pid = store.addPayment(ClientMsg.AddPayment(++req, "y", o.accountId, total, PayMethod.CASH, receivedCents = 10_000, deliver = true))
+        val pid = store.addPayment(ClientMsg.AddPayment(++req, "y", o.accountId, total, PayMethod.CASH, receivedCents = 20_000, deliver = true))
         val s = store.state.value
-        assertEquals(10_000L, account(o.accountId).payments.single().receivedCents)
+        assertEquals(20_000L, account(o.accountId).payments.single().receivedCents)
         assertEquals(OrderStatus.DELIVERED, s.orders.single().status)
         assertNotNull("pagada y entregada: se cierra", account(o.accountId).closedAt)
         // Deshacer el pago regresa la orden a cocina.

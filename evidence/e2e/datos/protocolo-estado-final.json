@@ -1,0 +1,2264 @@
+{
+ "products": [
+  {
+   "id": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+   "name": "Asada",
+   "priceCents": 2000,
+   "category": "Tacos",
+   "active": true,
+   "emoji": "",
+   "modifierGroupIds": [
+    "bbe08f9c-2d37-49de-8981-f74ed9b8fe4a",
+    "95527d65-23d2-4f75-9929-e1be60ba7f5c",
+    "ce58258b-2414-4c60-b45a-1e4c1f672b46",
+    "a24f5d25-8d3a-4c9f-bcac-8d2ca14370ff"
+   ]
+  },
+  {
+   "id": "ffe6a405-0310-4843-a4c4-8913decd648f",
+   "name": "Pastor",
+   "priceCents": 1800,
+   "category": "Tacos",
+   "active": true,
+   "emoji": "",
+   "modifierGroupIds": [
+    "bbe08f9c-2d37-49de-8981-f74ed9b8fe4a",
+    "95527d65-23d2-4f75-9929-e1be60ba7f5c",
+    "ce58258b-2414-4c60-b45a-1e4c1f672b46",
+    "a24f5d25-8d3a-4c9f-bcac-8d2ca14370ff"
+   ]
+  },
+  {
+   "id": "60cb917c-180f-4f82-847c-43aaaba6185f",
+   "name": "Adobada",
+   "priceCents": 1800,
+   "category": "Tacos",
+   "active": true,
+   "emoji": "",
+   "modifierGroupIds": [
+    "bbe08f9c-2d37-49de-8981-f74ed9b8fe4a",
+    "95527d65-23d2-4f75-9929-e1be60ba7f5c",
+    "ce58258b-2414-4c60-b45a-1e4c1f672b46",
+    "a24f5d25-8d3a-4c9f-bcac-8d2ca14370ff"
+   ]
+  },
+  {
+   "id": "9ccf29c6-59b6-4847-b423-5352030e3546",
+   "name": "Chorizo",
+   "priceCents": 1800,
+   "category": "Tacos",
+   "active": true,
+   "emoji": "",
+   "modifierGroupIds": [
+    "bbe08f9c-2d37-49de-8981-f74ed9b8fe4a",
+    "95527d65-23d2-4f75-9929-e1be60ba7f5c",
+    "ce58258b-2414-4c60-b45a-1e4c1f672b46",
+    "a24f5d25-8d3a-4c9f-bcac-8d2ca14370ff"
+   ]
+  },
+  {
+   "id": "f9a4bd62-478e-479e-bb0d-10a5d4e72712",
+   "name": "Suadero",
+   "priceCents": 1800,
+   "category": "Tacos",
+   "active": true,
+   "emoji": "",
+   "modifierGroupIds": [
+    "bbe08f9c-2d37-49de-8981-f74ed9b8fe4a",
+    "95527d65-23d2-4f75-9929-e1be60ba7f5c",
+    "ce58258b-2414-4c60-b45a-1e4c1f672b46",
+    "a24f5d25-8d3a-4c9f-bcac-8d2ca14370ff"
+   ]
+  },
+  {
+   "id": "1bb73197-1399-416f-9a8f-f434f607c0c9",
+   "name": "Bistec",
+   "priceCents": 2000,
+   "category": "Tacos",
+   "active": true,
+   "emoji": "",
+   "modifierGroupIds": [
+    "bbe08f9c-2d37-49de-8981-f74ed9b8fe4a",
+    "95527d65-23d2-4f75-9929-e1be60ba7f5c",
+    "ce58258b-2414-4c60-b45a-1e4c1f672b46",
+    "a24f5d25-8d3a-4c9f-bcac-8d2ca14370ff"
+   ]
+  },
+  {
+   "id": "24773edf-f0f5-449c-bbc9-fbc827001050",
+   "name": "Campechano",
+   "priceCents": 2000,
+   "category": "Tacos",
+   "active": true,
+   "emoji": "",
+   "modifierGroupIds": [
+    "bbe08f9c-2d37-49de-8981-f74ed9b8fe4a",
+    "95527d65-23d2-4f75-9929-e1be60ba7f5c",
+    "ce58258b-2414-4c60-b45a-1e4c1f672b46",
+    "a24f5d25-8d3a-4c9f-bcac-8d2ca14370ff"
+   ]
+  },
+  {
+   "id": "f3e8767a-c5cc-4bb4-a038-09723004ba42",
+   "name": "Longaniza",
+   "priceCents": 1800,
+   "category": "Tacos",
+   "active": true,
+   "emoji": "",
+   "modifierGroupIds": [
+    "bbe08f9c-2d37-49de-8981-f74ed9b8fe4a",
+    "95527d65-23d2-4f75-9929-e1be60ba7f5c",
+    "ce58258b-2414-4c60-b45a-1e4c1f672b46",
+    "a24f5d25-8d3a-4c9f-bcac-8d2ca14370ff"
+   ]
+  },
+  {
+   "id": "ed9d6a1f-8624-4f03-a17b-4c61c92cbc1e",
+   "name": "Tripa",
+   "priceCents": 2200,
+   "category": "Tacos",
+   "active": true,
+   "emoji": "",
+   "modifierGroupIds": [
+    "bbe08f9c-2d37-49de-8981-f74ed9b8fe4a",
+    "95527d65-23d2-4f75-9929-e1be60ba7f5c",
+    "ce58258b-2414-4c60-b45a-1e4c1f672b46",
+    "a24f5d25-8d3a-4c9f-bcac-8d2ca14370ff"
+   ]
+  },
+  {
+   "id": "b7c002b9-36f4-4536-aab9-92b5e21cbe90",
+   "name": "Cabeza",
+   "priceCents": 2000,
+   "category": "Tacos",
+   "active": true,
+   "emoji": "",
+   "modifierGroupIds": [
+    "bbe08f9c-2d37-49de-8981-f74ed9b8fe4a",
+    "95527d65-23d2-4f75-9929-e1be60ba7f5c",
+    "ce58258b-2414-4c60-b45a-1e4c1f672b46",
+    "a24f5d25-8d3a-4c9f-bcac-8d2ca14370ff"
+   ]
+  },
+  {
+   "id": "eeb67ee0-ad14-4f7d-bb3c-3bad7652af25",
+   "name": "Quesadilla",
+   "priceCents": 4500,
+   "category": "Especiales",
+   "active": true,
+   "emoji": "🧀",
+   "modifierGroupIds": [
+    "bbe08f9c-2d37-49de-8981-f74ed9b8fe4a",
+    "95527d65-23d2-4f75-9929-e1be60ba7f5c"
+   ]
+  },
+  {
+   "id": "860ef36c-da1f-4c1f-a5a7-e9a1d28060a6",
+   "name": "Gringa",
+   "priceCents": 5500,
+   "category": "Especiales",
+   "active": true,
+   "emoji": "🫓",
+   "modifierGroupIds": [
+    "bbe08f9c-2d37-49de-8981-f74ed9b8fe4a",
+    "95527d65-23d2-4f75-9929-e1be60ba7f5c"
+   ]
+  },
+  {
+   "id": "7abfddfb-9678-42b5-a267-5fc8e5a10c4a",
+   "name": "Refresco",
+   "priceCents": 3000,
+   "category": "Bebidas",
+   "active": true,
+   "emoji": "🥤",
+   "modifierGroupIds": [
+    "b604e517-e853-4234-bd54-75212e45214f"
+   ]
+  },
+  {
+   "id": "d52d81c9-31ab-48bb-a4d3-27e94530ff09",
+   "name": "Agua de horchata",
+   "priceCents": 3000,
+   "category": "Bebidas",
+   "active": true,
+   "emoji": "🥛",
+   "modifierGroupIds": [
+    "b604e517-e853-4234-bd54-75212e45214f"
+   ]
+  },
+  {
+   "id": "bd9b7a18-cd9d-49d6-ad2d-3499d880809f",
+   "name": "Agua de jamaica",
+   "priceCents": 3000,
+   "category": "Bebidas",
+   "active": true,
+   "emoji": "🍹",
+   "modifierGroupIds": [
+    "b604e517-e853-4234-bd54-75212e45214f"
+   ]
+  }
+ ],
+ "modifierGroups": [
+  {
+   "id": "bbe08f9c-2d37-49de-8981-f74ed9b8fe4a",
+   "name": "Salsa",
+   "options": [
+    "Con salsa",
+    "Sin salsa",
+    "Salsa aparte"
+   ],
+   "exclusive": true
+  },
+  {
+   "id": "95527d65-23d2-4f75-9929-e1be60ba7f5c",
+   "name": "Cebolla",
+   "options": [
+    "Con cebolla",
+    "Sin cebolla",
+    "Cebolla aparte"
+   ],
+   "exclusive": true
+  },
+  {
+   "id": "ce58258b-2414-4c60-b45a-1e4c1f672b46",
+   "name": "Cilantro",
+   "options": [
+    "Con cilantro",
+    "Sin cilantro"
+   ],
+   "exclusive": true
+  },
+  {
+   "id": "a24f5d25-8d3a-4c9f-bcac-8d2ca14370ff",
+   "name": "Extras",
+   "options": [
+    "Bien dorado",
+    "Con queso",
+    "Doble tortilla"
+   ],
+   "exclusive": false
+  },
+  {
+   "id": "b604e517-e853-4234-bd54-75212e45214f",
+   "name": "Hielo",
+   "options": [
+    "Con hielo",
+    "Sin hielo"
+   ],
+   "exclusive": true
+  }
+ ],
+ "accounts": [
+  {
+   "id": "5054bbba-2bb6-431b-8601-24783d67a881",
+   "table": "TV07",
+   "number": 1,
+   "createdAt": 1795293115472,
+   "payments": [
+    {
+     "id": "dd184b13-3d32-4ca3-9fc4-adcd0698f260",
+     "amountCents": 2000,
+     "method": "CASH",
+     "at": 1795293235367,
+     "clientKey": "63df536d-4ada-40d2-a495-036d9af0feb8",
+     "voided": false,
+     "receivedCents": 50000
+    }
+   ],
+   "cancelledAt": null,
+   "closedAt": 1795293235370
+  },
+  {
+   "id": "6add82a2-d70b-42b9-8a9a-a38edf5f0647",
+   "table": "TV08b",
+   "number": 1,
+   "createdAt": 1795293115814,
+   "payments": [],
+   "cancelledAt": null,
+   "closedAt": null
+  },
+  {
+   "id": "4d49cd9f-e4e6-48d9-a134-8a5b1406763e",
+   "table": "TV10",
+   "number": 1,
+   "createdAt": 1795293116400,
+   "payments": [],
+   "cancelledAt": null,
+   "closedAt": null
+  },
+  {
+   "id": "234802c8-c843-473f-aba0-5c5fed07216e",
+   "table": "TV13",
+   "number": 1,
+   "createdAt": 1795293116734,
+   "payments": [],
+   "cancelledAt": null,
+   "closedAt": null
+  },
+  {
+   "id": "bb4099a9-4ed2-422b-b2f2-127cfcb77442",
+   "table": "TV15",
+   "number": 1,
+   "createdAt": 1795293116840,
+   "payments": [],
+   "cancelledAt": null,
+   "closedAt": null
+  },
+  {
+   "id": "6e64b011-11f9-4458-9572-1eddf1b8e829",
+   "table": "TV16",
+   "number": 1,
+   "createdAt": 1795293116936,
+   "payments": [],
+   "cancelledAt": null,
+   "closedAt": null
+  },
+  {
+   "id": "fccdbff4-713c-457f-94eb-9f98122f7ee0",
+   "table": "TV17",
+   "number": 1,
+   "createdAt": 1795293116972,
+   "payments": [],
+   "cancelledAt": null,
+   "closedAt": null
+  },
+  {
+   "id": "84c9cc66-ae65-4f8b-ba67-a61f459c7e4b",
+   "table": "TV18",
+   "number": 1,
+   "createdAt": 1795293117061,
+   "payments": [],
+   "cancelledAt": null,
+   "closedAt": null
+  },
+  {
+   "id": "6426a655-6bbd-4283-af24-287af686e1cf",
+   "table": "TV19",
+   "number": 1,
+   "createdAt": 1795293117144,
+   "payments": [],
+   "cancelledAt": null,
+   "closedAt": null
+  },
+  {
+   "id": "31f57dfb-1005-4b2f-becd-6d804070a2e3",
+   "table": "TV21",
+   "number": 1,
+   "createdAt": 1795293117376,
+   "payments": [],
+   "cancelledAt": null,
+   "closedAt": null
+  },
+  {
+   "id": "06f8cb82-3c0b-4f0c-93ee-bbf4bf3463cf",
+   "table": "TB01",
+   "number": 1,
+   "createdAt": 1795293117382,
+   "payments": [],
+   "cancelledAt": null,
+   "closedAt": null
+  },
+  {
+   "id": "072d81d3-49cc-4c8a-a6c3-5a87463bf6d2",
+   "table": "TB06",
+   "number": 1,
+   "createdAt": 1795293117453,
+   "payments": [],
+   "cancelledAt": null,
+   "closedAt": null
+  },
+  {
+   "id": "403be938-1c84-46e7-a004-2261ce9b8bd6",
+   "table": "TB07",
+   "number": 1,
+   "createdAt": 1795293117565,
+   "payments": [],
+   "cancelledAt": null,
+   "closedAt": null
+  },
+  {
+   "id": "97be6861-f0d8-4482-8e6a-203e78e0ef14",
+   "table": "TB08",
+   "number": 1,
+   "createdAt": 1795293117666,
+   "payments": [
+    {
+     "id": "1f1ba1c8-8021-4d90-9d5b-5f6b8feac35c",
+     "amountCents": 2000,
+     "method": "CASH",
+     "at": 1795293117672,
+     "clientKey": "p-6acd123c268941fb98a8aa4fd5595a67",
+     "voided": false,
+     "receivedCents": null
+    }
+   ],
+   "cancelledAt": null,
+   "closedAt": null
+  },
+  {
+   "id": "a5140831-ddc5-44ed-bc6d-2eef83a6acde",
+   "table": "TB09",
+   "number": 1,
+   "createdAt": 1795293117749,
+   "payments": [],
+   "cancelledAt": null,
+   "closedAt": null
+  },
+  {
+   "id": "772b864a-65d1-4852-a69c-489aef07ed96",
+   "table": "TI01",
+   "number": 1,
+   "createdAt": 1795293117833,
+   "payments": [],
+   "cancelledAt": null,
+   "closedAt": null
+  },
+  {
+   "id": "88c4c142-c877-4f5f-9cfa-de851bdf72af",
+   "table": "TI02",
+   "number": 1,
+   "createdAt": 1795293117914,
+   "payments": [],
+   "cancelledAt": null,
+   "closedAt": null
+  },
+  {
+   "id": "f72abcf5-00f1-454f-99ab-a0c1af648ee4",
+   "table": "TI02",
+   "number": 2,
+   "createdAt": 1795293117920,
+   "payments": [],
+   "cancelledAt": null,
+   "closedAt": null
+  },
+  {
+   "id": "02c2e1ae-e165-4c09-8b51-d338d368f46d",
+   "table": "TI03",
+   "number": 1,
+   "createdAt": 1795293117997,
+   "payments": [],
+   "cancelledAt": null,
+   "closedAt": null
+  },
+  {
+   "id": "a9decb3a-111e-4a06-a21c-f33e2cb27755",
+   "table": "TI04",
+   "number": 1,
+   "createdAt": 1795293118042,
+   "payments": [],
+   "cancelledAt": null,
+   "closedAt": null
+  },
+  {
+   "id": "8c02dd1c-e73c-4b8c-984f-0bc873e71eb6",
+   "table": "TI06",
+   "number": 1,
+   "createdAt": 1795293118120,
+   "payments": [],
+   "cancelledAt": null,
+   "closedAt": null
+  },
+  {
+   "id": "7999dba4-df8c-4360-91e8-a4ed92aca8cc",
+   "table": "TI07",
+   "number": 1,
+   "createdAt": 1795293118215,
+   "payments": [],
+   "cancelledAt": null,
+   "closedAt": null
+  },
+  {
+   "id": "0761d051-d2e9-4fcd-899b-95773bb51f68",
+   "table": "TI08",
+   "number": 1,
+   "createdAt": 1795293118356,
+   "payments": [
+    {
+     "id": "625de019-4da7-494e-b229-08ed7a45d961",
+     "amountCents": 1000,
+     "method": "CASH",
+     "at": 1795293118361,
+     "clientKey": "pay-same-key",
+     "voided": false,
+     "receivedCents": null
+    }
+   ],
+   "cancelledAt": null,
+   "closedAt": null
+  },
+  {
+   "id": "ca36ed1d-9229-4485-87d8-1fc1674264b1",
+   "table": "TI09",
+   "number": 1,
+   "createdAt": 1795293118563,
+   "payments": [
+    {
+     "id": "92287837-44d1-4623-88cd-8bd616bbecdc",
+     "amountCents": 2000,
+     "method": "CASH",
+     "at": 1795293118583,
+     "clientKey": "p-6a2b24a25f6947b5b9d1f5d52cc22d70",
+     "voided": false,
+     "receivedCents": null
+    }
+   ],
+   "cancelledAt": null,
+   "closedAt": null
+  },
+  {
+   "id": "49c2498d-9f4d-4dd0-8a77-97c17f586488",
+   "table": "TI10",
+   "number": 1,
+   "createdAt": 1795293118780,
+   "payments": [],
+   "cancelledAt": null,
+   "closedAt": null
+  },
+  {
+   "id": "caa99c0d-c79b-41d4-8438-10ab517bcbc7",
+   "table": "TU01",
+   "number": 1,
+   "createdAt": 1795293119028,
+   "payments": [
+    {
+     "id": "7bca5f21-f3fb-419f-abc5-9696d464fa43",
+     "amountCents": 1000,
+     "method": "CASH",
+     "at": 1795293119042,
+     "clientKey": "p-8f55822db12b4d20a5eaa66734bcaece",
+     "voided": true,
+     "receivedCents": null
+    }
+   ],
+   "cancelledAt": null,
+   "closedAt": null
+  },
+  {
+   "id": "be8dcc65-9cf8-4b25-8927-98d3c24911d9",
+   "table": "TU02",
+   "number": 1,
+   "createdAt": 1795293119203,
+   "payments": [
+    {
+     "id": "d05d4bd5-85aa-4fcf-9d27-d25726694a2b",
+     "amountCents": 4000,
+     "method": "CASH",
+     "at": 1795293119217,
+     "clientKey": "p-0dab8b44808e458486c015ff90e9d960",
+     "voided": false,
+     "receivedCents": null
+    },
+    {
+     "id": "0af5a077-f4cb-48b4-a460-63c99a65fa37",
+     "amountCents": -2000,
+     "method": "CASH",
+     "at": 1795293119318,
+     "clientKey": "refund-1",
+     "voided": true,
+     "receivedCents": null
+    }
+   ],
+   "cancelledAt": null,
+   "closedAt": null
+  },
+  {
+   "id": "62f92591-7826-4413-b516-766531691761",
+   "table": "TE02",
+   "number": 1,
+   "createdAt": 1795293226119,
+   "payments": [],
+   "cancelledAt": null,
+   "closedAt": null
+  },
+  {
+   "id": "76de0a47-c41a-42e4-8e88-7657e3ee421a",
+   "table": "TP01",
+   "number": 1,
+   "createdAt": 1795293226241,
+   "payments": [
+    {
+     "id": "ed7ec36c-40fc-4fa3-8f62-6e8f96e2a778",
+     "amountCents": 2000,
+     "method": "CASH",
+     "at": 1795293226247,
+     "clientKey": "p-b6b400bb34c1436c9ea1157168704907",
+     "voided": false,
+     "receivedCents": null
+    }
+   ],
+   "cancelledAt": 1795293226263,
+   "closedAt": null
+  },
+  {
+   "id": "6f503485-c14e-4eda-b307-3e23bf49aad3",
+   "table": "TV08b",
+   "number": 2,
+   "createdAt": 1795293264978,
+   "payments": [],
+   "cancelledAt": null,
+   "closedAt": null
+  },
+  {
+   "id": "22efb581-e9e6-48d3-a29f-9bd5a35c4229",
+   "table": "TS01",
+   "number": 1,
+   "createdAt": 1795293271402,
+   "payments": [],
+   "cancelledAt": null,
+   "closedAt": null
+  },
+  {
+   "id": "af32ecad-c914-4277-a917-238245121e58",
+   "table": "TS02",
+   "number": 1,
+   "createdAt": 1795293271565,
+   "payments": [],
+   "cancelledAt": 1795293271572,
+   "closedAt": 1795293271572
+  },
+  {
+   "id": "0556947b-db22-4379-92b7-fa60ad8f4f3f",
+   "table": "TS03",
+   "number": 1,
+   "createdAt": 1795293271640,
+   "payments": [],
+   "cancelledAt": null,
+   "closedAt": null
+  },
+  {
+   "id": "9d1cd18e-e202-4b52-ad96-871f28e20fa9",
+   "table": "TF01",
+   "number": 1,
+   "createdAt": 1795293271813,
+   "payments": [
+    {
+     "id": "cd69871b-dc36-4f24-897c-bd273073499f",
+     "amountCents": 2000,
+     "method": "CASH",
+     "at": 1795293271940,
+     "clientKey": "p-7ddea8f51a864aef8f2d1601724313c7",
+     "voided": false,
+     "receivedCents": null
+    }
+   ],
+   "cancelledAt": null,
+   "closedAt": null
+  },
+  {
+   "id": "31a10e55-d0ed-4e9e-b5fc-0c94df6c3d81",
+   "table": "TF01",
+   "number": 2,
+   "createdAt": 1795293271936,
+   "payments": [],
+   "cancelledAt": null,
+   "closedAt": null
+  },
+  {
+   "id": "109d3625-108b-462f-8974-6bd1440a40c3",
+   "table": "TF02",
+   "number": 1,
+   "createdAt": 1795293272150,
+   "payments": [
+    {
+     "id": "59ab9f76-94bf-4248-a818-40e2f87e4ec4",
+     "amountCents": 2000,
+     "method": "CASH",
+     "at": 1795293272156,
+     "clientKey": "p-88a3fcdaafcf41f68b65c3a227fb674b",
+     "voided": false,
+     "receivedCents": null
+    },
+    {
+     "id": "fa8c9d04-3ddb-4875-9fa9-6b59a24ab6dc",
+     "amountCents": 2000,
+     "method": "TRANSFER",
+     "at": 1795293272162,
+     "clientKey": "p-6fbc117a22ff4c79bfbd3bcff818d18f",
+     "voided": false,
+     "receivedCents": null
+    }
+   ],
+   "cancelledAt": null,
+   "closedAt": null
+  },
+  {
+   "id": "c9005bd5-89ed-4dec-8167-bdf7153f4c4e",
+   "table": "TF03",
+   "number": 1,
+   "createdAt": 1795293272375,
+   "payments": [],
+   "cancelledAt": null,
+   "closedAt": null
+  },
+  {
+   "id": "5d221411-40a6-47f2-82d6-f33243f60440",
+   "table": "TF04",
+   "number": 1,
+   "createdAt": 1795293272511,
+   "payments": [],
+   "cancelledAt": null,
+   "closedAt": null
+  },
+  {
+   "id": "e9b8452d-6c11-473c-ae0a-420dc7791692",
+   "table": "TF04",
+   "number": 2,
+   "createdAt": 1795293272593,
+   "payments": [],
+   "cancelledAt": null,
+   "closedAt": null
+  }
+ ],
+ "orders": [
+  {
+   "id": "f8358211-8d8e-4d82-af0e-2ea01ad8328d",
+   "number": 2,
+   "accountId": "5054bbba-2bb6-431b-8601-24783d67a881",
+   "table": "TV07",
+   "accountNumber": 1,
+   "lines": [
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": ""
+    }
+   ],
+   "status": "DELIVERED",
+   "createdAt": 1795293115472,
+   "deliveredAt": 1795293115512,
+   "cancelledAt": null,
+   "cancelledByAccount": false,
+   "deliveredByPayment": null,
+   "revisions": [],
+   "editedAt": null,
+   "clientKey": "k-55558924149e470aa600e4b19fe3342e"
+  },
+  {
+   "id": "33845b36-201c-49d5-9cfa-e68d17adaf19",
+   "number": 4,
+   "accountId": "6add82a2-d70b-42b9-8a9a-a38edf5f0647",
+   "table": "TV08b",
+   "accountNumber": 1,
+   "lines": [
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": ""
+    }
+   ],
+   "status": "PENDING",
+   "createdAt": 1795293115814,
+   "deliveredAt": null,
+   "cancelledAt": null,
+   "cancelledByAccount": false,
+   "deliveredByPayment": null,
+   "revisions": [],
+   "editedAt": null,
+   "clientKey": "k-570c8052be5b40fa9da9b3a03ab21f29"
+  },
+  {
+   "id": "2e98ddbd-7a91-4613-9580-a7ca482312bd",
+   "number": 6,
+   "accountId": "4d49cd9f-e4e6-48d9-a134-8a5b1406763e",
+   "table": "TV10",
+   "accountNumber": 1,
+   "lines": [
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": ""
+    }
+   ],
+   "status": "PENDING",
+   "createdAt": 1795293116400,
+   "deliveredAt": null,
+   "cancelledAt": null,
+   "cancelledByAccount": false,
+   "deliveredByPayment": null,
+   "revisions": [],
+   "editedAt": null,
+   "clientKey": "k-b47297641b474364b10f482b101b094a"
+  },
+  {
+   "id": "7816702e-3da9-4e29-8899-b0a1f9a72ed0",
+   "number": 9,
+   "accountId": "234802c8-c843-473f-aba0-5c5fed07216e",
+   "table": "TV13",
+   "accountNumber": 1,
+   "lines": [
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": ""
+    }
+   ],
+   "status": "PENDING",
+   "createdAt": 1795293116734,
+   "deliveredAt": null,
+   "cancelledAt": null,
+   "cancelledByAccount": false,
+   "deliveredByPayment": null,
+   "revisions": [],
+   "editedAt": null,
+   "clientKey": "k-408edc83f8df4a03b1d0ede4ab980013"
+  },
+  {
+   "id": "03e3ed42-5fd9-4b63-a4e1-5ba876707a0f",
+   "number": 10,
+   "accountId": "bb4099a9-4ed2-422b-b2f2-127cfcb77442",
+   "table": "TV15",
+   "accountNumber": 1,
+   "lines": [
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": ""
+    }
+   ],
+   "status": "PENDING",
+   "createdAt": 1795293116840,
+   "deliveredAt": null,
+   "cancelledAt": null,
+   "cancelledByAccount": false,
+   "deliveredByPayment": null,
+   "revisions": [],
+   "editedAt": null,
+   "clientKey": "k-6a1bd89b78b246898f091ab4ae51e488"
+  },
+  {
+   "id": "6305a92e-bdf7-428c-948a-4b997d9ea08b",
+   "number": 11,
+   "accountId": "6e64b011-11f9-4458-9572-1eddf1b8e829",
+   "table": "TV16",
+   "accountNumber": 1,
+   "lines": [
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": ""
+    }
+   ],
+   "status": "PENDING",
+   "createdAt": 1795293116936,
+   "deliveredAt": null,
+   "cancelledAt": null,
+   "cancelledByAccount": false,
+   "deliveredByPayment": null,
+   "revisions": [],
+   "editedAt": null,
+   "clientKey": "k-869a08fa4c7c4838ba666f5ee1ac668d"
+  },
+  {
+   "id": "d0e93db0-fcb1-4b02-a6a6-25576b248058",
+   "number": 12,
+   "accountId": "fccdbff4-713c-457f-94eb-9f98122f7ee0",
+   "table": "TV17",
+   "accountNumber": 1,
+   "lines": [
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": ""
+    }
+   ],
+   "status": "PENDING",
+   "createdAt": 1795293116972,
+   "deliveredAt": null,
+   "cancelledAt": null,
+   "cancelledByAccount": false,
+   "deliveredByPayment": null,
+   "revisions": [],
+   "editedAt": null,
+   "clientKey": "k-3b38d0eda09d417189dcc81e70859ac7"
+  },
+  {
+   "id": "77aeec5e-0a64-4c1b-81ae-2d276622c8a7",
+   "number": 13,
+   "accountId": "84c9cc66-ae65-4f8b-ba67-a61f459c7e4b",
+   "table": "TV18",
+   "accountNumber": 1,
+   "lines": [
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": ""
+    }
+   ],
+   "status": "PENDING",
+   "createdAt": 1795293117061,
+   "deliveredAt": null,
+   "cancelledAt": null,
+   "cancelledByAccount": false,
+   "deliveredByPayment": null,
+   "revisions": [],
+   "editedAt": null,
+   "clientKey": "k-19d8ffd0419f469496dbf7b90ffc30fd"
+  },
+  {
+   "id": "d5b69c1b-c231-484e-bec4-3bdf3dd7a972",
+   "number": 14,
+   "accountId": "6426a655-6bbd-4283-af24-287af686e1cf",
+   "table": "TV19",
+   "accountNumber": 1,
+   "lines": [
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": ""
+    }
+   ],
+   "status": "PENDING",
+   "createdAt": 1795293117144,
+   "deliveredAt": null,
+   "cancelledAt": null,
+   "cancelledByAccount": false,
+   "deliveredByPayment": null,
+   "revisions": [],
+   "editedAt": null,
+   "clientKey": "k-9e69c3de7bb54b70b6ae0777bf28e017"
+  },
+  {
+   "id": "0fcc46f4-3a45-4d34-aa1a-34bcd51a59b9",
+   "number": 16,
+   "accountId": "31f57dfb-1005-4b2f-becd-6d804070a2e3",
+   "table": "TV21",
+   "accountNumber": 1,
+   "lines": [
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": ""
+    }
+   ],
+   "status": "PENDING",
+   "createdAt": 1795293117376,
+   "deliveredAt": null,
+   "cancelledAt": null,
+   "cancelledByAccount": false,
+   "deliveredByPayment": null,
+   "revisions": [],
+   "editedAt": null,
+   "clientKey": "k-2c30a2c98eb647a3bb7f7ab835f61dc3"
+  },
+  {
+   "id": "8d96bda6-8508-49bd-9743-413b81d09103",
+   "number": 17,
+   "accountId": "06f8cb82-3c0b-4f0c-93ee-bbf4bf3463cf",
+   "table": "TB01",
+   "accountNumber": 1,
+   "lines": [
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 99,
+     "mods": [],
+     "note": ""
+    }
+   ],
+   "status": "PENDING",
+   "createdAt": 1795293117382,
+   "deliveredAt": null,
+   "cancelledAt": null,
+   "cancelledByAccount": false,
+   "deliveredByPayment": null,
+   "revisions": [],
+   "editedAt": null,
+   "clientKey": "k-ea03af3a43f0428aaa675035cff92e9c"
+  },
+  {
+   "id": "63a33fb8-4880-41d8-aeec-8a8537a81a86",
+   "number": 18,
+   "accountId": "072d81d3-49cc-4c8a-a6c3-5a87463bf6d2",
+   "table": "TB06",
+   "accountNumber": 1,
+   "lines": [
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n0"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n1"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n2"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n3"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n4"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n5"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n6"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n7"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n8"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n9"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n10"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n11"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n12"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n13"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n14"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n15"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n16"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n17"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n18"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n19"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n20"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n21"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n22"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n23"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n24"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n25"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n26"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n27"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n28"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n29"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n30"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n31"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n32"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n33"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n34"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n35"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n36"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n37"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n38"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n39"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n40"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n41"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n42"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n43"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n44"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n45"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n46"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n47"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n48"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n49"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n50"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n51"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n52"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n53"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n54"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n55"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n56"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n57"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n58"
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "n59"
+    }
+   ],
+   "status": "PENDING",
+   "createdAt": 1795293117453,
+   "deliveredAt": null,
+   "cancelledAt": null,
+   "cancelledByAccount": false,
+   "deliveredByPayment": null,
+   "revisions": [],
+   "editedAt": null,
+   "clientKey": "k-a5b36f74fb714addb282250fc5cbdf26"
+  },
+  {
+   "id": "698fc751-3378-404e-bf24-19dcd361447a",
+   "number": 19,
+   "accountId": "403be938-1c84-46e7-a004-2261ce9b8bd6",
+   "table": "TB07",
+   "accountNumber": 1,
+   "lines": [
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn"
+    }
+   ],
+   "status": "PENDING",
+   "createdAt": 1795293117565,
+   "deliveredAt": null,
+   "cancelledAt": null,
+   "cancelledByAccount": false,
+   "deliveredByPayment": null,
+   "revisions": [],
+   "editedAt": null,
+   "clientKey": "k-f0d28ec7bcf744898ced8b371fd0cda9"
+  },
+  {
+   "id": "e736ddc8-bc57-4a6a-88a6-59f04bfee99a",
+   "number": 20,
+   "accountId": "97be6861-f0d8-4482-8e6a-203e78e0ef14",
+   "table": "TB08",
+   "accountNumber": 1,
+   "lines": [
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": ""
+    }
+   ],
+   "status": "PENDING",
+   "createdAt": 1795293117666,
+   "deliveredAt": null,
+   "cancelledAt": null,
+   "cancelledByAccount": false,
+   "deliveredByPayment": null,
+   "revisions": [],
+   "editedAt": null,
+   "clientKey": "k-588b02408bd9435ba2244ff810419343"
+  },
+  {
+   "id": "234aa530-ae29-40a5-aba1-53ca176c6619",
+   "number": 21,
+   "accountId": "a5140831-ddc5-44ed-bc6d-2eef83a6acde",
+   "table": "TB09",
+   "accountNumber": 1,
+   "lines": [
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": ""
+    }
+   ],
+   "status": "PENDING",
+   "createdAt": 1795293117749,
+   "deliveredAt": null,
+   "cancelledAt": null,
+   "cancelledByAccount": false,
+   "deliveredByPayment": null,
+   "revisions": [],
+   "editedAt": null,
+   "clientKey": "k-168d73cba09d4c48ade9e2bd73ba4136"
+  },
+  {
+   "id": "c5c92164-9105-41e9-8200-fcafb584e2b1",
+   "number": 22,
+   "accountId": "772b864a-65d1-4852-a69c-489aef07ed96",
+   "table": "TI01",
+   "accountNumber": 1,
+   "lines": [
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": ""
+    }
+   ],
+   "status": "PENDING",
+   "createdAt": 1795293117833,
+   "deliveredAt": null,
+   "cancelledAt": null,
+   "cancelledByAccount": false,
+   "deliveredByPayment": null,
+   "revisions": [],
+   "editedAt": null,
+   "clientKey": "same-key-1"
+  },
+  {
+   "id": "5f42e492-e8af-4b40-9861-f407073fb673",
+   "number": 23,
+   "accountId": "88c4c142-c877-4f5f-9cfa-de851bdf72af",
+   "table": "TI02",
+   "accountNumber": 1,
+   "lines": [
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": ""
+    }
+   ],
+   "status": "PENDING",
+   "createdAt": 1795293117914,
+   "deliveredAt": null,
+   "cancelledAt": null,
+   "cancelledByAccount": false,
+   "deliveredByPayment": null,
+   "revisions": [],
+   "editedAt": null,
+   "clientKey": "k-6d8599c3fd6c47adb9dedbe6bc721e18"
+  },
+  {
+   "id": "144dc762-0e35-4b78-b716-ea954a62d33f",
+   "number": 24,
+   "accountId": "f72abcf5-00f1-454f-99ab-a0c1af648ee4",
+   "table": "TI02",
+   "accountNumber": 2,
+   "lines": [
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": ""
+    }
+   ],
+   "status": "PENDING",
+   "createdAt": 1795293117920,
+   "deliveredAt": null,
+   "cancelledAt": null,
+   "cancelledByAccount": false,
+   "deliveredByPayment": null,
+   "revisions": [],
+   "editedAt": null,
+   "clientKey": "k-90c0a84eaee74f30b7c55b781d2f1f78"
+  },
+  {
+   "id": "5a6e1361-dcce-4704-8a81-3a2d4f9e8ff9",
+   "number": 25,
+   "accountId": "02c2e1ae-e165-4c09-8b51-d338d368f46d",
+   "table": "TI03",
+   "accountNumber": 1,
+   "lines": [
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": ""
+    }
+   ],
+   "status": "PENDING",
+   "createdAt": 1795293117997,
+   "deliveredAt": null,
+   "cancelledAt": null,
+   "cancelledByAccount": false,
+   "deliveredByPayment": null,
+   "revisions": [],
+   "editedAt": null,
+   "clientKey": "concurrent-key"
+  },
+  {
+   "id": "a264c0e8-ab94-4a31-ac30-f683bbc55adc",
+   "number": 26,
+   "accountId": "a9decb3a-111e-4a06-a21c-f33e2cb27755",
+   "table": "TI04",
+   "accountNumber": 1,
+   "lines": [
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": ""
+    }
+   ],
+   "status": "PENDING",
+   "createdAt": 1795293118042,
+   "deliveredAt": null,
+   "cancelledAt": null,
+   "cancelledByAccount": false,
+   "deliveredByPayment": null,
+   "revisions": [],
+   "editedAt": null,
+   "clientKey": "retry-key"
+  },
+  {
+   "id": "bc347e06-bb6c-43cd-abf0-008893b8d5b2",
+   "number": 27,
+   "accountId": "8c02dd1c-e73c-4b8c-984f-0bc873e71eb6",
+   "table": "TI06",
+   "accountNumber": 1,
+   "lines": [
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 2,
+     "mods": [],
+     "note": ""
+    }
+   ],
+   "status": "PENDING",
+   "createdAt": 1795293118120,
+   "deliveredAt": null,
+   "cancelledAt": null,
+   "cancelledByAccount": false,
+   "deliveredByPayment": null,
+   "revisions": [],
+   "editedAt": null,
+   "clientKey": "k-014833e0e40d41cb9c2580dd1cd57b89"
+  },
+  {
+   "id": "ccc57b3c-9bed-4c6f-b3ad-7eed2b2a5536",
+   "number": 28,
+   "accountId": "7999dba4-df8c-4360-91e8-a4ed92aca8cc",
+   "table": "TI07",
+   "accountNumber": 1,
+   "lines": [
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 2,
+     "mods": [],
+     "note": ""
+    }
+   ],
+   "status": "PENDING",
+   "createdAt": 1795293118215,
+   "deliveredAt": null,
+   "cancelledAt": null,
+   "cancelledByAccount": false,
+   "deliveredByPayment": null,
+   "revisions": [
+    [
+     {
+      "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+      "name": "Asada",
+      "priceCents": 2000,
+      "qty": 4,
+      "mods": [],
+      "note": ""
+     }
+    ],
+    [
+     {
+      "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+      "name": "Asada",
+      "priceCents": 2000,
+      "qty": 3,
+      "mods": [],
+      "note": ""
+     }
+    ]
+   ],
+   "editedAt": 1795293118268,
+   "clientKey": "k-779079955429442bbbcfa41b065a7841"
+  },
+  {
+   "id": "cd83ceb9-ad45-4b38-85ae-298686cec7c3",
+   "number": 29,
+   "accountId": "0761d051-d2e9-4fcd-899b-95773bb51f68",
+   "table": "TI08",
+   "accountNumber": 1,
+   "lines": [
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": ""
+    }
+   ],
+   "status": "PENDING",
+   "createdAt": 1795293118356,
+   "deliveredAt": null,
+   "cancelledAt": null,
+   "cancelledByAccount": false,
+   "deliveredByPayment": null,
+   "revisions": [],
+   "editedAt": null,
+   "clientKey": "k-d308d135e4724835b0e7192b35f73783"
+  },
+  {
+   "id": "ac62967f-009a-4599-accf-ae65d8de5725",
+   "number": 30,
+   "accountId": "ca36ed1d-9229-4485-87d8-1fc1674264b1",
+   "table": "TI09",
+   "accountNumber": 1,
+   "lines": [
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": ""
+    }
+   ],
+   "status": "PENDING",
+   "createdAt": 1795293118563,
+   "deliveredAt": null,
+   "cancelledAt": null,
+   "cancelledByAccount": false,
+   "deliveredByPayment": null,
+   "revisions": [],
+   "editedAt": null,
+   "clientKey": "k-85f191b5a598435485bd0698e72ac7b7"
+  },
+  {
+   "id": "22e72983-51bd-466a-84fc-0c284b39a861",
+   "number": 31,
+   "accountId": "49c2498d-9f4d-4dd0-8a77-97c17f586488",
+   "table": "TI10",
+   "accountNumber": 1,
+   "lines": [
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": ""
+    }
+   ],
+   "status": "DELIVERED",
+   "createdAt": 1795293118780,
+   "deliveredAt": 1795293118797,
+   "cancelledAt": null,
+   "cancelledByAccount": false,
+   "deliveredByPayment": null,
+   "revisions": [],
+   "editedAt": null,
+   "clientKey": "k-5dd8dddab24a4caf9a40b7c68f3731b5"
+  },
+  {
+   "id": "e9d5b1c2-18d8-4acb-a033-98e4965b3cdd",
+   "number": 33,
+   "accountId": "caa99c0d-c79b-41d4-8438-10ab517bcbc7",
+   "table": "TU01",
+   "accountNumber": 1,
+   "lines": [
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": ""
+    }
+   ],
+   "status": "PENDING",
+   "createdAt": 1795293119028,
+   "deliveredAt": null,
+   "cancelledAt": null,
+   "cancelledByAccount": false,
+   "deliveredByPayment": null,
+   "revisions": [],
+   "editedAt": null,
+   "clientKey": "k-8de320b53eaf431483d4203ac6a62ada"
+  },
+  {
+   "id": "0bb534e9-1ff0-469f-9ced-6e0e97082f7d",
+   "number": 34,
+   "accountId": "be8dcc65-9cf8-4b25-8927-98d3c24911d9",
+   "table": "TU02",
+   "accountNumber": 1,
+   "lines": [
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": ""
+    }
+   ],
+   "status": "PENDING",
+   "createdAt": 1795293119203,
+   "deliveredAt": null,
+   "cancelledAt": null,
+   "cancelledByAccount": false,
+   "deliveredByPayment": null,
+   "revisions": [
+    [
+     {
+      "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+      "name": "Asada",
+      "priceCents": 2000,
+      "qty": 2,
+      "mods": [],
+      "note": ""
+     }
+    ]
+   ],
+   "editedAt": 1795293119237,
+   "clientKey": "k-f559205f508745e38b3b546260f40a78"
+  },
+  {
+   "id": "196d0e50-a491-4722-9e3b-3e51ef61d015",
+   "number": 37,
+   "accountId": "62f92591-7826-4413-b516-766531691761",
+   "table": "TE02",
+   "accountNumber": 1,
+   "lines": [
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": ""
+    }
+   ],
+   "status": "PENDING",
+   "createdAt": 1795293226119,
+   "deliveredAt": null,
+   "cancelledAt": null,
+   "cancelledByAccount": false,
+   "deliveredByPayment": null,
+   "revisions": [],
+   "editedAt": null,
+   "clientKey": "k-fe3840fad95c4f5f880c68b7297b31c7"
+  },
+  {
+   "id": "5eb80da5-af85-4d37-b26e-f01641c2db4c",
+   "number": 38,
+   "accountId": "76de0a47-c41a-42e4-8e88-7657e3ee421a",
+   "table": "TP01",
+   "accountNumber": 1,
+   "lines": [
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": ""
+    }
+   ],
+   "status": "CANCELLED",
+   "createdAt": 1795293226241,
+   "deliveredAt": null,
+   "cancelledAt": 1795293226263,
+   "cancelledByAccount": true,
+   "deliveredByPayment": null,
+   "revisions": [],
+   "editedAt": null,
+   "clientKey": "k-531fb66dfdd041e98291918212635bbc"
+  },
+  {
+   "id": "3c957bae-98e5-4563-b41b-70bda702cdce",
+   "number": 39,
+   "accountId": "6f503485-c14e-4eda-b307-3e23bf49aad3",
+   "table": "TV08b",
+   "accountNumber": 2,
+   "lines": [
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [
+      "Con salsa",
+      "Con cebolla",
+      "Sin cilantro"
+     ],
+     "note": ""
+    },
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [
+      "Sin salsa",
+      "Sin cebolla",
+      "Sin cilantro"
+     ],
+     "note": ""
+    }
+   ],
+   "status": "PENDING",
+   "createdAt": 1795293264978,
+   "deliveredAt": null,
+   "cancelledAt": null,
+   "cancelledByAccount": false,
+   "deliveredByPayment": null,
+   "revisions": [],
+   "editedAt": null,
+   "clientKey": "1c208ee2-19a7-4133-a254-5964624a4ace"
+  },
+  {
+   "id": "6139c2ef-9978-4794-a4d0-fd178b17e3f3",
+   "number": 40,
+   "accountId": "22efb581-e9e6-48d3-a29f-9bd5a35c4229",
+   "table": "TS01",
+   "accountNumber": 1,
+   "lines": [
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": ""
+    }
+   ],
+   "status": "PENDING",
+   "createdAt": 1795293271402,
+   "deliveredAt": null,
+   "cancelledAt": null,
+   "cancelledByAccount": false,
+   "deliveredByPayment": null,
+   "revisions": [],
+   "editedAt": null,
+   "clientKey": "k-274db61db4b44eacaef222caed881240"
+  },
+  {
+   "id": "7a5dd085-ecf4-499a-b200-14cf38d50336",
+   "number": 41,
+   "accountId": "af32ecad-c914-4277-a917-238245121e58",
+   "table": "TS02",
+   "accountNumber": 1,
+   "lines": [
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": ""
+    }
+   ],
+   "status": "CANCELLED",
+   "createdAt": 1795293271565,
+   "deliveredAt": null,
+   "cancelledAt": 1795293271572,
+   "cancelledByAccount": true,
+   "deliveredByPayment": null,
+   "revisions": [],
+   "editedAt": null,
+   "clientKey": "k-67a1462e2d1d4f57b29aa6966654e136"
+  },
+  {
+   "id": "53fafe6e-c134-4a18-989a-7f3a2b71ddca",
+   "number": 42,
+   "accountId": "0556947b-db22-4379-92b7-fa60ad8f4f3f",
+   "table": "TS03",
+   "accountNumber": 1,
+   "lines": [
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": "Dijo \"sin cebolla\" \\ y 😀"
+    }
+   ],
+   "status": "PENDING",
+   "createdAt": 1795293271640,
+   "deliveredAt": null,
+   "cancelledAt": null,
+   "cancelledByAccount": false,
+   "deliveredByPayment": null,
+   "revisions": [],
+   "editedAt": null,
+   "clientKey": "k-7b3b520d4c9f4b6a8fff717bc9cded51"
+  },
+  {
+   "id": "4e2797d8-866e-4f4a-8770-d363181788ea",
+   "number": 43,
+   "accountId": "9d1cd18e-e202-4b52-ad96-871f28e20fa9",
+   "table": "TF01",
+   "accountNumber": 1,
+   "lines": [
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": ""
+    }
+   ],
+   "status": "PENDING",
+   "createdAt": 1795293271813,
+   "deliveredAt": null,
+   "cancelledAt": null,
+   "cancelledByAccount": false,
+   "deliveredByPayment": null,
+   "revisions": [],
+   "editedAt": null,
+   "clientKey": "k-085ce8286c73445aa034771ce3a05991"
+  },
+  {
+   "id": "3ff08441-18b0-42f1-a070-bb6df04ff23a",
+   "number": 44,
+   "accountId": "31a10e55-d0ed-4e9e-b5fc-0c94df6c3d81",
+   "table": "TF01",
+   "accountNumber": 2,
+   "lines": [
+    {
+     "productId": "ffe6a405-0310-4843-a4c4-8913decd648f",
+     "name": "Pastor",
+     "priceCents": 1800,
+     "qty": 1,
+     "mods": [],
+     "note": ""
+    }
+   ],
+   "status": "PENDING",
+   "createdAt": 1795293271936,
+   "deliveredAt": null,
+   "cancelledAt": null,
+   "cancelledByAccount": false,
+   "deliveredByPayment": null,
+   "revisions": [],
+   "editedAt": null,
+   "clientKey": "k-06e80bcce10648e2aaa04d1eb684b2f3"
+  },
+  {
+   "id": "823479d5-48c0-459c-9f3e-f0f48a92ed08",
+   "number": 45,
+   "accountId": "109d3625-108b-462f-8974-6bd1440a40c3",
+   "table": "TF02",
+   "accountNumber": 1,
+   "lines": [
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 2,
+     "mods": [],
+     "note": ""
+    }
+   ],
+   "status": "PENDING",
+   "createdAt": 1795293272150,
+   "deliveredAt": null,
+   "cancelledAt": null,
+   "cancelledByAccount": false,
+   "deliveredByPayment": null,
+   "revisions": [],
+   "editedAt": null,
+   "clientKey": "k-783a11c2a0a246c3aee3a2a22e4a2b17"
+  },
+  {
+   "id": "d11dc0f4-fb78-4458-98a5-cdc46d579a9a",
+   "number": 46,
+   "accountId": "c9005bd5-89ed-4dec-8167-bdf7153f4c4e",
+   "table": "TF03",
+   "accountNumber": 1,
+   "lines": [
+    {
+     "productId": "ffe6a405-0310-4843-a4c4-8913decd648f",
+     "name": "Pastor",
+     "priceCents": 1800,
+     "qty": 2,
+     "mods": [
+      "Sin salsa",
+      "Cebolla aparte"
+     ],
+     "note": ""
+    },
+    {
+     "productId": "ffe6a405-0310-4843-a4c4-8913decd648f",
+     "name": "Pastor",
+     "priceCents": 1800,
+     "qty": 2,
+     "mods": [
+      "Bien dorado",
+      "Con queso"
+     ],
+     "note": ""
+    }
+   ],
+   "status": "PENDING",
+   "createdAt": 1795293272375,
+   "deliveredAt": null,
+   "cancelledAt": null,
+   "cancelledByAccount": false,
+   "deliveredByPayment": null,
+   "revisions": [],
+   "editedAt": null,
+   "clientKey": "k-bed65272c5bf47f99ddcdb83c6e75ffb"
+  },
+  {
+   "id": "f853f185-6891-43bf-bad6-697831518a65",
+   "number": 47,
+   "accountId": "5d221411-40a6-47f2-82d6-f33243f60440",
+   "table": "TF04",
+   "accountNumber": 1,
+   "lines": [
+    {
+     "productId": "ffa3945f-442d-4f76-be29-0f78a9edcbb3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": ""
+    }
+   ],
+   "status": "PENDING",
+   "createdAt": 1795293272511,
+   "deliveredAt": null,
+   "cancelledAt": null,
+   "cancelledByAccount": false,
+   "deliveredByPayment": null,
+   "revisions": [],
+   "editedAt": null,
+   "clientKey": "k-38ddd63c8a4d42a08432c9206c804e3b"
+  },
+  {
+   "id": "aedc7d4e-d5f5-4fe8-a5f3-a6a877597e3a",
+   "number": 48,
+   "accountId": "e9b8452d-6c11-473c-ae0a-420dc7791692",
+   "table": "TF04",
+   "accountNumber": 2,
+   "lines": [
+    {
+     "productId": "7abfddfb-9678-42b5-a267-5fc8e5a10c4a",
+     "name": "Refresco",
+     "priceCents": 3000,
+     "qty": 1,
+     "mods": [],
+     "note": ""
+    }
+   ],
+   "status": "PENDING",
+   "createdAt": 1795293272593,
+   "deliveredAt": null,
+   "cancelledAt": null,
+   "cancelledByAccount": false,
+   "deliveredByPayment": null,
+   "revisions": [],
+   "editedAt": null,
+   "clientKey": "k-4caa2ca054584fdb903511112ae4d830"
+  }
+ ],
+ "counterDate": "2026-11-21",
+ "counterLast": 48
+}

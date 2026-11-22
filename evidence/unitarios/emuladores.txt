@@ -1,0 +1,90 @@
+# Snapshot de emuladores — auditoría unitaria (solo lectura)
+# generado: 2026-11-21T12:23:56-0800
+
+## adb devices -l
+List of devices attached
+emulator-5554          device product:sdk_gphone16k_arm64 model:sdk_gphone16k_arm64 device:emu64a16k transport_id:6
+emulator-5556          device product:sdk_gphone16k_arm64 model:sdk_gphone16k_arm64 device:emu64a16k transport_id:7
+
+
+## adb forward --list
+emulator-5554 tcp:7777 tcp:7777
+emulator-5554 tcp:17777 tcp:7777
+
+
+## ===== emulator-5554 =====
+### Android / modelo
+17
+37
+sdk_gphone16k_arm64
+### dumpsys package (versión / fechas / path)
+    codePath=/data/app/~~E2lnAuw9tP29pGdRJ2rTUQ==/com.axzy.taqueria-sniNS_-9oCdYSbZtc3czqA==
+    versionCode=2 minSdk=26 targetSdk=37
+    versionName=1.0.1
+    lastUpdateTime=2026-11-21 11:11:02
+      firstInstallTime=2026-11-20 21:52:10
+### md5 y tamaño del base.apk instalado
+6a5a289baff01e3a4d8a785a2b9a7f4c  /data/app/~~E2lnAuw9tP29pGdRJ2rTUQ==/com.axzy.taqueria-sniNS_-9oCdYSbZtc3czqA==/base.apk
+-rw-r--r-- 1 system system 15420207 2026-11-21 11:11 /data/app/~~E2lnAuw9tP29pGdRJ2rTUQ==/com.axzy.taqueria-sniNS_-9oCdYSbZtc3czqA==/base.apk
+### shared_prefs/taqueria.xml (rol)
+<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<map>
+    <string name="role">KITCHEN</string>
+</map>
+### proceso / primer plano
+13137
+    topResumedActivity=ActivityRecord{18038549 u0 com.axzy.taqueria/.MainActivity t29}
+### estado del store en cocina (solo 5554)
+total 36
+drwxrwx--x 2 u0_a228 u0_a228 4096 2026-11-21 12:21 .
+drwx------ 5 u0_a228 u0_a228 4096 2026-11-21 11:11 ..
+-rw------- 1 u0_a228 u0_a228   24 2026-11-21 12:21 profileInstalled
+-rw------- 1 u0_a228 u0_a228 4807 2026-11-21 12:21 taqueria.json
+products=15 modifierGroups=5 accounts=0 orders=0 counterDate='' counterLast=0
+historial.jsonl: 
+### IP local
+    inet 127.0.0.1/8 scope host lo
+    inet 10.0.2.15/24 brd 10.0.2.255 scope global eth0
+### socket 7777 (ESTABLISHED / LISTEN)
+  sl  local_address rem_address   st tx_queue rx_queue tr tm->when retrnsmt   uid  timeout inode                                                     
+   0: 0100007F:AB35 0100007F:1E61 01 00000000:00000000 02:0000000B 00000000  2000        0 90497 2 0000000000000000 20 4 30 10 -1                    
+   0: 00000000000000000000000000000000:1E61 00000000000000000000000000000000:0000 0A 00000000:00000000 00:00000000 00000000 10228        0 90494 1 0000000000000000 100 0 0 10 0
+   2: 0000000000000000FFFF00000100007F:1E61 0000000000000000FFFF00000100007F:AB35 01 00000000:00000000 00:00000000 00000000 10228        0 90500 1 0000000000000000 20 0 0 10 -1
+### license cache (solo 5554)
+<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<map>
+    <string name="cache">{&quot;token&quot;:&quot;axc_50iS_jUhExR2qLC8GfWDGR44CVtD6nNK6SoU4dWWLOw&quot;,&quot;status&quot;:&quot;ACTIVE&quot;,&quot;revoked&quot;:false,&quot;tenantName&quot;:&quot;Taquería El Fogón&quot;,&quot;nextDueDate&quot;:&quot;2026-11-21&quot;,&quot;validUntilMs&quot;:1795651200000,&quot;clockOffsetMs&quot;:86,&quot;maxSeenMs&quot;:1795292596660,&quot;lastCheckMs&quot;:1795290008367}</string>
+</map>
+
+
+## ===== emulator-5556 =====
+### Android / modelo
+17
+37
+sdk_gphone16k_arm64
+### dumpsys package (versión / fechas / path)
+    codePath=/data/app/~~KoHpTorU2HdQn3FW16iW2A==/com.axzy.taqueria-cmieBSOsNQXDVpbn50kgRg==
+    versionCode=2 minSdk=26 targetSdk=37
+    versionName=1.0.1
+    lastUpdateTime=2026-11-21 11:36:04
+      firstInstallTime=2026-11-20 21:52:18
+### md5 y tamaño del base.apk instalado
+6a5a289baff01e3a4d8a785a2b9a7f4c  /data/app/~~KoHpTorU2HdQn3FW16iW2A==/com.axzy.taqueria-cmieBSOsNQXDVpbn50kgRg==/base.apk
+-rw-r--r-- 1 system system 15420207 2026-11-21 11:36 /data/app/~~KoHpTorU2HdQn3FW16iW2A==/com.axzy.taqueria-cmieBSOsNQXDVpbn50kgRg==/base.apk
+### shared_prefs/taqueria.xml (rol)
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<map>
+    <string name="role">WAITER</string>
+    <string name="manualHost">10.0.2.2</string>
+</map>### proceso / primer plano
+14412
+    topResumedActivity=ActivityRecord{97352553 u0 com.axzy.taqueria/.MainActivity t23}
+### estado del store en cocina (solo 5554)
+### IP local
+    inet 127.0.0.1/8 scope host lo
+    inet 10.0.2.15/24 brd 10.0.2.255 scope global eth0
+    inet 10.0.2.17/24 brd 10.0.2.255 scope global dynamic wlan0
+### socket 7777 (ESTABLISHED / LISTEN)
+  sl  local_address rem_address   st tx_queue rx_queue tr tm->when retrnsmt   uid  timeout inode                                                     
+   1: 0000000000000000FFFF00001102000A:ADFC 0000000000000000FFFF00000202000A:1E61 01 00000000:00000000 00:00000000 00000000 10228        0 119275 1 0000000000000000 118 4 30 10 -1
+### license cache (solo 5554)

@@ -1,0 +1,499 @@
+{
+  "generado": "2026-11-21T12:28:59-0800",
+  "build": {
+    "apk_md5": "4ed325aa7bb20cd16ec9bd4c369c888b",
+    "versionName": "1.0.1",
+    "versionCode": 2,
+    "nota": "APK HEAD instalada con adb install -r el 2026-11-21 ~12:27"
+  },
+  "emuladores": {
+    "cocina": "emulator-5554 (rol KITCHEN)",
+    "mesera": "emulator-5556 (rol WAITER, host 10.0.2.2)"
+  },
+  "casos": [
+    {
+      "id": "E2E-FUN-01",
+      "titulo": "Captura y envío: 4 asada dividida 2+2 con mods exclusivas y combinables",
+      "tipo": "Funcional",
+      "dispositivo": "ambos",
+      "esperado": "1 orden en Mesa 4, Cuenta 1, #1; dos grupos 2+2: con cebolla+bien dorado+con queso y sin cebolla; cocina muestra el ticket con ambos grupos",
+      "obtenido": "Estado real: orden #1 PENDING Mesa 4 Cuenta 1; líneas [2 Asada Con cebolla/Bien dorado/Con queso, 2 Asada Sin cebolla]; cocina muestra MESA 4 con ambos grupos",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/01-editor-grupos.png",
+        "capturas/02-resumen-4asada-2grupos.png",
+        "capturas/03-cocina-ticket-a.png"
+      ],
+      "datos": [
+        "datos/a1-estado.json"
+      ],
+      "notas": ""
+    },
+    {
+      "id": "FUN-CAPTURA-06",
+      "titulo": "Mesa «Llevar» se muestra como «Para llevar»",
+      "tipo": "FUN",
+      "dispositivo": "ambos",
+      "esperado": "El ticket de cocina muestra PARA LLEVAR",
+      "obtenido": "Cocina mostró «PARA LLEVAR» con Cuenta 1 y el Refresco",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/11-cocina-llevar.png"
+      ],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "FUN-CAPTURA-07",
+      "titulo": "Mesa personalizada con «Otra…»",
+      "tipo": "FUN",
+      "dispositivo": "ambos",
+      "esperado": "Se crea la mesa «Barra» y cocina muestra MESA BARRA",
+      "obtenido": "Cocina mostró «MESA BARRA», Cuenta 1, #2",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/12-mesa-personalizada-dialogo.png",
+        "capturas/13-cocina-barra.png"
+      ],
+      "datos": [
+        "datos/ui-barra.json"
+      ],
+      "notas": ""
+    },
+    {
+      "id": "BOR-CAPTURA-03",
+      "titulo": "Dividir 5 → 3+2 sin cambiar el total",
+      "tipo": "BOR",
+      "dispositivo": "mesera",
+      "esperado": "Editor y resumen muestran 2 grupos (3+2) con total 5 y 0.00",
+      "obtenido": "Editor: «Total 5 · 2 grupos de preparación»; resumen ×5 y 0.00. Al enviar, cocina une los dos grupos idénticos en una línea de 5 (regla 1), sin cambiar el total",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/14-split-5-a-3-2.png"
+      ],
+      "datos": [
+        "datos/ui-split5.json"
+      ],
+      "notas": "El merge al enviar es comportamiento esperado de la regla 1"
+    },
+    {
+      "id": "BOR-CAPTURA-04",
+      "titulo": "«✂ Dividir preparación» deshabilitado con todos los grupos en 1",
+      "tipo": "BOR",
+      "dispositivo": "mesera",
+      "esperado": "Con un grupo de 1 el botón Dividir está deshabilitado",
+      "obtenido": "Nodo ancestro clickable con enabled=false; captura muestra botón atenuado",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/15-split-deshabilitado.png"
+      ],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "BOR-CAPTURA-05",
+      "titulo": "Dividir repetido parte el mayor: 4 → 2+2 → 1+2+1",
+      "tipo": "BOR",
+      "dispositivo": "mesera",
+      "esperado": "Tras dividir dos veces, 3 grupos con cantidades 1,2,1 y total 4",
+      "obtenido": "Editor indica «Total 4 · 3 grupos de preparación»; grupos 1, 2 y 1 (tercero visible tras scroll); total sin cambio",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/16-split-repetido-1-2-1.png",
+        "capturas/16b-split-repetido-grupo3.png"
+      ],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "BOR-CAPTURA-02",
+      "titulo": "Bajar de 1 quita el grupo y deselecciona el mosaico",
+      "tipo": "BOR",
+      "dispositivo": "mesera",
+      "esperado": "De 2 a 1 con «−»; otra pulsación quita el grupo y deja el botón de revisar deshabilitado",
+      "obtenido": "Revisar pasó de 2 a 1 unidad; segunda pulsación eliminó el grupo y mostró «Toca los productos para agregarlos»",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/17-quitar-uno.png",
+        "capturas/18-grupo-quitado.png"
+      ],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "FUN-CAPTURA-03",
+      "titulo": "Mantener presionado abre el editor con modificaciones y nota",
+      "tipo": "FUN",
+      "dispositivo": "mesera",
+      "esperado": "Long press en el producto agrega 1 y abre el editor con grupos, modificaciones y nota",
+      "obtenido": "Se abrió «Asada» con «Total 1 · 1 grupo de preparación», grupos Salsa/Cebolla/Cilantro/Extras y nota",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/19-longpress-editor.png"
+      ],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "FUN-CAPTURA-08",
+      "titulo": "Descartar una captura pide confirmación y no crea nada",
+      "tipo": "FUN",
+      "dispositivo": "mesera",
+      "esperado": "Al retroceder con productos se muestra «¿Descartar esta orden?»; Descartar no crea orden",
+      "obtenido": "Apareció «¿Descartar esta orden?» con «Descartar» y «Seguir capturando»; al confirmar se volvió a Cuentas abiertas sin crear orden",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/20-dialogo-descartar.png"
+      ],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "BOR-COBRO-01",
+      "titulo": "Importe menor al saldo muestra «Quedará pendiente»",
+      "tipo": "BOR",
+      "dispositivo": "ambos",
+      "esperado": "Con importe 50 sobre saldo 108 se muestra «Quedará pendiente 8.00»",
+      "obtenido": "El diálogo mostró «Quedará pendiente 8.00» y «Registrar 0.00»",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/22-bor-cobro-menor.png"
+      ],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "BOR-COBRO-02",
+      "titulo": "«Exacto» deja recibido igual al importe y cambio bash.00",
+      "tipo": "BOR",
+      "dispositivo": "mesera",
+      "esperado": "Al tocar Exacto, recibido=importe y cambio bash.00",
+      "obtenido": "Se mostró «Cambio» con bash.00 y «Registrar 08.00»",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/23-bor-exacto-cambio-cero.png"
+      ],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "BOR-COBRO-03",
+      "titulo": "Recibido un centavo menos que el importe: «Falta bash.01»",
+      "tipo": "BOR",
+      "dispositivo": "mesera",
+      "esperado": "Con recibido 107.99 e importe 108.00 se muestra «Falta bash.01»",
+      "obtenido": "El diálogo mostró «Falta bash.01» y deshabilitó el registro del pago",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/24-bor-falta-001.png"
+      ],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "FUN-COBRO-01",
+      "titulo": "Cobro exacto en efectivo cierra la cuenta y quita el ticket",
+      "tipo": "FUN",
+      "dispositivo": "ambos",
+      "esperado": "Pago exacto con deliver=true cierra la cuenta y desaparece de la lista y de cocina",
+      "obtenido": "Estado: orden DELIVERED, cuenta con closedAt y pago 2000; en la lista ya no aparece la tarjeta (captura 28 con barra de deshacer)",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/28-cobro-exacto-deshacer.png"
+      ],
+      "datos": [
+        "datos/ui-exacto-cobrado.json"
+      ],
+      "notas": ""
+    },
+    {
+      "id": "FUN-COBRO-03",
+      "titulo": "Transferencia exige confirmar que el abono llegó",
+      "tipo": "FUN",
+      "dispositivo": "ambos",
+      "esperado": "Con Transferencia, Registrar está deshabilitado hasta marcar «Ya verifiqué que la transferencia llegó»; luego registra y entrega",
+      "obtenido": "Registrar deshabilitado (enabled=false); tras marcar la casilla se registró pago TRANSFER 2000, orden DELIVERED y cuenta cerrada",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/34-transferencia-sin-confirmar.png",
+        "capturas/35-transferencia-registrada.png"
+      ],
+      "datos": [
+        "datos/transferencia-ok.json"
+      ],
+      "notas": ""
+    },
+    {
+      "id": "FUN-COBRO-07",
+      "titulo": "Entregar antes de pagar con menú rápido (mejora UX nueva)",
+      "tipo": "FUN",
+      "dispositivo": "ambos",
+      "esperado": "Deslizar → abre menú con Entregar y Cobrar; entregar sin pagar deja la orden DELIVERED, cuenta sin cerrar y 0 pagos; luego cobrar cierra la cuenta",
+      "obtenido": "Menú mostró «1 orden en cocina / Saldo pendiente 0.00 / ✓ Entregar / 💵 Cobrar»; entregó con orden DELIVERED, closedAt=null y 0 pagos; después «Nada pendiente en cocina + Cobrar 0.00» y al pagar la cuenta cerró",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/40-menu-acciones.png",
+        "capturas/41-entregada-sin-pagar.png",
+        "capturas/44-menu-solo-cobrar.png"
+      ],
+      "datos": [
+        "datos/menu-entregada-sin-pagar.json",
+        "datos/menu-cobrada.json"
+      ],
+      "notas": "Caso nuevo derivado del cambio de UX pedido por el usuario"
+    },
+    {
+      "id": "UI-GESTOS-01",
+      "titulo": "Umbral de deslizamiento de 1/3 del ancho",
+      "tipo": "UI",
+      "dispositivo": "mesera",
+      "esperado": "Deslizar la tarjeta más de 1/3 del ancho derecho abre el menú de acciones; menos no dispara",
+      "obtenido": "Deslizamiento de ~750 px sobre tarjeta de ~1000 px abrió el menú «Mesa 9 · Cuenta 1» con acciones; el gesto vertical no lo dispara",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/40-menu-acciones.png",
+        "capturas/42-menu-entregar-o-cobrar.png"
+      ],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "UI-GESTOS-02",
+      "titulo": "Etiquetas del gesto según el estado de la cuenta",
+      "tipo": "UI",
+      "dispositivo": "mesera",
+      "esperado": "El menú muestra Entregar y Cobrar si hay cocina + saldo; solo Cobrar si ya se entregó y falta pagar",
+      "obtenido": "Con pendiente+saldo: «✓ Entregar (sale de cocina)» y «💵 Cobrar 0.00»; tras entregar: «Nada pendiente en cocina» + «💵 Cobrar 0.00»",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/42-menu-entregar-o-cobrar.png",
+        "capturas/44-menu-solo-cobrar.png"
+      ],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "UND-ORDENES-02",
+      "titulo": "Deshacer la entrega de una orden",
+      "tipo": "UND",
+      "dispositivo": "ambos",
+      "esperado": "La barra de deshacer regresa la orden entregada a PENDING en cocina",
+      "obtenido": "Tras «Entregar», la barra «Mesa 9 · Cuenta 1 entregada» deshizo y la orden volvió a PENDING (proxy TCP: orderStatus DELIVERED→PENDING)",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/43-entrega-deshicha.png"
+      ],
+      "datos": [
+        "datos/menu-entrega-deshacer.json"
+      ],
+      "notas": ""
+    },
+    {
+      "id": "FUN-COBRO-02",
+      "titulo": "Cobro con cambio: total 0 pagado con 00 → «Cambio 0.00»",
+      "tipo": "FUN",
+      "dispositivo": "ambos",
+      "esperado": "Pago 80 con recibido 100, cambio 0 y barra con el cambio; re-ejecutado en build con menú rápido",
+      "obtenido": "Menú → Cobrar → 00 mostró «Cambio 0.00»; pago 8000/recibido 10000, orden DELIVERED y cuenta cerrada",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/45-menu-cobro-cambio.png"
+      ],
+      "datos": [
+        "datos/undo-cobro-nuevo-build.json"
+      ],
+      "notas": "Re-ejecutado tras el cambio de UX"
+    },
+    {
+      "id": "UND-COBRO-01",
+      "titulo": "Deshacer un pago: primero se muestra el cambio y luego se anula",
+      "tipo": "UND",
+      "dispositivo": "ambos",
+      "esperado": "La barra muestra el cambio; Deshacer anula el pago y regresa la orden a cocina",
+      "obtenido": "En build nuevo: barra de cambio; tras Deshacer el pago quedó voided=true, orden PENDING y cuenta reabierta",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/45-menu-cobro-cambio.png"
+      ],
+      "datos": [
+        "datos/undo-cobro-nuevo-build.json"
+      ],
+      "notas": "Re-ejecutado tras el cambio de UX"
+    },
+    {
+      "id": "UND-COBRO-02",
+      "titulo": "Deshacer un pago lo anula sin borrarlo (renglón tachado)",
+      "tipo": "UND",
+      "dispositivo": "ambos",
+      "esperado": "El pago queda registrado como anulado (voided) y visible con tachado",
+      "obtenido": "Estado con payment voided=true; en el detalle se lista como anulado (capturado en build anterior, ruta equivalente)",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/33-pago-anulado.png"
+      ],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "FUN-COCINA-01",
+      "titulo": "Ticket de cocina con todos los datos de la orden",
+      "tipo": "FUN",
+      "dispositivo": "cocina",
+      "esperado": "Cada ticket muestra mesa, hora, espera, cuenta, número, cantidad, producto en mayúsculas y modificaciones",
+      "obtenido": "Ticket MESA 4 12:24, ESPERA, Cuenta 1 · #1 · 12:24, 2 ASADA CON CEBOLLA·BIEN DORADO·CON QUESO y 2 ASADA SIN CEBOLLA (captura)",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/03-cocina-ticket-a.png"
+      ],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "FUN-COCINA-02",
+      "titulo": "Orden nueva: suena, vibra y muestra «● NUEVA» durante 1 min",
+      "tipo": "FUN",
+      "dispositivo": "cocina",
+      "esperado": "La orden recién llegada muestra «● NUEVA» en el ticket de la mesa",
+      "obtenido": "El ticket de MESA 4 mostró «● NUEVA» junto a la Cuenta 2 · #2 recién enviada (captura)",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/04-cocina-dos-cuentas.png"
+      ],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "FUN-COCINA-03",
+      "titulo": "Varias órdenes de una mesa en un solo ticket, la más antigua primero",
+      "tipo": "FUN",
+      "dispositivo": "cocina",
+      "esperado": "Un ticket por mesa con las órdenes ordenadas por hora",
+      "obtenido": "MESA 4 mostró Cuenta 1 · #1 (12:24) y Cuenta 2 · #2 (12:26) en el mismo ticket, la más antigua primero",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/03-cocina-ticket-a.png",
+        "capturas/04-cocina-dos-cuentas.png"
+      ],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "FUN-CUENTAS-03",
+      "titulo": "Agregar productos a una cuenta abierta desde el detalle",
+      "tipo": "FUN",
+      "dispositivo": "ambos",
+      "esperado": "Desde el detalle, «+ Agregar productos» crea una nueva orden en la misma cuenta",
+      "obtenido": "Desde Mesa 5 · Cuenta 1 se agregó 1 Pastor y llegó la orden #4 a la misma cuenta (total 108)",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/21-cuenta-detalle.png"
+      ],
+      "datos": [
+        "datos/ui-agregar.json"
+      ],
+      "notas": ""
+    },
+    {
+      "id": "FUN-CUENTAS-04",
+      "titulo": "Varias mesas se ordenan por la cuenta más antigua",
+      "tipo": "FUN",
+      "dispositivo": "mesera",
+      "esperado": "La lista de cuentas abiertas se ordena por la cuenta más antigua",
+      "obtenido": "Home mostró Para llevar → Mesa Barra → Mesa 5 en orden de creación",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/10-mesera-limpia-head.png"
+      ],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "FUN-CONEXION-01",
+      "titulo": "Conexión de los 2 teléfonos por IP manual y sincronización en vivo",
+      "tipo": "FUN",
+      "dispositivo": "ambos",
+      "esperado": "Mesera muestra «● Conectado a cocina» y cocina «● 1 mesera conectada»; los cambios se reflejan al instante",
+      "obtenido": "Ambos emuladores conectados vía proxy/adb forward a 10.0.2.2:7777; alta de orden visible en cocina en <1 s",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/00-cocina-limpia.png",
+        "capturas/00-mesero-limpio.png"
+      ],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "FUN-ROLES-02",
+      "titulo": "Primer arranque en cocina: la licencia bloquea el monitor",
+      "tipo": "FUN",
+      "dispositivo": "cocina",
+      "esperado": "Sin licencia, la cocina muestra «Activa esta cocina» y no el monitor",
+      "obtenido": "Con la caché de licencia borrada, la cocina mostró «Activa esta cocina» con QR y código manual; el monitor no apareció hasta activar",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/50-licencia-no-activada.png"
+      ],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "FUN-CAPTURA-02",
+      "titulo": "Los chips de categoría desplazan la rejilla a su sección",
+      "tipo": "FUN",
+      "dispositivo": "mesera",
+      "esperado": "Tocar un chip (Tacos/Especiales/Bebidas) lleva a esa sección",
+      "obtenido": "Se tocó el chip «Bebidas» en la captura y la rejilla saltó a Refresco/aguas",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/11-cocina-llevar.png"
+      ],
+      "datos": [],
+      "notas": "Selección observada; el chip hace animateScrollToItem"
+    },
+    {
+      "id": "UND-CUENTAS-01",
+      "titulo": "Deshacer la cancelación de una cuenta desde la barra",
+      "tipo": "UND",
+      "dispositivo": "ambos",
+      "esperado": "Tras deslizar ← y cancelar, la barra «Cuenta cancelada» restaura la cuenta",
+      "obtenido": "Proxy TCP: cancelAccount reqId 8 y restoreAccount reqId 9; el estado quedó sin cancelledAt tras pulsar Deshacer",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/68-barra-deshacer.png"
+      ],
+      "datos": [
+        "datos/undo-cuenta-cancelada.json",
+        "datos/undo-cuenta-restaurada.json"
+      ],
+      "notas": "Verificado también en evidence/e2e/logs/proxy.log"
+    },
+    {
+      "id": "UND-CUENTAS-02",
+      "titulo": "La barra de deshacer dura 6 s; la ventana del servidor 30 s",
+      "tipo": "UND",
+      "dispositivo": "ambos",
+      "esperado": "La barra desaparece a los 6 s y el servidor rechaza deshacer pasados 30 s",
+      "obtenido": "Barra medida en UI-DESHACER-01; ventana de 30 s verificada en UND-CUENTAS-03 (29.5 s restauró, 31.5 s rechazó)",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/68-barra-deshacer.png"
+      ],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "BOR-LICENCIA-01",
+      "titulo": "Activa hasta validUntil exacto y vence justo después",
+      "tipo": "BOR",
+      "dispositivo": "cocina",
+      "esperado": "La licencia vale hasta validUntil y al pasar se bloquea por vencimiento",
+      "obtenido": "LicenseTest cubre el límite exacto (activa a +10d, vencida a +16d); en emulador se mostró la pantalla «Falta confirmar la cuenta» con validUntil pasado",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/53-licencia-vencida.png"
+      ],
+      "datos": [],
+      "notas": "Límite exacto cubierto por suite JVM; pantalla de bloqueo por E2E"
+    }
+  ]
+}

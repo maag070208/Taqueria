@@ -1,0 +1,327 @@
+{
+ "products": [
+  {
+   "id": "1de91c1a-a3e7-44e7-8bb3-da008a3a00a3",
+   "name": "Asada",
+   "priceCents": 2000,
+   "category": "Tacos",
+   "active": true,
+   "emoji": "",
+   "modifierGroupIds": [
+    "f5b4f39a-386d-47f7-8d38-90965b8fb69f",
+    "f4532c6b-fc9b-439c-9677-79ea60169597",
+    "4df8e2e2-2ebf-4ef8-95f3-46e5148978e1",
+    "a0d5c080-e4c1-42a9-bee4-ca1e5e223113"
+   ]
+  },
+  {
+   "id": "e5204865-e092-483f-ac87-ab974bafba15",
+   "name": "Pastor",
+   "priceCents": 1800,
+   "category": "Tacos",
+   "active": true,
+   "emoji": "",
+   "modifierGroupIds": [
+    "f5b4f39a-386d-47f7-8d38-90965b8fb69f",
+    "f4532c6b-fc9b-439c-9677-79ea60169597",
+    "4df8e2e2-2ebf-4ef8-95f3-46e5148978e1",
+    "a0d5c080-e4c1-42a9-bee4-ca1e5e223113"
+   ]
+  },
+  {
+   "id": "961b0fe9-b7e7-4432-808a-f2635d2eb459",
+   "name": "Adobada",
+   "priceCents": 1800,
+   "category": "Tacos",
+   "active": true,
+   "emoji": "",
+   "modifierGroupIds": [
+    "f5b4f39a-386d-47f7-8d38-90965b8fb69f",
+    "f4532c6b-fc9b-439c-9677-79ea60169597",
+    "4df8e2e2-2ebf-4ef8-95f3-46e5148978e1",
+    "a0d5c080-e4c1-42a9-bee4-ca1e5e223113"
+   ]
+  },
+  {
+   "id": "0ef379c8-78b9-4632-82ae-3affd573d2b6",
+   "name": "Chorizo",
+   "priceCents": 1800,
+   "category": "Tacos",
+   "active": true,
+   "emoji": "",
+   "modifierGroupIds": [
+    "f5b4f39a-386d-47f7-8d38-90965b8fb69f",
+    "f4532c6b-fc9b-439c-9677-79ea60169597",
+    "4df8e2e2-2ebf-4ef8-95f3-46e5148978e1",
+    "a0d5c080-e4c1-42a9-bee4-ca1e5e223113"
+   ]
+  },
+  {
+   "id": "f1e17f62-5325-4ea6-bac3-24a91056f64b",
+   "name": "Suadero",
+   "priceCents": 1800,
+   "category": "Tacos",
+   "active": true,
+   "emoji": "",
+   "modifierGroupIds": [
+    "f5b4f39a-386d-47f7-8d38-90965b8fb69f",
+    "f4532c6b-fc9b-439c-9677-79ea60169597",
+    "4df8e2e2-2ebf-4ef8-95f3-46e5148978e1",
+    "a0d5c080-e4c1-42a9-bee4-ca1e5e223113"
+   ]
+  },
+  {
+   "id": "66f75bcc-7598-43af-bfa6-ed7fd73a37d9",
+   "name": "Bistec",
+   "priceCents": 2000,
+   "category": "Tacos",
+   "active": true,
+   "emoji": "",
+   "modifierGroupIds": [
+    "f5b4f39a-386d-47f7-8d38-90965b8fb69f",
+    "f4532c6b-fc9b-439c-9677-79ea60169597",
+    "4df8e2e2-2ebf-4ef8-95f3-46e5148978e1",
+    "a0d5c080-e4c1-42a9-bee4-ca1e5e223113"
+   ]
+  },
+  {
+   "id": "8f139fbd-718f-4561-9b70-314c79d8866f",
+   "name": "Campechano",
+   "priceCents": 2000,
+   "category": "Tacos",
+   "active": true,
+   "emoji": "",
+   "modifierGroupIds": [
+    "f5b4f39a-386d-47f7-8d38-90965b8fb69f",
+    "f4532c6b-fc9b-439c-9677-79ea60169597",
+    "4df8e2e2-2ebf-4ef8-95f3-46e5148978e1",
+    "a0d5c080-e4c1-42a9-bee4-ca1e5e223113"
+   ]
+  },
+  {
+   "id": "20f8a338-c1b4-4d04-81ce-6a59632d7e95",
+   "name": "Longaniza",
+   "priceCents": 1800,
+   "category": "Tacos",
+   "active": true,
+   "emoji": "",
+   "modifierGroupIds": [
+    "f5b4f39a-386d-47f7-8d38-90965b8fb69f",
+    "f4532c6b-fc9b-439c-9677-79ea60169597",
+    "4df8e2e2-2ebf-4ef8-95f3-46e5148978e1",
+    "a0d5c080-e4c1-42a9-bee4-ca1e5e223113"
+   ]
+  },
+  {
+   "id": "5377e9bc-d0cc-440a-b583-19965df47971",
+   "name": "Tripa",
+   "priceCents": 2200,
+   "category": "Tacos",
+   "active": true,
+   "emoji": "",
+   "modifierGroupIds": [
+    "f5b4f39a-386d-47f7-8d38-90965b8fb69f",
+    "f4532c6b-fc9b-439c-9677-79ea60169597",
+    "4df8e2e2-2ebf-4ef8-95f3-46e5148978e1",
+    "a0d5c080-e4c1-42a9-bee4-ca1e5e223113"
+   ]
+  },
+  {
+   "id": "bc2878ac-ccff-44a4-a1cb-10eec633eddc",
+   "name": "Cabeza",
+   "priceCents": 2000,
+   "category": "Tacos",
+   "active": true,
+   "emoji": "",
+   "modifierGroupIds": [
+    "f5b4f39a-386d-47f7-8d38-90965b8fb69f",
+    "f4532c6b-fc9b-439c-9677-79ea60169597",
+    "4df8e2e2-2ebf-4ef8-95f3-46e5148978e1",
+    "a0d5c080-e4c1-42a9-bee4-ca1e5e223113"
+   ]
+  },
+  {
+   "id": "30dd06de-f245-4362-b366-83af014fa6da",
+   "name": "Quesadilla",
+   "priceCents": 4500,
+   "category": "Especiales",
+   "active": true,
+   "emoji": "🧀",
+   "modifierGroupIds": [
+    "f5b4f39a-386d-47f7-8d38-90965b8fb69f",
+    "f4532c6b-fc9b-439c-9677-79ea60169597"
+   ]
+  },
+  {
+   "id": "be8d20fc-411e-46cd-a748-82bcb1393a81",
+   "name": "Gringa",
+   "priceCents": 5500,
+   "category": "Especiales",
+   "active": true,
+   "emoji": "🫓",
+   "modifierGroupIds": [
+    "f5b4f39a-386d-47f7-8d38-90965b8fb69f",
+    "f4532c6b-fc9b-439c-9677-79ea60169597"
+   ]
+  },
+  {
+   "id": "d4bbf089-5d09-43ac-ae18-182c8583f845",
+   "name": "Refresco",
+   "priceCents": 3000,
+   "category": "Bebidas",
+   "active": true,
+   "emoji": "🥤",
+   "modifierGroupIds": [
+    "be3c4cbb-889d-4290-9d91-0e8c16112c71"
+   ]
+  },
+  {
+   "id": "fb826370-1edb-4b2b-ae93-e18d04db3229",
+   "name": "Agua de horchata",
+   "priceCents": 3000,
+   "category": "Bebidas",
+   "active": true,
+   "emoji": "🥛",
+   "modifierGroupIds": [
+    "be3c4cbb-889d-4290-9d91-0e8c16112c71"
+   ]
+  },
+  {
+   "id": "8a5fa5d7-ef00-4ae9-b6de-d171955a4d78",
+   "name": "Agua de jamaica",
+   "priceCents": 3000,
+   "category": "Bebidas",
+   "active": true,
+   "emoji": "🍹",
+   "modifierGroupIds": [
+    "be3c4cbb-889d-4290-9d91-0e8c16112c71"
+   ]
+  }
+ ],
+ "modifierGroups": [
+  {
+   "id": "f5b4f39a-386d-47f7-8d38-90965b8fb69f",
+   "name": "Salsa",
+   "options": [
+    "Con salsa",
+    "Sin salsa",
+    "Salsa aparte"
+   ],
+   "exclusive": true
+  },
+  {
+   "id": "f4532c6b-fc9b-439c-9677-79ea60169597",
+   "name": "Cebolla",
+   "options": [
+    "Con cebolla",
+    "Sin cebolla",
+    "Cebolla aparte"
+   ],
+   "exclusive": true
+  },
+  {
+   "id": "4df8e2e2-2ebf-4ef8-95f3-46e5148978e1",
+   "name": "Cilantro",
+   "options": [
+    "Con cilantro",
+    "Sin cilantro"
+   ],
+   "exclusive": true
+  },
+  {
+   "id": "a0d5c080-e4c1-42a9-bee4-ca1e5e223113",
+   "name": "Extras",
+   "options": [
+    "Bien dorado",
+    "Con queso",
+    "Doble tortilla"
+   ],
+   "exclusive": false
+  },
+  {
+   "id": "be3c4cbb-889d-4290-9d91-0e8c16112c71",
+   "name": "Hielo",
+   "options": [
+    "Con hielo",
+    "Sin hielo"
+   ],
+   "exclusive": true
+  }
+ ],
+ "accounts": [
+  {
+   "id": "a545e93c-3600-4827-a880-224e489835b5",
+   "table": "Llevar",
+   "number": 1,
+   "createdAt": 1795293476685,
+   "payments": [],
+   "cancelledAt": null,
+   "closedAt": null
+  },
+  {
+   "id": "e414e49e-953a-498d-9e99-e140549b813c",
+   "table": "Barra",
+   "number": 1,
+   "createdAt": 1795293637221,
+   "payments": [],
+   "cancelledAt": null,
+   "closedAt": null
+  }
+ ],
+ "orders": [
+  {
+   "id": "95ec4e09-dcdb-414d-94da-56ab077019f3",
+   "number": 1,
+   "accountId": "a545e93c-3600-4827-a880-224e489835b5",
+   "table": "Llevar",
+   "accountNumber": 1,
+   "lines": [
+    {
+     "productId": "d4bbf089-5d09-43ac-ae18-182c8583f845",
+     "name": "Refresco",
+     "priceCents": 3000,
+     "qty": 1,
+     "mods": [],
+     "note": ""
+    }
+   ],
+   "status": "PENDING",
+   "createdAt": 1795293476685,
+   "deliveredAt": null,
+   "cancelledAt": null,
+   "cancelledByAccount": false,
+   "deliveredByPayment": null,
+   "revisions": [],
+   "editedAt": null,
+   "clientKey": "ac9aa2fa-f1ac-45d4-adc0-98ae4ce4f6c9"
+  },
+  {
+   "id": "8b7d5e51-b7ab-4503-bd24-c83544520fb5",
+   "number": 2,
+   "accountId": "e414e49e-953a-498d-9e99-e140549b813c",
+   "table": "Barra",
+   "accountNumber": 1,
+   "lines": [
+    {
+     "productId": "1de91c1a-a3e7-44e7-8bb3-da008a3a00a3",
+     "name": "Asada",
+     "priceCents": 2000,
+     "qty": 1,
+     "mods": [],
+     "note": ""
+    }
+   ],
+   "status": "PENDING",
+   "createdAt": 1795293637221,
+   "deliveredAt": null,
+   "cancelledAt": null,
+   "cancelledByAccount": false,
+   "deliveredByPayment": null,
+   "revisions": [],
+   "editedAt": null,
+   "clientKey": "1e0add24-5271-455e-a570-225499a70f23"
+  }
+ ],
+ "counterDate": "2026-11-21",
+ "counterLast": 2
+}

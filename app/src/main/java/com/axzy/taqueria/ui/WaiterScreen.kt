@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.sp
 import com.axzy.taqueria.Account
 import com.axzy.taqueria.App
 import com.axzy.taqueria.AppState
+import com.axzy.taqueria.ConnectionQr
 import com.axzy.taqueria.Link
 import com.axzy.taqueria.OrderStatus
 import com.axzy.taqueria.PayStatus
@@ -96,11 +97,33 @@ fun WaiterScreen(app: App, onExit: () -> Unit) {
     val ctx = remember { WaiterCtx(app, scope, context, undo) }
     var page by remember { mutableStateOf<Page>(Page.Home) }
     var showSettings by remember { mutableStateOf(false) }
+    // Escáner del QR de conexión que muestra la cocina.
+    var scanning by remember { mutableStateOf(false) }
     val state by app.client.state.collectAsState()
 
     // Si cocina retira un producto mientras se captura, se quita del borrador.
     LaunchedEffect(state.products) {
         app.draft.retainAvailable(state.products.filter { it.active }.map { it.id }.toSet())
+    }
+
+    if (scanning) {
+        QrScannerScreen(
+            onDetected = { raw ->
+                scanning = false
+                when (val r = ConnectionQr.parse(raw)) {
+                    is ConnectionQr.Result.Valid -> {
+                        app.updateManualHost("${r.host}:${r.port}")
+                        ctx.toast("Cocina configurada: ${r.host}:${r.port}")
+                    }
+                    is ConnectionQr.Result.Invalid -> ctx.toast(r.message)
+                }
+            },
+            onCancel = { scanning = false },
+            title = "Escanear QR de cocina",
+            hint = "Apunta la cámara al QR que muestra la cocina (📲). Se guarda la dirección automáticamente.",
+            fallbackLabel = "Cancelar",
+        )
+        return
     }
 
     Column(Modifier.fillMaxSize().safeDrawingPadding()) {
@@ -133,6 +156,7 @@ fun WaiterScreen(app: App, onExit: () -> Unit) {
             current = app.manualHost,
             onDismiss = { showSettings = false },
             onSave = { showSettings = false; app.updateManualHost(it) },
+            onScanQr = { showSettings = false; scanning = true },
             onChangeRole = { showSettings = false; onExit() },
         )
     }
@@ -146,6 +170,8 @@ private fun Home(
     val link by ctx.client.link.collectAsState()
     val now = rememberNow() + ctx.client.clockOffset
     var paying by remember { mutableStateOf<Account?>(null) }
+    // Deslizar → abre las acciones disponibles: entregar (aunque no esté pagada) y cobrar.
+    var actions by remember { mutableStateOf<Account?>(null) }
     val connected = link is Link.Connected
     val (linkColor, linkText) = when (link) {
         is Link.Connected -> Palette.ok to "● Conectado a cocina"
@@ -187,8 +213,9 @@ private fun Home(
                     items(accounts.sortedBy { it.number }, key = { it.id }) { acc ->
                         val balance = state.balanceOf(acc)
                         val cancelled = acc.cancelledAt != null
-                        // Con saldo: cobrar. Ya pagada pero en cocina: el mismo gesto entrega.
-                        val deliverOnly = balance == 0L && state.hasPending(acc.id)
+                        val pending = state.hasPending(acc.id)
+                        // Comer antes de pagar es normal: el gesto ofrece entregar y cobrar por separado.
+                        val hasActions = pending || balance != 0L
                         SwipeCard(
                             leftLabel = "Cancelar cuenta",
                             onSwipeLeft = if (!cancelled && connected) {
@@ -201,16 +228,15 @@ private fun Home(
                                 }
                             } else null,
                             rightLabel = when {
+                                balance < 0 && pending -> "✓  Entregar o devolver"
                                 balance < 0 -> "💵  Devolver"
-                                deliverOnly -> "✓  Entregar"
+                                pending && balance > 0 -> "✓  Entregar o cobrar"
+                                pending -> "✓  Entregar"
                                 else -> "💵  Cobrar"
                             },
-                            onSwipeRight = when {
-                                !connected -> null
-                                balance != 0L -> { { paying = acc } }
-                                deliverOnly -> { { ctx.deliverAll(acc, state) } }
-                                else -> null
-                            },
+                            onSwipeRight = if (connected && hasActions) {
+                                { actions = acc }
+                            } else null,
                         ) {
                             AccountCard(state, acc, now) { onOpen(acc.id) }
                         }
@@ -227,6 +253,57 @@ private fun Home(
     }
 
     paying?.let { acc -> PaymentDialog(ctx, state, acc, onDismiss = { paying = null }) }
+    actions?.let { acc ->
+        AccountActionsDialog(
+            ctx, state, acc,
+            onEntregar = { ctx.deliverAll(acc, state); actions = null },
+            onCobrar = { paying = acc; actions = null },
+            onDismiss = { actions = null },
+        )
+    }
+}
+
+/**
+ * Acciones rápidas al deslizar la tarjeta: el taquero puede marcar entregado lo
+ * que ya salió de cocina aunque la cuenta se cobre hasta el final, o cobrar.
+ */
+@Composable
+private fun AccountActionsDialog(
+    ctx: WaiterCtx, state: AppState, acc: Account,
+    onEntregar: () -> Unit, onCobrar: () -> Unit, onDismiss: () -> Unit,
+) {
+    val balance = state.balanceOf(acc)
+    val pendingOrders = state.ordersOf(acc.id).count { it.status == OrderStatus.PENDING }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("${tableLabel(acc.table)} · Cuenta ${acc.number}") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Text(
+                    if (pendingOrders > 0) "$pendingOrders ${if (pendingOrders == 1) "orden" else "órdenes"} en cocina" else "Nada pendiente en cocina",
+                    color = Palette.muted,
+                )
+                Text(
+                    when {
+                        balance > 0 -> "Saldo pendiente ${money(balance)}"
+                        balance < 0 -> "A devolver ${money(-balance)}"
+                        else -> "Cuenta saldada"
+                    },
+                    fontWeight = FontWeight.Bold,
+                )
+                if (pendingOrders > 0) {
+                    ActionButton("✓  Entregar (sale de cocina)", Palette.ok, Color.White, Modifier.fillMaxWidth(), onClick = onEntregar)
+                }
+                if (balance != 0L) {
+                    ActionButton(
+                        if (balance > 0) "💵  Cobrar ${money(balance)}" else "💵  Devolver ${money(-balance)}",
+                        Palette.primary, Color.White, Modifier.fillMaxWidth(), onClick = onCobrar,
+                    )
+                }
+            }
+        },
+        confirmButton = { TextButton(onClick = onDismiss) { Text("Cerrar") } },
+    )
 }
 
 /** Tarjeta uniforme: cuenta, estado de pago, consumo, estado en cocina y saldo. */
@@ -277,7 +354,7 @@ fun payColor(p: PayStatus) = when (p) {
 }
 
 @Composable
-private fun SettingsDialog(current: String, onDismiss: () -> Unit, onSave: (String) -> Unit, onChangeRole: () -> Unit) {
+private fun SettingsDialog(current: String, onDismiss: () -> Unit, onSave: (String) -> Unit, onScanQr: () -> Unit, onChangeRole: () -> Unit) {
     var host by remember { mutableStateOf(current) }
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -285,6 +362,8 @@ private fun SettingsDialog(current: String, onDismiss: () -> Unit, onSave: (Stri
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text("Déjalo vacío para encontrar la cocina automáticamente. Si no la encuentra, escribe la IP que aparece arriba en la pantalla de cocina.", color = Palette.muted)
+                ActionButton("📷  Escanear QR de cocina", Palette.primary, Color.White, Modifier.fillMaxWidth(), onClick = onScanQr)
+                Text("O escribe la IP a mano:", color = Palette.muted, fontSize = 13.sp)
                 OutlinedTextField(host, { host = it.take(40) }, label = { Text("IP de cocina (opcional)") }, singleLine = true, shape = Ui.smallShape, placeholder = { Text("192.168.1.20") })
                 TextButton(onClick = onChangeRole) { Text("Cambiar rol de este teléfono") }
             }

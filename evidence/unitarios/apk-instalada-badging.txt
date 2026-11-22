@@ -1,0 +1,16 @@
+# APK instalada en emulator-5554 (idéntica en emulator-5556 por md5)
+# path: /data/app/~~E2lnAuw9tP29pGdRJ2rTUQ==/com.axzy.taqueria-sniNS_-9oCdYSbZtc3czqA==/base.apk
+# md5: 6a5a289baff01e3a4d8a785a2b9a7f4c  bytes: 15420207
+# fecha de análisis: 2026-11-21T12:23:50-0800
+
+package: name='com.axzy.taqueria' versionCode='2' versionName='1.0.1' platformBuildVersionName='17' platformBuildVersionCode='37' compileSdkVersion='37' compileSdkVersionCodename='17'
+targetSdkVersion:'37'
+uses-permission: name='android.permission.CAMERA'
+uses-permission: name='android.permission.ACCESS_LOCAL_NETWORK'
+application-label:'Taquería'
+launchable-activity: name='com.axzy.taqueria.MainActivity'  label='' icon=''
+
+## recursos de icono (ausencia de roundIcon / PNG por densidad)
+res/drawable/ic_launcher_bg.xml
+res/drawable/ic_launcher_fg.xml
+res/mipmap-anydpi-v26/ic_launcher.xml

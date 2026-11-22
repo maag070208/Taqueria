@@ -49,6 +49,7 @@ import com.axzy.taqueria.KitchenServer
 import com.axzy.taqueria.Order
 import com.axzy.taqueria.OrderStatus
 import com.axzy.taqueria.OrderStore
+import com.axzy.taqueria.DEFAULT_PORT
 import com.axzy.taqueria.clockText
 import com.axzy.taqueria.elapsedText
 import com.axzy.taqueria.tableLabel
@@ -65,6 +66,8 @@ private const val EDIT_MS = 3 * 60_000L
 @Composable
 fun KitchenScreen(store: OrderStore, server: KitchenServer, notice: String?, onExit: () -> Unit) {
     var showAdmin by rememberSaveable { mutableStateOf(false) }
+    // QR de conexión para la mesera (evita mDNS/IP manual).
+    var showQr by rememberSaveable { mutableStateOf(false) }
     // La pantalla de cocina nunca se apaga.
     val view = LocalView.current
     DisposableEffect(Unit) {
@@ -75,7 +78,10 @@ fun KitchenScreen(store: OrderStore, server: KitchenServer, notice: String?, onE
         BackHandler { showAdmin = false }
         AdminScreen(store, onBack = { showAdmin = false })
     } else {
-        OrdersBoard(store, server, notice, onAdmin = { showAdmin = true }, onExit = onExit)
+        OrdersBoard(store, server, notice, onAdmin = { showAdmin = true }, onExit = onExit, onShowQr = { showQr = true })
+    }
+    if (showQr) {
+        ConnectionQrDialog(ips = KitchenServer.localIps(), port = DEFAULT_PORT, onDismiss = { showQr = false })
     }
 }
 
@@ -84,7 +90,7 @@ fun KitchenScreen(store: OrderStore, server: KitchenServer, notice: String?, onE
  * primero) con cada orden, su cuenta y sus grupos de preparación.
  */
 @Composable
-private fun OrdersBoard(store: OrderStore, server: KitchenServer, notice: String?, onAdmin: () -> Unit, onExit: () -> Unit) {
+private fun OrdersBoard(store: OrderStore, server: KitchenServer, notice: String?, onAdmin: () -> Unit, onExit: () -> Unit, onShowQr: () -> Unit) {
     val context = LocalContext.current
     val state by store.state.collectAsState()
     val waiters by server.clientCount.collectAsState()
@@ -120,7 +126,8 @@ private fun OrdersBoard(store: OrderStore, server: KitchenServer, notice: String
                 else -> Palette.muted
             },
         ) {
-            // Configuración, no operación: menú y rol del teléfono.
+            // Configuración, no operación: menú, QR de conexión y rol del teléfono.
+            SquareButton("📲", onClick = onShowQr)
             SquareButton("📋", onClick = onAdmin)
             SquareButton("⇄", onClick = { confirmExit = true })
         }

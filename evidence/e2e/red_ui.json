@@ -1,0 +1,309 @@
+{
+  "generado": "2026-11-21T13:57:36-0800",
+  "casos": [
+    {
+      "id": "RED-RECONEXION-01",
+      "titulo": "Al detener la cocina, la mesera detecta el enlace muerto en ≤25 s",
+      "tipo": "RED",
+      "dispositivo": "mesera",
+      "esperado": "La mesera deja de mostrar «Conectado a cocina» en ≤25 s",
+      "obtenido": "detectado en 6.6s",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/62-mesera-sin-conexion.png"
+      ],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "RED-OFFLINE-01",
+      "titulo": "Sin conexión la UI bloquea las operaciones",
+      "tipo": "RED",
+      "dispositivo": "mesera",
+      "esperado": "La lista muestra «Sin conexión con cocina» y el botón está deshabilitado",
+      "obtenido": "texto de enlace: '● Buscando cocina en la red…'; botón «Sin conexión con cocina»: True",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/62-mesera-sin-conexion.png"
+      ],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "RED-RECONEXION-02",
+      "titulo": "Reconexión automática y resincronización del estado",
+      "tipo": "RED",
+      "dispositivo": "ambos",
+      "esperado": "Al volver cocina, la mesera reconecta sola y cocina reporta 1 mesera",
+      "obtenido": "reconectó=True; cocina: '● 1 mesera conectada · IP 10.0.2.15'",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/52-licencia-reactivada.png"
+      ],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "RED-OFFLINE-02",
+      "titulo": "Lo creado durante el corte aparece al reconectar",
+      "tipo": "RED",
+      "dispositivo": "mesera",
+      "esperado": "La orden creada mientras la mesera estaba apagada aparece al reconectar",
+      "obtenido": "reconectó=True; tarjeta visible=True",
+      "estado": "PASA",
+      "evidencia": [],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "RED-CONEXION-03",
+      "titulo": "Dos meseras conectadas a la vez",
+      "tipo": "RED",
+      "dispositivo": "ambos",
+      "esperado": "Cocina cuenta 2 meseras con un cliente extra y vuelve a 1 al desconectarlo",
+      "obtenido": "2 meseras: True; vuelve a 1: True",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/63-cocina-dos-meseras.png"
+      ],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "FUN-ROLES-03",
+      "titulo": "Cambiar rol de cocina a mesera conserva órdenes y menú",
+      "tipo": "FUN",
+      "dispositivo": "cocina",
+      "esperado": "El rol se cambia desde ⇄ y luego se puede volver a cocina conservando datos",
+      "obtenido": "diálogo=True; pantalla de rol=True",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/64-pantalla-rol.png"
+      ],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "RED-CONEXION-04",
+      "titulo": "Cambiar de rol detiene el servidor y libera el puerto 7777",
+      "tipo": "RED",
+      "dispositivo": "cocina",
+      "esperado": "En rol Mesero el puerto 7777 queda cerrado",
+      "obtenido": "pantalla de mesera en cocina=True; puerto 7777 cerrado=True",
+      "estado": "PASA",
+      "evidencia": [],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "FUN-ROLES-04",
+      "titulo": "Volver a cocina desde el engrane de la mesera",
+      "tipo": "FUN",
+      "dispositivo": "cocina",
+      "esperado": "Desde Mesero → ⚙ → Cambiar rol → Cocina vuelve el monitor con las órdenes intactas",
+      "obtenido": "pantalla de rol=True; monitor=True; órdenes conservadas=1",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/52-licencia-reactivada.png"
+      ],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "RED-CONEXION-02",
+      "titulo": "Formato de IP manual: host, host:puerto y puerto alterno",
+      "tipo": "RED",
+      "dispositivo": "mesera",
+      "esperado": "Acepta «10.0.2.2:7777» y conecta",
+      "obtenido": "diálogo=True; conectó con host:puerto=True",
+      "estado": "PASA",
+      "evidencia": [],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "RED-CONEXION-05",
+      "titulo": "IP equivocada: «Conectando…» y corrección sin reiniciar",
+      "tipo": "RED",
+      "dispositivo": "mesera",
+      "esperado": "Con IP mala no queda «Conectado»; al corregirla reconecta sin reiniciar",
+      "obtenido": "estado con IP mala detectado=True; reconectó al corregir=True",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/65-mesera-ip-equivocada.png"
+      ],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "UI-ROTACION-01",
+      "titulo": "Rotar durante la captura: se pierde la pantalla de captura (comportamiento actual)",
+      "tipo": "UI",
+      "dispositivo": "mesera",
+      "esperado": "Comportamiento observado: al rotar se pierde la captura y el borrador queda inaccesible",
+      "obtenido": "antes «Revisar · 2»=True; tras rotar se perdió la captura=True (pantalla: ['● Conectado a cocina', 'Cuentas abiertas', '⚙', 'Toca: detalle · ← cancelar · → cobrar o entregar'])",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/66-rotacion-captura.png"
+      ],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "UI-ROTACION-02",
+      "titulo": "Rotar en cocina conserva la pestaña del menú y no afecta el monitor",
+      "tipo": "UI",
+      "dispositivo": "cocina",
+      "esperado": "El monitor de cocina sigue mostrando órdenes tras rotar",
+      "obtenido": "monitor presente tras rotar=True",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/67-rotacion-cocina.png"
+      ],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "UI-DESHACER-01",
+      "titulo": "La barra de deshacer dura 6 s y trunca el mensaje a una línea",
+      "tipo": "UI",
+      "dispositivo": "mesera",
+      "esperado": "La barra aparece y desaparece sola a los 6 s",
+      "obtenido": "visible al inicio=True; visible a los 6.5 s=False",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/68-barra-deshacer.png"
+      ],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "UI-GESTOS-03",
+      "titulo": "Tocar abre el detalle y el scroll vertical no dispara el gesto",
+      "tipo": "UI",
+      "dispositivo": "mesera",
+      "esperado": "Un deslizamiento vertical no abre acciones ni cancela la cuenta",
+      "obtenido": "sin acción tras scroll vertical=True",
+      "estado": "PASA",
+      "evidencia": [],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "UI-NAVEGACION-01",
+      "titulo": "BackHandler y flujo de pasos de la captura",
+      "tipo": "UI",
+      "dispositivo": "mesera",
+      "esperado": "Retroceder desde productos lleva a mesa y luego a cuentas abiertas",
+      "obtenido": "volvió a mesa=True; volvió a inicio=True",
+      "estado": "PASA",
+      "evidencia": [],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "FUN-CATALOGO-01",
+      "titulo": "Alta de producto nuevo disponible para la mesera",
+      "tipo": "FUN",
+      "dispositivo": "cocina",
+      "esperado": "Se agrega un producto desde 📋 y queda visible para la mesera",
+      "obtenido": "admin abierto=True; producto creado=True precio=1500",
+      "estado": "PASA",
+      "evidencia": [],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "FUN-CATALOGO-02",
+      "titulo": "Apagar un producto lo marca agotado y lo quita de la captura",
+      "tipo": "FUN",
+      "dispositivo": "cocina",
+      "esperado": "El interruptor deja active=false y la mesera ya no lo ve en captura",
+      "obtenido": "activo tras apagar=False",
+      "estado": "PASA",
+      "evidencia": [],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "VAL-CATALOGO-01",
+      "titulo": "Producto sin nombre o con precio inválido no se guarda",
+      "tipo": "VAL",
+      "dispositivo": "cocina",
+      "esperado": "Con nombre vacío Guardar está deshabilitado",
+      "obtenido": "Guardar habilitado con nombre vacío=False",
+      "estado": "PASA",
+      "evidencia": [],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "VAL-CATALOGO-03",
+      "titulo": "Una opción no puede existir en dos tipos de modificación",
+      "tipo": "VAL",
+      "dispositivo": "cocina",
+      "esperado": "Guardar un tipo con la opción «Con salsa» no crea el tipo",
+      "obtenido": "tipos antes=5, después=5",
+      "estado": "PASA",
+      "evidencia": [],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "FUN-CONEXION-02",
+      "titulo": "QR de conexión en cocina (host y puerto)",
+      "tipo": "FUN",
+      "dispositivo": "cocina",
+      "esperado": "La cocina muestra un QR con su IP:puerto y la instrucción para la mesera",
+      "obtenido": "diálogo=True; Cocina: 10.0.2.15:7777; instrucción=True",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/71-cocina-qr-conexion.png"
+      ],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "FUN-CONEXION-03",
+      "titulo": "La mesera escanea el QR de cocina y se conecta sin escribir IP",
+      "tipo": "FUN",
+      "dispositivo": "mesera",
+      "esperado": "El escáner abre desde ⚙ → Conexión; el escaneo real necesita cámara física",
+      "obtenido": "botón en ajustes=True; pantalla de escáner=True; escaneo real bloqueado en AVD (cámara virtual)",
+      "estado": "BLOQUEADO",
+      "evidencia": [
+        "capturas/72-mesera-escaner-qr.png"
+      ],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "UI-DENSIDAD-01",
+      "titulo": "Escala de fuente 1.5× y tamaño de pantalla grande",
+      "tipo": "UI",
+      "dispositivo": "mesera",
+      "esperado": "Con fuente 1.5× la pantalla principal sigue usable",
+      "obtenido": "pantalla principal visible con 1.5×=True",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/69-mesera-fuente-150.png"
+      ],
+      "datos": [],
+      "notas": ""
+    },
+    {
+      "id": "RED-PERMISO-01",
+      "titulo": "Permiso de red local en Android 17+: denegado y concedido",
+      "tipo": "RED",
+      "dispositivo": "mesera",
+      "esperado": "La app pide el permiso; al concederlo restablece la red",
+      "obtenido": "diálogo de permiso detectado=True; conectó tras conceder=True",
+      "estado": "PASA",
+      "evidencia": [
+        "capturas/70-permiso-red-local.png"
+      ],
+      "datos": [],
+      "notas": ""
+    }
+  ]
+}

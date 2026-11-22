@@ -379,13 +379,16 @@ class OrderStore(
             return AppState(
                 modifierGroups = listOf(salsa, cebolla, cilantro, extras, hielo),
                 products = listOf(
-                    "Asada" to 2000L, "Pastor" to 1800L, "Adobada" to 1800L, "Chorizo" to 1800L, "Suadero" to 1800L, "Bistec" to 2000L,
-                    "Campechano" to 2000L, "Longaniza" to 1800L, "Tripa" to 2200L, "Cabeza" to 2000L,
+                    "Asada" to 3500L, "Adobada" to 3000L, "Suadero" to 3500L, "Cabeza" to 3500L, "Tripa" to 3500L, "Vampiro" to 5000L,
                 ).map { (n, p) -> Product(id(), n, p, "Tacos", modifierGroupIds = taco) } +
-                    listOf(Triple("Quesadilla", 4500L, "🧀"), Triple("Gringa", 5500L, "🫓")).map { (n, p, e) ->
+                    listOf(
+                        Triple("Quesataco Asada", 4500L, "🧀"), Triple("Quesataco Adobada", 4500L, "🧀"),
+                        Triple("Quesadilla Asada", 9000L, "🧀"), Triple("Quesadilla Adobada", 9000L, "🧀"),
+                        Triple("Burrito", 18000L, "🌯"), Triple("Torta", 8000L, "🥖"), Triple("Torta con queso", 10000L, "🥖"),
+                    ).map { (n, p, e) ->
                         Product(id(), n, p, "Especiales", emoji = e, modifierGroupIds = listOf(salsa.id, cebolla.id))
                     } +
-                    listOf(Triple("Refresco", 3000L, "🥤"), Triple("Agua de horchata", 3000L, "🥛"), Triple("Agua de jamaica", 3000L, "🍹")).map { (n, p, e) ->
+                    listOf(Triple("Refresco", 3000L, "🥤"), Triple("Agua de sabor", 3000L, "🍹")).map { (n, p, e) ->
                         Product(id(), n, p, "Bebidas", emoji = e, modifierGroupIds = listOf(hielo.id))
                     },
             )
