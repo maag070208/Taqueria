@@ -174,15 +174,31 @@ Consola: Cliente → **Menú** (botón en el detalle del cliente), como en el mo
 
 **Objetivo:** el editor que hoy es confuso queda simple, y cada giro nuevo arranca con su menú.
 
-- [ ] En la app, el admin usa los mismos tres bloques que la Central.
-  - "Preparación" pasa a llamarse **Opciones** y los extras sin costo van a **Ajustes**.
+- [x] En la app, el admin usa los mismos tres bloques que la Central (**¿Cómo se vende?**, **¿Qué le pueden
+  pedir?** e **Icono**, con los iconos del set del giro).
+  - "Preparación" pasa a llamarse **Opciones**; los extras sin costo siguen en **Ajustes**.
   - Los precios bajan de renglón en lugar de cortarse.
-- [ ] Plantillas de menú:
-  - **Taquería**, sale del menú semilla de la app;
-  - **Sushi**: rollos, nigiri, entradas y bebidas;
-  - **Pizzería**: tamaños Chica, Mediana y Grande, y orillas como opciones.
-- [ ] "Copiar de la plantilla" en el menú de un cliente.
-- [ ] Un cliente nuevo arranca con la plantilla de su giro. La API ya lo hace; falta probarlo en la consola.
+  - Un producto nuevo arranca con las opciones de su categoría.
+  - "Menú predeterminado" solo aparece en la taquería; los demás giros reciben su menú de la Central.
+- [x] Plantillas de menú en la Central (`api/src/lib/menu-templates`):
+  - **Taquería** sale del menú semilla de la app (37 productos);
+  - **Sushi**: rollos, nigiri, entradas y bebidas (18);
+  - **Pizzería**: tamaños Chica, Mediana y Grande, y orilla y masa como opciones (19).
+- [x] En Productos → Giro, **Menú base** elige una plantilla; cada cliente nuevo del giro arranca con ella.
+- [x] **Copiar de la plantilla** en el menú de un cliente: el menú base del giro o cualquier plantilla. Queda en
+  el borrador hasta "Enviar a cocina"; si la cocina aún no sube su menú, se envía directo.
+- [x] La consola muestra las partes del giro como las ve la app: una que no está guardada cuenta como encendida
+  (igual que en la taquería) y al guardar se mandan las tres.
+- [x] Un giro nuevo nace sin mixtos ni color de carne, y con extras gratis; antes heredaba los de la taquería.
+- [x] Pruebas: 4 unitarias por plantilla en la Central (41 en total) y 1 de integración nueva (32).
+- [x] Probado en emuladores con la Central local:
+  - Pizzería con la plantilla como menú base, "Pizzas Don Luigi" dado de alta en la consola con 19 productos;
+  - la cocina nueva se activó como Pizzero y tomó las pizzas con sus iconos;
+  - el mesero pidió una Pepperoni Mediana con orilla rellena de queso ($179) y la cocina la recibió.
+- [ ] Demo en los dos teléfonos físicos.
+
+Pendiente fuera del MVP: las opciones no tienen precio, así que la orilla rellena no cobra extra. Hoy se resuelve
+con otro tamaño ("Mediana orilla rellena") o subiendo el precio; cobrarla aparte necesita precio por opción.
 
 **Demo:** creas "Pizzas Don Luigi"; el teléfono se activa y ya trae pizzas con tamaños y sus iconos.
 
@@ -216,7 +232,7 @@ la Central.
 | 1 · La Central conoce los giros | ✅ Hecho en local; espera tu demo |
 | 2 · La app se viste del giro | 🟡 Hecho en emuladores; falta la demo en teléfonos y el flujo de Maestro |
 | 3 · Menú desde la Central | 🟡 Hecho en emuladores; falta la demo en teléfonos |
-| 4 · Menú claro y plantillas | ⏳ Pendiente |
+| 4 · Menú claro y plantillas | 🟡 Hecho en emuladores; falta la demo en teléfonos |
 | 5 · Migración y entrega | ⏳ Pendiente |
 
 ## Decisiones pendientes

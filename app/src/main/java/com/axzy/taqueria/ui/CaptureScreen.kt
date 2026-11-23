@@ -506,7 +506,9 @@ private fun PersonCard(ctx: WaiterCtx, state: AppState, category: Category, prod
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text("Persona $person", fontSize = 18.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
             val n = lines.sumOf { it.qty }
-            if (n > 0) Text("$n ${category.name.lowercase()}", color = Palette.muted, fontSize = 14.sp)
+            // "1 pizza" y "2 pizzas": en singular, el nombre de la pieza de la categoría.
+            val what = if (n == 1 && !category.byAmount && category.singular.isNotBlank()) category.singular else category.name
+            if (n > 0) Text("$n ${what.lowercase()}", color = Palette.muted, fontSize = 14.sp)
         }
         Grid(products, 3) { p ->
             MeatTile(
