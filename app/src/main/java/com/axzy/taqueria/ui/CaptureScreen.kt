@@ -151,13 +151,15 @@ fun CaptureScreen(ctx: WaiterCtx, state: AppState, pickTable: Boolean, onClose: 
             else -> "${tableLabel(draft.table)} · ${account?.let { "Cuenta ${it.number}" } ?: "Cuenta nueva"}"
         }
     }
+    // "Carne" es de taquería; en otros giros se toca el producto.
+    val what = if (currentGiro().features.meatColors) "la carne" else "el producto"
     val subtitle = when (val s = step) {
         Step.Table -> "Paso 1 · ¿Dónde?"
         Step.Account -> "Paso 2 · ¿A qué cuenta?"
         Step.Menu -> "${tableLabel(draft.table)} · ¿Qué van a pedir?"
         is Step.InCategory -> if (state.menuCategories().firstOrNull { it.name == s.name }?.byAmount == true) {
-            "Elige la carne y el monto"
-        } else "Toca la carne · cada toque +1"
+            "Elige $what y el monto"
+        } else "Toca $what · cada toque +1"
         Step.Summary -> "Revisa antes de enviar"
     }
 
@@ -535,7 +537,7 @@ private fun PersonCard(ctx: WaiterCtx, state: AppState, category: Category, prod
                 ) { LineCard(ctx, state, category, p, l, open = draft.openLineId == l.id) }
             }
         }
-        if (category.freeExtras && state.freeExtras.isNotEmpty()) {
+        if (category.freeExtras && state.freeExtras.isNotEmpty() && currentGiro().features.freeExtras) {
             Text("Extras gratis", color = Palette.muted, fontSize = 13.sp)
             FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 state.freeExtras.forEach { e ->
@@ -549,7 +551,7 @@ private fun PersonCard(ctx: WaiterCtx, state: AppState, category: Category, prod
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun MeatTile(p: Product, iconKeys: List<String>, qty: Int, subtitle: String?, selected: Boolean, onTap: () -> Unit) {
-    val (bg, fg, _) = p.color.colors()
+    val (bg, fg, _) = p.shownColor().colors()
     Box(
         Modifier.fillMaxWidth().height(104.dp)
             .background(bg, Ui.smallShape)
@@ -576,7 +578,7 @@ private fun MeatTile(p: Product, iconKeys: List<String>, qty: Int, subtitle: Str
 private fun AmountPicker(p: Product, onAdd: (Long) -> Unit) {
     var other by remember(p.id) { mutableStateOf("") }
     val cents = parseMoney(other)
-    val (_, _, bar) = p.color.colors()
+    val (_, _, bar) = p.shownColor().colors()
     Column(
         Modifier.fillMaxWidth().background(Palette.bg, Ui.smallShape).border(1.dp, bar, Ui.smallShape).padding(10.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -604,11 +606,12 @@ private fun AmountPicker(p: Product, onAdd: (Long) -> Unit) {
 @Composable
 private fun LineCard(ctx: WaiterCtx, state: AppState, category: Category, p: Product, l: DraftLine, open: Boolean) {
     val draft = ctx.app.draft
-    val (_, _, bar) = p.color.colors()
+    val color = p.shownColor()
+    val (_, _, bar) = color.colors()
     val unit = state.unitPrice(l)
     // La barra de color se pinta detrás (no como hijo) para no depender de medidas intrínsecas,
     // que los campos de texto no soportan y cortaban el renglón abierto.
-    val barColor = if (p.color == com.axzy.taqueria.MeatColor.NONE) Palette.line else bar
+    val barColor = if (color == com.axzy.taqueria.MeatColor.NONE) Palette.line else bar
     Row(
         Modifier.fillMaxWidth()
             .clip(Ui.smallShape)

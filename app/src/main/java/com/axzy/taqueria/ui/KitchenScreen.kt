@@ -138,7 +138,7 @@ fun KitchenScreen(app: App, notice: String?) {
         listOf(DrawerItem(R.drawable.ic_key, "Entrar como admin") { pinMode = if (app.adminPin.isSet) PinMode.ENTER else PinMode.CREATE }),
     )
 
-    AppDrawer(drawer, staff, "Teléfono de cocina", groups) {
+    AppDrawer(drawer, staff, "Teléfono de ${currentGiro().terms.kitchen.lowercase()}", groups) {
         if (page != KitchenPage.ORDERS) BackHandler(onBack = ::toOrders)
         when (page) {
             KitchenPage.ORDERS -> OrdersBoard(store, server, notice, (zone as? KitchenZone.State.On)?.wifi?.ssid, app.license.update, app.stationView, onMenu = drawer::open)
@@ -245,9 +245,10 @@ fun OrdersView(
         known = current
     }
 
+    val giro = currentGiro()
     Column(Modifier.fillMaxSize().safeDrawingPadding()) {
         TopBar(
-            title = "${station?.name ?: state.kitchenName.ifBlank { "Cocina" }} · ${pending.size} ${if (pending.size == 1) "orden" else "órdenes"}",
+            title = "${station?.name ?: state.kitchenName.ifBlank { giro.terms.kitchen }} · ${pending.size} ${if (pending.size == 1) "orden" else "órdenes"}",
             subtitle = subtitle,
             subtitleColor = subtitleColor,
             onMenu = onMenu,

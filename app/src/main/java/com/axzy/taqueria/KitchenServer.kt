@@ -45,6 +45,10 @@ class KitchenServer(
     private val latestApp: () -> LatestApp? = { null },
     /** Fallas que reporta una mesera; la cocina las sube a la Central. */
     private val onWaiterErrors: (List<AppErrorReport>) -> Unit = {},
+    /** Giro de la licencia; viaja a meseras y pantallas con cada estado. */
+    private val giro: () -> Giro? = { null },
+    /** Set de iconos guardado en la cocina, para la mesera que lo pida. */
+    private val iconSet: () -> IconSetDownload? = { null },
 ) {
     private val tag = "KitchenServer"
     private var scope: CoroutineScope? = null
@@ -142,6 +146,8 @@ class KitchenServer(
                 runCatching { onWaiterErrors(msg.errors.take(20).map { it.copy(source = "mesero") }) }
                 return ServerMsg.Reply(msg.reqId)
             }
+            // Meseras y pantallas, aunque la licencia esté bloqueada: solo son dibujos.
+            is ClientMsg.GetIconSet -> return ServerMsg.Reply(msg.reqId, iconSet = runCatching { iconSet() }.getOrNull())
             else -> Unit
         }
         // Con límite de meseras solo se atiende a quien se identificó (una app de mesera vieja no).
@@ -157,7 +163,7 @@ class KitchenServer(
                 is ClientMsg.RestoreAccount -> ServerMsg.Reply(msg.reqId).also { store.restoreAccount(msg.accountId) }
                 is ClientMsg.AddPayment -> ServerMsg.Reply(msg.reqId, paymentId = store.addPayment(msg))
                 is ClientMsg.VoidPayment -> ServerMsg.Reply(msg.reqId).also { store.voidPayment(msg.accountId, msg.paymentId) }
-                is ClientMsg.Hello, is ClientMsg.ReportErrors -> null
+                is ClientMsg.Hello, is ClientMsg.ReportErrors, is ClientMsg.GetIconSet -> null
             }
         } catch (e: ValidationException) {
             ServerMsg.Reply(msg.reqId, error = e.message)
@@ -192,7 +198,11 @@ class KitchenServer(
         _screenCount.value = clients.count { it.screen }
     }
 
-    private fun stateMsg() = AppJson.encodeToString<ServerMsg>(ServerMsg.State(store.state.value, System.currentTimeMillis(), latestApp()))
+    private fun stateMsg() =
+        AppJson.encodeToString<ServerMsg>(ServerMsg.State(store.state.value, System.currentTimeMillis(), latestApp(), giro()))
+
+    /** Cambió el giro o su set de iconos: se avisa a meseras y pantallas sin esperar un cambio de órdenes. */
+    fun announceGiro() = broadcast(stateMsg())
 
     private fun broadcast(line: String) {
         for (c in clients) {

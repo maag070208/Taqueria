@@ -68,7 +68,8 @@ fun ScreenScreen(app: App, onExit: () -> Unit) {
         ),
         listOf(DrawerItem(R.drawable.ic_swap, "Cambiar rol del teléfono") { confirmExit = true }),
     )
-    val kitchen = state.kitchenName.ifBlank { "la cocina" }
+    val giro = currentGiro()
+    val kitchen = state.kitchenName.ifBlank { "la ${giro.terms.kitchen.lowercase()}" }
     val (color, text) = when {
         link is Link.Connected -> Palette.ok to "● Pantalla conectada a $kitchen"
         link is Link.Rejected -> Palette.late to "● ${(link as Link.Rejected).message}"
@@ -77,7 +78,7 @@ fun ScreenScreen(app: App, onExit: () -> Unit) {
         link is Link.Connecting -> Palette.warn to "● Conectando…"
         else -> Palette.late to "● Buscando la cocina principal… (escanea su QR)"
     }
-    AppDrawer(drawer, Staff.TAQUERO, "Pantalla de cocina", groups) {
+    AppDrawer(drawer, Staff.TAQUERO, "Pantalla de ${giro.terms.kitchen.lowercase()}", groups) {
         OrdersView(
             state = state,
             stationId = app.stationView,

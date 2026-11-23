@@ -97,19 +97,28 @@ Consola:
 
 **Objetivo:** el mismo APK se ve y habla como el giro de la licencia.
 
-- [ ] Leer `product.terms`, `product.features`, `iconSet` y `catalog` de la licencia. Si no vienen, la app es una
+- [x] Leer `product.terms`, `product.features`, `iconSet` y `catalog` de la licencia. Si no vienen, la app es una
   taquería, como hoy.
-- [ ] `IconStore`:
+- [x] `IconStore`:
   - baja el set cuando cambia la versión y lo guarda en `files/iconos/`;
-  - sin internet usa lo último que bajó o los iconos que trae el APK.
-- [ ] `DishIcon` busca en este orden:
+  - sin internet usa lo último que bajó o los iconos que trae el APK;
+  - la cocina se lo pasa a meseros y pantallas, sin que ellos necesiten internet.
+- [x] `DishIcon` busca en este orden:
   1. la llave explícita del producto (`icon`);
-  2. el set bajado;
-  3. la búsqueda por nombre de hoy;
+  2. el set bajado, por el nombre del producto ("Dragon" → `rollo_dragon`);
+  3. los iconos de taquería que trae el APK;
   4. el genérico del giro.
-- [ ] Palabras del giro en roles y textos: "Sushero", "Barra", "+ Agregar rollo".
-- [ ] Partes del giro: sin `mixes` no aparece "mixto"; sin `meatColors` no aparece el color de carne.
-- [ ] Pantalla de activación como en el mock: logo del giro y avance de "Preparando la app".
+- [x] Palabras del giro en roles y textos: "Sushero", "Barra"; "Toca el producto" en lugar de "Toca la carne".
+- [x] Partes del giro: sin `mixes` no aparece "mixto"; sin `meatColors` no aparece el color de carne (admin,
+  captura y renglones); sin `freeExtras` no aparecen los extras gratis.
+- [x] Pantalla "Preparando la app" con el logo del giro mientras bajan los iconos; "Seguir sin esperar" a los 8 s.
+- [x] Probado en emuladores con la Central local: la cocina se activa como Sushi Makis, baja 41 iconos, el mesero
+  los recibe de la cocina y una orden de Dragon y California llega a la "Barra".
+- [ ] Demo en los dos teléfonos físicos.
+- [ ] Flujo de Maestro que activa un cliente de Sushi con la Central falsa.
+
+Visto en la demo y pendiente para el Sprint 4: el menú semilla sigue siendo de taquería (Tacos, Cebollitas, "Con
+todo"), aunque el giro sea Sushi. Lo resuelven las plantillas por giro.
 
 **Demo:**
 - el Oppo se activa como Sushi Makis y el Samsung como mesero;
@@ -191,7 +200,7 @@ la Central.
 |---|---|
 | 0 · Arranque | ✅ Hecho |
 | 1 · La Central conoce los giros | ✅ Hecho en local; espera tu demo |
-| 2 · La app se viste del giro | ⏳ Pendiente |
+| 2 · La app se viste del giro | 🟡 Hecho en emuladores; falta la demo en teléfonos y el flujo de Maestro |
 | 3 · Menú desde la Central | ⏳ Pendiente; la API ya existe |
 | 4 · Menú claro y plantillas | ⏳ Pendiente |
 | 5 · Migración y entrega | ⏳ Pendiente |

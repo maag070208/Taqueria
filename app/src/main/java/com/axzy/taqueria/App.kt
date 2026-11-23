@@ -60,10 +60,20 @@ class App : Application() {
             screenLimit = { license.screenLimit },
             latestApp = { license.update },
             onWaiterErrors = crashes::add,
+            giro = { license.giro },
+            iconSet = { icons.download() },
         )
     }
+    /** Iconos del giro guardados en este teléfono (la cocina los baja de la Central, las meseras de la cocina). */
+    val icons by lazy { IconStore(File(filesDir, "iconos")) }
     /** Conexión con la cocina principal: la usan la mesera y la pantalla de cocina extra. */
-    val client by lazy { WaiterClient(this, waiterId, crashes, isScreen = { role == Role.SCREEN }) }
+    val client by lazy {
+        WaiterClient(
+            this, waiterId, crashes, isScreen = { role == Role.SCREEN }, icons = icons,
+            initialGiro = prefs.getString("giro", null)?.let { runCatching { AppJson.decodeFromString<Giro>(it) }.getOrNull() } ?: Giro(),
+            onGiro = { prefs.edit().putString("giro", AppJson.encodeToString(it)).apply() },
+        )
+    }
     /** Id fijo de este teléfono para la cocina (cuenta contra las meseras del plan). */
     private val waiterId by lazy {
         prefs.getString("waiterId", null) ?: UUID.randomUUID().toString().also { prefs.edit().putString("waiterId", it).apply() }
@@ -86,6 +96,7 @@ class App : Application() {
     private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var outboxJob: Job? = null
     private var errorsJob: Job? = null
+    private var giroJob: Job? = null
     val adminPin by lazy {
         AdminPin(
             get = { prefs.getString(it, null) },
@@ -143,11 +154,15 @@ class App : Application() {
                     delay(5 * 60_000L)
                 }
             }
+            giroJob?.cancel()
+            giroJob = appScope.launch { followGiro() }
         } else {
             // En mesera no se instancia el servidor (ni su OrderStore): no se guardan datos de negocio.
             if (serverStarted) { server.stop(); serverStarted = false; salesSync.stop(); backupSync.stop() }
             errorsJob?.cancel()
             errorsJob = null
+            giroJob?.cancel()
+            giroJob = null
             license.stop()
         }
         if (next != Role.KITCHEN) zone.stop()
@@ -194,6 +209,27 @@ class App : Application() {
     /** Red de la zona de cocina que trajo el QR (null = la cocina está en la red del local). */
     var savedWifi: KitchenWifi? = null
         private set
+
+    /**
+     * Cocina: cada vez que la licencia trae otro giro (o otra versión de su set), baja los iconos de la
+     * Central y avisa a meseras y pantallas. Sin internet reintenta cada 5 minutos; mientras tanto se
+     * usan los iconos que ya tenía (o los de taquería que trae la app).
+     */
+    private suspend fun followGiro() {
+        license.giroFlow.collectLatest { giro ->
+            while (true) {
+                val error = icons.syncFromCentral(license.credentials(), giro.iconSet)
+                if (serverStarted) server.announceGiro()
+                if (error == null) break
+                android.util.Log.i("App", error)
+                delay(5 * 60_000L)
+            }
+        }
+    }
+
+    /** Giro con el que se ve este teléfono: la cocina usa su licencia; mesera y pantalla, lo que manda la cocina. */
+    val giro: Giro
+        get() = if (role == Role.KITCHEN) license.giro else client.giro.value
 
     /** Mientras haya conexión y órdenes pendientes, las manda (reintenta cada 5 s si cocina no contesta). */
     private suspend fun sendQueuedOrders() {

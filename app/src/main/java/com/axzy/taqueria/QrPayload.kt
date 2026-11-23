@@ -10,8 +10,8 @@ import java.net.URI
  * `{"v":1,"u":"https://central-api.axzy.dev/api/v1","c":"axc_…","p":"TAQUERIA"}`
  *
  * `u` (la dirección del servidor) es opcional: si falta se usa la compilada en
- * la app. `p` también es opcional, pero si viene tiene que ser el producto de
- * esta app: un QR de otro producto se rechaza con un mensaje claro.
+ * la app. `p` (el giro: TAQUERIA, SUSHI…) es opcional e informativo: la app
+ * multi-negocio acepta cualquiera y el giro real llega en la licencia.
  *
  * Este archivo es Kotlin puro (sin Android) para poder probarlo en la JVM.
  */
@@ -25,6 +25,8 @@ data class QrPayload(
     companion object {
         const val VERSION = 1
         const val PRODUCT = "TAQUERIA"
+        /** Claves de producto de la Central: MAYÚSCULAS, números y guion bajo. */
+        private val PRODUCT_KEY = Regex("^[A-Za-z0-9_]{2,40}$")
 
         /** Los códigos de activación de Axzy Central empiezan así. */
         const val CODE_PREFIX = "axc_"
@@ -74,11 +76,11 @@ data class QrPayload(
             if (code.isEmpty() || code.length > MAX_CODE) {
                 return QrResult.Invalid("El QR no trae un código de activación válido.")
             }
+            // Desde la versión multi-negocio cualquier giro (TAQUERIA, SUSHI, PIZZERIA…) se activa
+            // con la misma app: el giro real llega en la licencia.
             val product = dto.p?.trim()?.takeIf { it.isNotEmpty() }
-            if (product != null && !product.equals(PRODUCT, ignoreCase = true)) {
-                return QrResult.Invalid(
-                    "Este QR es para el producto \"$product\", no para Taquería. Pide a tu proveedor el QR correcto.",
-                )
+            if (product != null && !PRODUCT_KEY.matches(product)) {
+                return QrResult.Invalid("El QR trae un producto inválido. Pide un QR nuevo a tu proveedor.")
             }
             val rawUrl = dto.u?.trim()?.takeIf { it.isNotEmpty() }
             val apiUrl = if (rawUrl == null) null else normalizeUrl(rawUrl)

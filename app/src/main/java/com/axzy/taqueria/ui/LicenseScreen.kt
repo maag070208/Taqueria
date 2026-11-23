@@ -34,6 +34,21 @@ import com.axzy.taqueria.LockReason
 import com.axzy.taqueria.QrPayload
 import com.axzy.taqueria.QrResult
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.ui.platform.LocalContext
+import com.axzy.taqueria.Giro
+import com.axzy.taqueria.app
 
 /**
  * Lo que ve el teléfono de cocina antes de operar: activar con el código que da
@@ -45,9 +60,67 @@ fun LicenseGate(license: LicenseManager, onExit: () -> Unit, content: @Composabl
     when (val s = license.state) {
         LicenseState.NotActivated -> ActivationScreen(license, onExit)
         is LicenseState.Locked -> LockedScreen(license, s, onExit)
-        is LicenseState.Active -> content(
-            if (s.expiresSoon) "Conecta este teléfono a internet antes del ${dateText(s.validUntilMs)} para que la app siga funcionando." else null,
-        )
+        is LicenseState.Active -> {
+            val icons = LocalContext.current.app.icons
+            val meta by icons.meta.collectAsState()
+            val ref = license.giro.iconSet
+            var skipped by remember { mutableStateOf(false) }
+            // Solo la primera vez (o al cambiar de giro): una versión nueva del mismo set baja sin interrumpir.
+            if (ref != null && meta?.id != ref.id && !skipped) {
+                PreparingScreen(s.tenantName, license.giro, onSkip = { skipped = true })
+            } else {
+                content(
+                    if (s.expiresSoon) "Conecta este teléfono a internet antes del ${dateText(s.validUntilMs)} para que la app siga funcionando." else null,
+                )
+            }
+        }
+    }
+}
+
+/** Recién activada en un giro con iconos propios: espera a que bajen (con salida por si no hay internet). */
+@Composable
+private fun PreparingScreen(tenant: String, giro: Giro, onSkip: () -> Unit) {
+    var waited by remember { mutableIntStateOf(0) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(1_000)
+            waited++
+        }
+    }
+    Column(
+        Modifier.fillMaxSize().background(Palette.bg).safeDrawingPadding().padding(Ui.pad),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Spacer(Modifier.height(48.dp))
+        Text("● Licencia activada", color = Palette.ok, fontSize = 14.sp)
+        Text(tenant, fontSize = 28.sp, fontWeight = FontWeight.Black, textAlign = TextAlign.Center)
+        Text("${giro.name} · ${giro.terms.kitchenRole}, ${giro.terms.waiterRole.lowercase()}", color = Palette.muted, fontSize = 15.sp)
+        Column(
+            Modifier.fillMaxWidth().background(Palette.card, Ui.shape).border(1.dp, Palette.line, Ui.shape).padding(Ui.pad),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
+        ) {
+            Text("Preparando la app", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                CircularProgressIndicator(Modifier.size(24.dp), color = Palette.primary, strokeWidth = 3.dp)
+                Column(Modifier.padding(start = 12.dp)) {
+                    Text("Iconos de ${giro.name.lowercase()}", fontWeight = FontWeight.Medium)
+                    Text("Bajando de la Central…", color = Palette.muted, fontSize = 13.sp)
+                }
+            }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("✓", color = Palette.ok, fontWeight = FontWeight.Black, fontSize = 18.sp, modifier = Modifier.width(24.dp), textAlign = TextAlign.Center)
+                Column(Modifier.padding(start = 12.dp)) {
+                    Text("Palabras del giro", fontWeight = FontWeight.Medium)
+                    Text("${giro.terms.kitchenRole} · ${giro.terms.waiterRole} · ${giro.terms.item}", color = Palette.muted, fontSize = 13.sp)
+                }
+            }
+        }
+        // Sin internet no se queda atorada: después de unos segundos se puede seguir con los iconos de la app.
+        if (waited >= 8) {
+            Text("¿Sin internet? Puedes seguir; los iconos bajan solos en cuanto haya conexión.", color = Palette.muted, fontSize = 14.sp, textAlign = TextAlign.Center)
+            ActionButton("Seguir sin esperar", Palette.card, Palette.primary, Modifier.fillMaxWidth(), onClick = onSkip)
+        }
     }
 }
 

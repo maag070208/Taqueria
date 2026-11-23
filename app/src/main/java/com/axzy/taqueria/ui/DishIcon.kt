@@ -12,6 +12,15 @@ import androidx.compose.ui.unit.Dp
 import com.axzy.taqueria.Category
 import com.axzy.taqueria.Product
 import com.axzy.taqueria.R
+import android.graphics.BitmapFactory
+import android.util.LruCache
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
+import com.axzy.taqueria.app
+import java.io.File
 import java.text.Normalizer
 
 /**
@@ -30,7 +39,13 @@ object DishIcons {
 
     fun categoryKeys(c: Category) = listOf("cat_${slug(c.name)}", "esp_${slug(c.singular)}")
 
-    /** Tacos y bebidas tienen ilustración por producto; lo demás usa la de su categoría. */
+    /** Marca de "busca por nombre en el set del giro" dentro de la lista de llaves. */
+    const val BY_NAME = "nombre:"
+
+    /**
+     * Orden de búsqueda: la llave que eligió el admin (`p.icon`), luego por nombre en el set del giro
+     * ("Dragón" → `rollo_dragon`), y al final las ilustraciones de taquería de siempre.
+     */
     fun productKeys(p: Product, c: Category): List<String> {
         val n = slug(p.name).let { alias[it] ?: it }
         val own = when (slug(c.name)) {
@@ -38,7 +53,7 @@ object DishIcons {
             "bebidas" -> "beb_$n"
             else -> "esp_$n"
         }
-        return listOf(own) + categoryKeys(c)
+        return listOfNotNull(p.icon?.takeIf { it.isNotBlank() }, "$BY_NAME$n", own) + categoryKeys(c)
     }
 
     @SuppressLint("DiscouragedApi")
@@ -47,9 +62,35 @@ object DishIcons {
     }
 }
 
-/** Ilustración del platillo; si el producto no tiene una propia, la de su categoría o el taco genérico. */
+/** PNG del set ya leídos, por ruta y versión del set (un icono pesa ~20 kB). */
+private val bitmaps = object : LruCache<String, ImageBitmap>(160) {}
+
+private fun bitmapOf(file: File, version: Int): ImageBitmap? =
+    bitmaps.get("$version:${file.path}") ?: BitmapFactory.decodeFile(file.path)?.asImageBitmap()?.also { bitmaps.put("$version:${file.path}", it) }
+
+/**
+ * Ilustración del platillo. Primero el set del giro que bajó la Central (llave explícita o por nombre),
+ * luego las ilustraciones de taquería del APK, y al final el genérico del giro o el taco genérico.
+ */
 @Composable
 fun DishIcon(keys: List<String>, size: Dp, modifier: Modifier = Modifier) {
-    val id = DishIcons.resolve(LocalContext.current, keys) ?: R.drawable.ico_taco_generico
-    Image(painterResource(id), contentDescription = null, modifier = modifier.size(size))
+    val context = LocalContext.current
+    val store = context.app.icons
+    val meta by store.meta.collectAsState()
+    val version = meta?.version ?: 0
+    val fromSet = remember(keys, meta) {
+        if (meta == null) null
+        else keys.firstNotNullOfOrNull { k ->
+            if (k.startsWith(DishIcons.BY_NAME)) store.byName(k.removePrefix(DishIcons.BY_NAME)) else store.file(k)
+        }
+    }
+    val bitmap = fromSet?.let { bitmapOf(it, version) }
+    if (bitmap != null) {
+        Image(bitmap, contentDescription = null, modifier = modifier.size(size))
+        return
+    }
+    val res = DishIcons.resolve(context, keys.filterNot { it.startsWith(DishIcons.BY_NAME) })
+    val generic = if (res == null && meta != null) store.generic()?.let { bitmapOf(it, version) } else null
+    if (generic != null) Image(generic, contentDescription = null, modifier = modifier.size(size))
+    else Image(painterResource(res ?: R.drawable.ico_taco_generico), contentDescription = null, modifier = modifier.size(size))
 }

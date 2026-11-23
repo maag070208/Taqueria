@@ -213,19 +213,20 @@ private fun ProductRow(
     p: Product, category: com.axzy.taqueria.Category,
     onClick: (() -> Unit)?, onUp: (() -> Unit)?, onDown: (() -> Unit)?, onToggle: (Boolean) -> Unit,
 ) {
-    val (bg, _, bar) = p.color.colors()
+    val color = p.shownColor()
+    val (bg, _, bar) = color.colors()
     Row(
         Modifier.fillMaxWidth().height(72.dp).background(Palette.card, Ui.shape)
             .border(1.dp, Palette.line, Ui.shape).then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier).padding(end = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(Modifier.width(6.dp).fillMaxHeight().background(if (p.color == MeatColor.NONE) Color.Transparent else bar, RoundedCornerShape(topStart = 16.dp, bottomStart = 16.dp)))
-        Box(Modifier.padding(start = 6.dp).size(44.dp).background(if (p.color == MeatColor.NONE) Palette.soft else bg, RoundedCornerShape(50)), contentAlignment = Alignment.Center) {
+        Box(Modifier.width(6.dp).fillMaxHeight().background(if (color == MeatColor.NONE) Color.Transparent else bar, RoundedCornerShape(topStart = 16.dp, bottomStart = 16.dp)))
+        Box(Modifier.padding(start = 6.dp).size(44.dp).background(if (color == MeatColor.NONE) Palette.soft else bg, RoundedCornerShape(50)), contentAlignment = Alignment.Center) {
             DishIcon(DishIcons.productKeys(p, category), 36.dp)
         }
         Column(Modifier.weight(1f).padding(start = 12.dp)) {
             Text(
-                p.name + if (p.mix) " · mixto" else "", fontSize = 17.sp, fontWeight = FontWeight.Bold,
+                p.name + if (p.mix && currentGiro().features.mixes) " · mixto" else "", fontSize = 17.sp, fontWeight = FontWeight.Bold,
                 color = if (p.active) Palette.text else Palette.muted, maxLines = 1, overflow = TextOverflow.Ellipsis,
             )
             Text(
@@ -270,6 +271,7 @@ private fun ProductDialog(
     var category by remember { mutableStateOf(product?.category ?: categories.firstOrNull() ?: "Tacos") }
     var groupIds by remember { mutableStateOf(product?.modifierGroupIds ?: groups.map { it.id }) }
     var color by remember { mutableStateOf(product?.color ?: MeatColor.NONE) }
+    val giro = currentGiro()
     var mix by remember { mutableStateOf(product?.mix ?: false) }
     var variants by remember { mutableStateOf(product?.variants.orEmpty().map { VariantInput(it.name, moneyInput(it.priceCents)) }) }
     var confirmDelete by remember { mutableStateOf(false) }
@@ -315,16 +317,21 @@ private fun ProductDialog(
                     variants = if (variants.isEmpty()) listOf(VariantInput("Maíz", price), VariantInput("Harina", "")) else variants + VariantInput("", "")
                 }) { Text(if (variants.isEmpty()) "+ Precio por presentación (maíz / harina…)" else "+ Otra presentación") }
 
-                Text("Color de la tarjeta", fontWeight = FontWeight.Bold)
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    MeatColor.entries.forEach { c -> Pill(c.label, c == color) { color = c } }
-                }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Column(Modifier.weight(1f)) {
-                        Text("Es mixto", fontWeight = FontWeight.Bold)
-                        Text("Al pedirlo se eligen las carnes (de las de su categoría).", color = Palette.muted, fontSize = 13.sp)
+                // Color de carne y mixtos solo en los giros que los usan (la taquería sí).
+                if (giro.features.meatColors) {
+                    Text("Color de la tarjeta", fontWeight = FontWeight.Bold)
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        MeatColor.entries.forEach { c -> Pill(c.label, c == color) { color = c } }
                     }
-                    Switch(mix, { mix = it }, colors = SwitchDefaults.colors(checkedTrackColor = Palette.primary, checkedThumbColor = Color.White))
+                }
+                if (giro.features.mixes || mix) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Column(Modifier.weight(1f)) {
+                            Text("Es mixto", fontWeight = FontWeight.Bold)
+                            Text("Al pedirlo se eligen las carnes (de las de su categoría).", color = Palette.muted, fontSize = 13.sp)
+                        }
+                        Switch(mix, { mix = it }, colors = SwitchDefaults.colors(checkedTrackColor = Palette.primary, checkedThumbColor = Color.White))
+                    }
                 }
 
                 Text("Preparación permitida", fontWeight = FontWeight.Bold)
@@ -452,7 +459,7 @@ private fun SettingsPanel(state: AppState, onTables: (Int) -> Unit, onExtras: (L
                 ActionButton("Guardar", Palette.primary, Color.White, Modifier.width(120.dp), enabled = tables != state.tableCount) { onTables(tables) }
             }
         }
-        Column(
+        if (currentGiro().features.freeExtras) Column(
             Modifier.fillMaxWidth().background(Palette.card, Ui.shape).border(1.dp, Palette.line, Ui.shape).padding(Ui.pad),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {

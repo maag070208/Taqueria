@@ -14,6 +14,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -38,6 +39,12 @@ data class LicenseResponse(
     /** Lo que incluye el plan; una Central sin este campo = ilimitado. */
     val limits: PlanLimits = PlanLimits(),
     val latestApp: LatestApp? = null,
+    /** Giro del cliente (palabras y partes); una Central vieja solo manda key y name. */
+    val product: ProductRef? = null,
+    /** Set de iconos del giro; null = los de taquería que trae la app. */
+    val iconSet: IconSetRef? = null,
+    /** Versión vigente del menú en la Central (null = todavía no tiene). */
+    val catalog: CatalogRef? = null,
 )
 
 @Serializable
@@ -88,6 +95,9 @@ data class LicenseCache(
     /** Teléfonos de cocina que incluye el plan, contando la principal (null = ilimitados). */
     val kitchenLimit: Int? = null,
     val latestApp: LatestApp? = null,
+    /** Giro del cliente; una licencia guardada por la 1.2.x no lo trae y queda como taquería. */
+    val giro: Giro = Giro(),
+    val catalogVersion: Int? = null,
 ) {
     fun effectiveNow(phoneNowMs: Long) = maxOf(phoneNowMs + clockOffsetMs, maxSeenMs)
 
@@ -105,6 +115,8 @@ data class LicenseCache(
             waiterLimit = r.limits.waiters,
             kitchenLimit = r.limits.kitchens,
             latestApp = r.latestApp,
+            giro = giroOf(r.product, r.iconSet),
+            catalogVersion = r.catalog?.version,
         )
     }
 }
@@ -167,6 +179,16 @@ class LicenseManager(context: Context, private val buildApiUrl: String, private 
     /** Versión nueva publicada en la Central, si es mayor que la instalada. */
     var update by mutableStateOf(cache?.latestApp?.takeIf { it.versionCode > installedVersionCode })
         private set
+
+    /** Giro del cliente (palabras, partes y set de iconos). Taquería si no está activada. */
+    var giro by mutableStateOf(cache?.giro ?: Giro())
+        private set
+    /**
+     * El mismo giro como flujo, para lo que corre fuera de la pantalla (bajar iconos): se actualiza
+     * en cuanto se guarda la licencia, sin esperar a que Compose aplique el cambio de estado.
+     */
+    private val _giroFlow = kotlinx.coroutines.flow.MutableStateFlow(cache?.giro ?: Giro())
+    val giroFlow = _giroFlow.asStateFlow()
 
     /** Lo lee el servidor de cocina desde sus hilos. */
     @Volatile
@@ -369,7 +391,9 @@ class LicenseManager(context: Context, private val buildApiUrl: String, private 
         locked = next !is LicenseState.Active
         val newer = cache?.latestApp?.takeIf { it.versionCode > installedVersionCode }
         // El estado de Compose se escribe desde el hilo principal.
-        android.os.Handler(android.os.Looper.getMainLooper()).post { state = next; update = newer }
+        val nextGiro = cache?.giro ?: Giro()
+        _giroFlow.value = nextGiro
+        android.os.Handler(android.os.Looper.getMainLooper()).post { state = next; update = newer; giro = nextGiro }
     }
 
     private fun load(): LicenseCache? = prefs.getString(KEY, null)?.let {
