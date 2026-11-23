@@ -133,20 +133,34 @@ todo"), aunque el giro sea Sushi. Lo resuelven las plantillas por giro.
 
 **Objetivo:** tú cambias el menú de un cliente y le llega a su cocina, y al revés.
 
+Decisión: el admin del local también edita el menú y se sincroniza con la Central (decisión pendiente 2).
+
 App (teléfono de cocina):
 
-- [ ] Si la Central no tiene menú, sube el suyo como versión 1. Es la adopción y el paso clave de la migración.
-- [ ] Si la licencia trae una versión mayor, baja y aplica el menú:
-  - respeta los agotados;
+- [x] Si la Central no tiene menú, sube el suyo como versión 1. Es la adopción y el paso clave de la migración.
+- [x] Lo que cambia en la Central llega en menos de un minuto: la cocina pregunta cada 30 s con ETag (304 si no
+  cambió) y aplica el menú nuevo:
+  - respeta los agotados de la cocina;
   - no toca cuentas abiertas ni órdenes en cocina.
-- [ ] Lo que el admin cambie en el teléfono se sube a la Central.
-- [ ] Si hubo conflicto, avisa "La Central cambió el menú" y deja elegir cuál queda.
+- [x] Lo que el admin cambie en el teléfono se sube a la Central a los ~3 s.
+- [x] Un teléfono nuevo (sin cuentas ni historial) toma el menú que ya tiene la Central.
+- [x] Si hubo conflicto, avisa "La Central cambió el menú" y deja elegir cuál queda. Si se usa el de la Central, el
+  de aquí se guarda aparte en el teléfono; si se queda el de aquí, el de la Central sigue en el historial.
 
-Consola: Cliente → **Menú**, como en el mock.
+Consola: Cliente → **Menú** (botón en el detalle del cliente), como en el mock.
 
-- [ ] Categorías y productos con icono.
-- [ ] Editor de producto en tres bloques: **¿Cómo se vende?**, **¿Qué le pueden pedir?** e **Icono**.
-- [ ] Historial de versiones (quién cambió qué y cuándo) y el botón **Enviar a cocina**.
+- [x] Categorías y productos con icono, con "agotado" y "sin enviar".
+- [x] Editor de producto en tres bloques: **¿Cómo se vende?**, **¿Qué le pueden pedir?** e **Icono**, con los
+  iconos del set del giro (o el que la app encuentra por nombre).
+- [x] Historial de versiones (quién cambió qué y cuándo), "Volver a esta" y el botón **Enviar a cocina**. Si la
+  cocina cambió algo mientras editabas, avisa y recarga.
+- [x] Pruebas: 10 nuevas en la JVM (118 en total) y 31 de integración en la Central.
+- [x] Probado en emuladores con la Central local:
+  - la cocina subió su menú como v1;
+  - Dragon a $165 desde la consola llegó a la cocina en ~30 s;
+  - Tempura agotado en el teléfono llegó a la Central como "cocina" en ~3 s;
+  - un cambio en los dos lados mostró el aviso y "Usar el de la Central" dejó todo en orden.
+- [ ] Demo en los dos teléfonos físicos.
 
 **Demo:**
 1. Cambias el precio del Dragón en la Central y en menos de un minuto la barra y el mesero ven el precio nuevo.
@@ -201,7 +215,7 @@ la Central.
 | 0 · Arranque | ✅ Hecho |
 | 1 · La Central conoce los giros | ✅ Hecho en local; espera tu demo |
 | 2 · La app se viste del giro | 🟡 Hecho en emuladores; falta la demo en teléfonos y el flujo de Maestro |
-| 3 · Menú desde la Central | ⏳ Pendiente; la API ya existe |
+| 3 · Menú desde la Central | 🟡 Hecho en emuladores; falta la demo en teléfonos |
 | 4 · Menú claro y plantillas | ⏳ Pendiente |
 | 5 · Migración y entrega | ⏳ Pendiente |
 
@@ -211,6 +225,6 @@ Hay que resolverlas antes del sprint que se indica:
 
 1. **Antes del Sprint 2: marca de la app.** ¿Sigue "Tacomanda" o un nombre general, como "Comanda" con el nombre
    del cliente arriba?
-2. **Antes del Sprint 3: quién manda en el menú.** Recomiendo que el admin del local también pueda editarlo y que
-   se sincronice con la Central.
+2. ~~**Antes del Sprint 3: quién manda en el menú.**~~ Resuelto: el admin del local también lo edita y se
+   sincroniza con la Central.
 3. **Antes del Sprint 5: precio.** ¿El giro cambia el precio del plan o los planes siguen por cantidad de teléfonos?

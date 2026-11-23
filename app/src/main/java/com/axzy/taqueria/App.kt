@@ -48,6 +48,15 @@ class App : Application() {
             putSent = { salesPrefs.edit().putInt("sent", it).apply() },
         )
     }
+    /** Menú de la cocina con la Central: lo que cambia en un lado llega al otro. */
+    val catalogSync by lazy {
+        CatalogSync(
+            store, license::credentials,
+            getMark = { prefs.getString("catalogMark", null)?.let { runCatching { AppJson.decodeFromString<CatalogMark>(it) }.getOrNull() } },
+            putMark = { m -> prefs.edit().putString("catalogMark", m?.let { AppJson.encodeToString(it) }).apply() },
+            saveAside = { c -> runCatching { File(filesDir, "menu-antes-de-central-${System.currentTimeMillis()}.json").writeText(AppJson.encodeToString(c)) } },
+        )
+    }
     /** Respaldo del estado de cocina en la Central, para recuperarlo en otro teléfono. */
     val backupSync by lazy { BackupSync(store, license::credentials, versionLabel) }
     /** Cierres inesperados de la app; llegan a la Central por la cocina. */
@@ -147,6 +156,7 @@ class App : Application() {
             serverStarted = true
             salesSync.start()
             backupSync.start()
+            catalogSync.start()
             errorsJob?.cancel()
             errorsJob = appScope.launch {
                 while (true) {
@@ -158,7 +168,7 @@ class App : Application() {
             giroJob = appScope.launch { followGiro() }
         } else {
             // En mesera no se instancia el servidor (ni su OrderStore): no se guardan datos de negocio.
-            if (serverStarted) { server.stop(); serverStarted = false; salesSync.stop(); backupSync.stop() }
+            if (serverStarted) { server.stop(); serverStarted = false; salesSync.stop(); backupSync.stop(); catalogSync.stop() }
             errorsJob?.cancel()
             errorsJob = null
             giroJob?.cancel()

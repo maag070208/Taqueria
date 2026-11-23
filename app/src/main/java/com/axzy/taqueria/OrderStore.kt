@@ -285,6 +285,18 @@ class OrderStore(
         )
     }
 
+    /**
+     * Pone el menú que llegó de la Central (ver [withCatalog]). Si el admin cambió algo desde
+     * que se revisó ([expected] ya no es la huella actual) no se aplica: devuelve false y la
+     * siguiente vuelta de la sincronización decide con el menú nuevo.
+     */
+    fun applyCatalog(c: Catalog, expected: String): Boolean = synchronized(lock) {
+        val s = _state.value
+        if (s.catalog().fingerprint() != expected) return@synchronized false
+        commit(s.withCatalog(c))
+        true
+    }
+
     /** Alta (id vacío) o edición de un producto. */
     fun saveProduct(p: Product) = synchronized(lock) {
         val s = _state.value

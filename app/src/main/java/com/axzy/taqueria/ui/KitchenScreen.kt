@@ -182,6 +182,36 @@ fun KitchenScreen(app: App, notice: String?) {
             dismissButton = { TextButton(onClick = { confirmExit = false }) { Text("Cancelar") } },
         )
     }
+    CatalogConflictDialog(app.catalogSync)
+}
+
+/**
+ * El menú cambió en la Central y aquí a la vez. Nada se pierde: la Central guarda cada versión y,
+ * si se usa la suya, el menú de aquí queda apartado en el teléfono.
+ */
+@Composable
+private fun CatalogConflictDialog(sync: com.axzy.taqueria.CatalogSync) {
+    val conflict by sync.conflict.collectAsState()
+    val c = conflict ?: return
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
+    var busy by remember { mutableStateOf(false) }
+    fun choose(useCentral: Boolean) {
+        busy = true
+        scope.launch { sync.resolve(useCentral); busy = false }
+    }
+    val who = c.remote.author.takeIf { it.isNotBlank() }?.let { " ($it)" }.orEmpty()
+    AlertDialog(
+        onDismissRequest = {},
+        title = { Text("La Central cambió el menú") },
+        text = {
+            Text(
+                "En la Central$who cambiaron el menú y aquí también hubo cambios. ¿Cuál se queda? " +
+                    "Las cuentas abiertas no se tocan.",
+            )
+        },
+        confirmButton = { TextButton(enabled = !busy, onClick = { choose(true) }) { Text("Usar el de la Central") } },
+        dismissButton = { TextButton(enabled = !busy, onClick = { choose(false) }) { Text("Quedarme con el de aquí") } },
+    )
 }
 
 /**
