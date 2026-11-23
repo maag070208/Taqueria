@@ -3,8 +3,8 @@ appId: com.axzy.taqueria
 name: Cocina · activar
 tags: [cocina, setup]
 ---
+# Sin clearState: run_maestro.sh reinstala la app (algunos teléfonos no dejan borrar datos por adb).
 - launchApp:
-    clearState: true
     permissions:
       all: allow
 - runFlow: ../comun/cerrar_avisos.yaml

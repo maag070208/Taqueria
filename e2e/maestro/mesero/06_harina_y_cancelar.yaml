@@ -32,4 +32,4 @@ tags: [mesero, orden, cuenta]
 - extendedWaitUntil:
     visible: ".*Debe \\$90.00.*"
     timeout: 10000
-- assertVisible: "En cocina.*"
+- assertVisible: "Pendiente de entrega.*"

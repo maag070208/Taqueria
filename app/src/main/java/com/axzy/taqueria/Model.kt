@@ -187,6 +187,10 @@ enum class PayStatus(val label: String) {
     UNPAID("Sin pagar"), PARTIALLY_PAID("Pago parcial"), PAID("Pagada"), CANCELLED("Cancelada"),
 }
 
+enum class Delivery(val label: String) { NONE("Sin órdenes"), PENDING("Pendiente de entrega"), DELIVERED("Entregado") }
+
+data class DeliveryState(val delivery: Delivery, val pendingSince: Long? = null)
+
 /** Todo lo que vive en el teléfono de cocina. Las cuentas cerradas pasan al historial. */
 @Serializable
 data class AppState(
@@ -232,6 +236,20 @@ data class AppState(
         !hasPending(account.id) && balanceOf(account) == 0L && (account.cancelledAt != null || ordersOf(account.id).isNotEmpty())
 
     fun openAccounts() = accounts.filter { it.closedAt == null }
+
+    /**
+     * Entrega de una cuenta o de una mesa con cuentas divididas: pendiente si cocina
+     * tiene algo de cualquiera de ellas (y desde cuándo espera lo más viejo).
+     */
+    fun deliveryOf(accountIds: Collection<String>): DeliveryState {
+        val live = orders.filter { it.accountId in accountIds && it.status != OrderStatus.CANCELLED }
+        val pending = live.filter { it.status == OrderStatus.PENDING }
+        return when {
+            pending.isNotEmpty() -> DeliveryState(Delivery.PENDING, pending.minOf { it.createdAt })
+            live.isNotEmpty() -> DeliveryState(Delivery.DELIVERED)
+            else -> DeliveryState(Delivery.NONE)
+        }
+    }
 
     /** ¿Este renglón lo prepara la estación? Por categoría, por producto o, en un mixto, por cualquiera de sus carnes. */
     fun Station.prepares(l: OrderLine): Boolean {

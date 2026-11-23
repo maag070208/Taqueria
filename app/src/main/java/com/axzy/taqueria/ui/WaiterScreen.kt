@@ -249,11 +249,15 @@ private fun Home(
                 }
                 tables.forEach { (table, accounts) ->
                     item(key = "t-$table") {
-                        Row(Modifier.fillMaxWidth().padding(top = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-                            SectionTitle(tableLabel(table), Modifier.weight(1f))
-                            ActionButton(if (isTakeout(table)) "+ Pedido" else "+ Cuenta", Palette.card, Palette.primary, Modifier.width(120.dp), enabled = canCapture) {
-                                onNewAccount(table)
+                        Column(Modifier.fillMaxWidth().padding(top = 4.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                SectionTitle(tableLabel(table), Modifier.weight(1f))
+                                ActionButton(if (isTakeout(table)) "+ Pedido" else "+ Cuenta", Palette.card, Palette.primary, Modifier.width(120.dp), enabled = canCapture) {
+                                    onNewAccount(table)
+                                }
                             }
+                            // Cuentas divididas: la mesa resume a todas (con una sola, la tarjeta ya lo dice).
+                            if (accounts.size > 1) TableSummary(state, accounts, now)
                         }
                     }
                     items(accounts.sortedBy { it.number }, key = { it.id }) { acc ->
@@ -356,11 +360,23 @@ private fun AccountActionsDialog(
     )
 }
 
+/** Estado de la mesa con varias cuentas: entrega de todas y lo que deben juntas. */
+@Composable
+private fun TableSummary(state: AppState, accounts: List<Account>, now: Long) {
+    val owed = accounts.sumOf { state.balanceOf(it).coerceAtLeast(0) }
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        DeliveryChip(state.deliveryOf(accounts.map { it.id }), now)
+        Text(
+            "${accounts.size} cuentas" + if (owed > 0) " · debe ${money(owed)}" else " · pagada",
+            color = Palette.muted, fontSize = 13.sp, maxLines = 1, overflow = TextOverflow.Ellipsis,
+        )
+    }
+}
+
 /** Tarjeta uniforme: cuenta, estado de pago, consumo, estado en cocina y saldo. */
 @Composable
 fun AccountCard(state: AppState, acc: Account, now: Long, onClick: () -> Unit) {
     val orders = state.ordersOf(acc.id)
-    val pending = orders.filter { it.status == OrderStatus.PENDING }
     val balance = state.balanceOf(acc)
     val pay = state.payStatus(acc)
     val items = orders.filter { it.status != OrderStatus.CANCELLED }.flatMap { it.lines }
@@ -372,16 +388,11 @@ fun AccountCard(state: AppState, acc: Account, now: Long, onClick: () -> Unit) {
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text("Cuenta ${acc.number}", fontSize = 18.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-            StatusChip(pay.label, payColor(pay))
+            StatusChip(pay.label, payColor(pay), filled = pay == PayStatus.PAID || pay == PayStatus.CANCELLED)
         }
         Text(items.joinToString(" · ").ifEmpty { "Sin consumo" }, maxLines = 1, overflow = TextOverflow.Ellipsis)
         Row(verticalAlignment = Alignment.CenterVertically) {
-            if (pending.isNotEmpty()) {
-                val wait = now - pending.minOf { it.createdAt }
-                StatusChip("En cocina · ${elapsedText(wait)}", waitColor(wait))
-            } else {
-                StatusChip(if (orders.any { it.status == OrderStatus.DELIVERED }) "Entregado" else "Sin órdenes", Palette.muted)
-            }
+            DeliveryChip(state.deliveryOf(listOf(acc.id)), now)
             Spacer(Modifier.weight(1f))
             Text(
                 when {
@@ -397,10 +408,10 @@ fun AccountCard(state: AppState, acc: Account, now: Long, onClick: () -> Unit) {
 }
 
 fun payColor(p: PayStatus) = when (p) {
-    PayStatus.UNPAID -> Palette.muted
+    PayStatus.UNPAID -> Palette.late
     PayStatus.PARTIALLY_PAID -> Palette.warn
     PayStatus.PAID -> Palette.ok
-    PayStatus.CANCELLED -> Palette.late
+    PayStatus.CANCELLED -> Palette.muted
 }
 
 @Composable

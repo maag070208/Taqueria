@@ -161,10 +161,10 @@ private fun OrderCard(ctx: WaiterCtx, state: AppState, o: Order, now: Long, conn
             when (o.status) {
                 OrderStatus.PENDING -> {
                     val wait = now - o.createdAt
-                    StatusChip("En cocina · ${elapsedText(wait)}", waitColor(wait))
+                    StatusChip("Pendiente de entrega · ${elapsedText(wait)}", pendingColor(wait), filled = true)
                 }
-                OrderStatus.DELIVERED -> StatusChip("Entregada", Palette.ok)
-                OrderStatus.CANCELLED -> StatusChip("Cancelada", Palette.late)
+                OrderStatus.DELIVERED -> StatusChip("Entregada", Palette.ok, filled = true)
+                OrderStatus.CANCELLED -> StatusChip("Cancelada", Palette.muted, filled = true)
             }
         }
         o.lines.forEach { l ->

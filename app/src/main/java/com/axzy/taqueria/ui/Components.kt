@@ -2,6 +2,9 @@ package com.axzy.taqueria.ui
 
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.core.animate
+import com.axzy.taqueria.Delivery
+import com.axzy.taqueria.DeliveryState
+import com.axzy.taqueria.elapsedText
 import com.axzy.taqueria.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -51,6 +54,9 @@ import kotlin.math.roundToInt
 const val WARN_MIN = 5
 const val LATE_MIN = 10
 const val CRITICAL_MIN = 15
+
+/** Pendiente de entrega: ámbar mientras va a tiempo, rojo cuando ya se tardó. Verde queda para "Entregado". */
+fun pendingColor(elapsedMs: Long): Color = if (elapsedMs / 60_000 >= LATE_MIN) Palette.late else Palette.warn
 
 fun waitColor(elapsedMs: Long): Color {
     val min = elapsedMs / 60_000
@@ -122,6 +128,19 @@ private fun StepButton(label: String, size: androidx.compose.ui.unit.Dp, onClick
         Modifier.size(size).background(Palette.soft, Ui.smallShape).clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) { Glyph(label, 22.sp, color = Palette.primaryDark, weight = FontWeight.Black) }
+}
+
+/** Pendiente de entrega (con su espera) o entregado, de una cuenta o de toda la mesa. */
+@Composable
+fun DeliveryChip(d: DeliveryState, now: Long) {
+    when (d.delivery) {
+        Delivery.PENDING -> {
+            val wait = now - (d.pendingSince ?: now)
+            StatusChip("${d.delivery.label} · ${elapsedText(wait)}", pendingColor(wait), filled = true)
+        }
+        Delivery.DELIVERED -> StatusChip(d.delivery.label, Palette.ok, filled = true)
+        Delivery.NONE -> StatusChip(d.delivery.label, Palette.muted)
+    }
 }
 
 @Composable

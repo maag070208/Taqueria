@@ -1,13 +1,13 @@
 # Mesero nuevo: elegir el rol y conectarse a la cocina con la IP a mano.
-# KITCHEN_HOST: dirección de la cocina vista desde este teléfono (en emulador, 10.0.2.2:<forward>).
+# KITCHEN_HOST: dirección de la cocina vista desde este teléfono (por adb reverse, 127.0.0.1:<forward>).
 appId: com.axzy.taqueria
 name: Mesero · conectar
 tags: [mesero, setup]
 env:
-  KITCHEN_HOST: 10.0.2.2:7790
+  KITCHEN_HOST: 127.0.0.1:7790
 ---
+# Sin clearState: run_maestro.sh reinstala la app (algunos teléfonos no dejan borrar datos por adb).
 - launchApp:
-    clearState: true
     permissions:
       all: allow
 - runFlow: ../comun/cerrar_avisos.yaml
