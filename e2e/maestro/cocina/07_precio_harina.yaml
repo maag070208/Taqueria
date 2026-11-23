@@ -12,7 +12,15 @@ tags: [cocina, admin, menu]
 - assertVisible: "Asada"
 # El primero con este precio es Asada (es la primera carne de Tacos).
 - tapOn: "Maíz \\$35.00 · Harina \\$100.00"
-- tapOn: "100(\\.00)?"
+# En pantallas chicas el precio queda abajo del diálogo.
+- scrollUntilVisible:
+    element:
+      text: "100(\\.00)?"
+    direction: DOWN
+# Tocar del lado derecho: el cursor queda al final y eraseText borra todo el número.
+- tapOn:
+    text: "100(\\.00)?"
+    point: "95%,50%"
 - eraseText: 10
 - inputText: "90"
 - hideKeyboard

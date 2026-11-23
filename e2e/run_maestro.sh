@@ -7,6 +7,9 @@
 #   emulator -avd maestro_cocina -port 5560 -no-window &
 #   emulator -avd maestro_mesero -port 5562 -no-window &
 #
+# También corre en teléfonos físicos por USB (e2e/run_maestro.sh <serial-cocina> <serial-mesero>):
+# todo viaja por adb reverse/forward, así que no hace falta que estén en la misma red.
+#
 # Compila un APK de debug apuntando a una Central falsa local (e2e/mock_central.py), así la
 # cocina se activa en la prueba sin tocar la Central real. Los flujos borran los datos de la app.
 set -euo pipefail
@@ -21,7 +24,7 @@ APK=e2e/build/tacomanda-e2e.apk
 FLOWS=e2e/maestro
 
 echo "▸ APK de pruebas contra la Central falsa"
-./gradlew -q :app:assembleDebug -Ptaqueria.apiUrl=http://10.0.2.2:$CENTRAL_PORT/api/v1
+./gradlew -q :app:assembleDebug -Ptaqueria.apiUrl=http://127.0.0.1:$CENTRAL_PORT/api/v1
 mkdir -p e2e/build
 cp app/build/outputs/apk/debug/app-debug.apk "$APK"
 
@@ -37,17 +40,28 @@ for d in "$COCINA" "$MESERO"; do
   echo "▸ Instalando en $d"
   adb -s "$d" wait-for-device
   until [ "$(adb -s "$d" shell getprop sys.boot_completed | tr -d '\r')" = 1 ]; do sleep 2; done
-  adb -s "$d" install -r "$APK" > /dev/null
+  # Desinstalar en vez de que Maestro borre los datos: ColorOS (Oppo) le niega `pm clear` a adb.
+  adb -s "$d" uninstall com.axzy.taqueria > /dev/null 2>&1 || true
+  # Por USB algunos teléfonos se reconectan al desinstalar: esperar y reintentar.
+  for try in 1 2 3; do
+    adb -s "$d" wait-for-device
+    adb -s "$d" install -g "$APK" > /dev/null && break
+    [ "$try" = 3 ] && { echo "✘ No se pudo instalar en $d"; exit 1; }
+    sleep 3
+  done
   # Emuladores sin ventana: que Android no tape la app con avisos de apps en segundo plano.
-  adb -s "$d" shell settings put secure anr_show_background 0
+  [[ "$d" == emulator-* ]] && adb -s "$d" shell settings put secure anr_show_background 0
+  # La Central falsa de la Mac, en 127.0.0.1 del teléfono (emulador o físico por USB).
+  adb -s "$d" reverse tcp:$CENTRAL_PORT tcp:$CENTRAL_PORT > /dev/null
 done
-# El mesero (emulador) llega a la cocina por la Mac: 10.0.2.2:$FORWARD_PORT → cocina:7777.
+# El mesero llega a la cocina por la Mac: mesero 127.0.0.1:$FORWARD_PORT → Mac:$FORWARD_PORT → cocina:7777.
 adb -s "$COCINA" forward tcp:$FORWARD_PORT tcp:7777 > /dev/null
+adb -s "$MESERO" reverse tcp:$FORWARD_PORT tcp:$FORWARD_PORT > /dev/null
 
 run() {
   local device=$1 flow=$2
   echo "▸ [$device] $flow"
-  "$MAESTRO" --device "$device" test -e KITCHEN_HOST=10.0.2.2:$FORWARD_PORT "$FLOWS/$flow" \
+  "$MAESTRO" --device "$device" test -e KITCHEN_HOST=127.0.0.1:$FORWARD_PORT "$FLOWS/$flow" \
     --format junit --output "e2e/build/$(basename "$flow" .yaml)-$(basename "$(dirname "$flow")").xml"
 }
 

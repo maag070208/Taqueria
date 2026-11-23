@@ -231,7 +231,8 @@ private fun ProductRow(
             Text(
                 if (p.active) priceText(p) else "${priceText(p)} · agotado",
                 color = if (p.active) Palette.primary else Palette.muted, fontWeight = FontWeight.SemiBold, fontSize = 14.sp,
-                maxLines = 1, overflow = TextOverflow.Ellipsis,
+                // Con letra grande del sistema los precios bajan de renglón en vez de cortarse.
+                maxLines = 3, overflow = TextOverflow.Ellipsis,
             )
         }
         onUp?.let { ArrowButton(R.drawable.ic_arrow_up, it) }

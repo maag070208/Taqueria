@@ -2,7 +2,7 @@
 
 Responde el mismo contrato que AxzyCentral (`POST /activate` y `GET /license`) para que la
 cocina de prueba se active sin tocar la Central real. Escucha solo en 127.0.0.1; el emulador
-llega por 10.0.2.2.
+llega por adb reverse (127.0.0.1 del teléfono).
 
     python3 e2e/mock_central.py [puerto]      # 4999 por defecto
 
