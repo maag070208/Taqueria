@@ -61,14 +61,29 @@ En el cliente, una pestaña **Menú digital**:
 
 ## Sprints
 
-### Sprint D1 · Página pública
+### Sprint D1 · Página pública ✅ (en local, 2026-11-25)
 
-- [ ] Migración: `Client.menuSlug` (único, opcional), `menuEnabled` y `menuInfo` (horario, WhatsApp y
-  dirección).
-- [ ] `GET /m/:slug` con el HTML del menú: categorías, tamaños, opciones como texto y "Agotado".
-- [ ] `GET /m/:slug/i/:key.png` con los iconos del giro.
-- [ ] Pruebas: un slug apagado o inexistente da 404 con página amable; en el HTML no aparece nada interno; un
-  agotado en la cocina se ve en la página después de la siguiente sincronización.
+- [x] Migración `20261125010000_menu_digital`: `Client.menuSlug` (único), `menuEnabled` (apagado por defecto) y
+  `menuInfo` (horario, WhatsApp y dirección). La consola los guarda con `PATCH /clients/:id`: no se enciende sin
+  dirección y una dirección repetida da `MENU_SLUG_TAKEN`.
+- [x] `GET /m/:slug` (`api/src/routes/public-menu.ts` y `api/src/lib/public-menu.ts`):
+  - HTML armado en el servidor, sin JavaScript, con modo oscuro;
+  - categorías con atajos, tamaños con precio, "Por monto" en Órdenes y extras sin costo;
+  - si todos los productos de una categoría tienen las mismas opciones, se dicen una vez arriba;
+  - agotados tachados con "Agotado";
+  - si la cocina lleva más de 30 min sin conectarse: "Menú actualizado hace 3 h; puede haber cambios";
+  - caché de 30 s, límite de 1200 peticiones por minuto por IP y una CSP propia (sin scripts ni nada de fuera);
+  - con el cliente suspendido, el menú apagado o sin menú en la Central: 404 con "Este menú no está
+    disponible".
+- [x] `GET /m/:slug/i/:key.png`: el icono se elige igual que en la app (llave del admin, por nombre en el set,
+  por categoría y el genérico); la URL lleva el sha, así que se guarda en caché un año.
+- [x] Pruebas: 5 unitarias (46 en total) y 3 de integración (35): validación de la dirección, nada interno en el
+  HTML (notas, teléfono, código del dispositivo), nombres escapados, iconos y agotado después de sincronizar.
+- [x] Probado con la Central local: `localhost:4100/m/don-luigi` en tamaño celular, con pizzas, tamaños e
+  iconos. En la cocina del emulador se agotó Cabeza y a los 37 s la página ya lo mostraba tachado.
+
+Para el D3: `menu.axzy.dev/<slug>` sin el `/m/` necesita que la Central reconozca ese dominio y sirva el menú en
+la raíz.
 
 **Demo:** abres `localhost:4100/m/don-luigi` en el celular y ves las pizzas con sus tamaños.
 
