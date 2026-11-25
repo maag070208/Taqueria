@@ -213,6 +213,16 @@ con otro tamaño ("Mediana orilla rellena") o subiendo el precio; cobrarla apart
   2. generar datos: menú editado, cuentas abiertas, ventas, PIN y estaciones;
   3. instalar la versión nueva encima;
   4. revisar que todo siga igual y que el menú llegó a la Central.
+- [x] Lo mismo en emuladores con la Central local (2026-11-25):
+  - con los 14 flujos de Maestro de la 1.2.2 quedaron: precio de harina editado, PIN, 1 venta en el historial
+    y la Mesa 8 abierta con su orden;
+  - con la versión nueva instalada encima (`adb install -r`, sin desinstalar) siguen idénticos el menú, las
+    cuentas, las órdenes, el folio, el historial, el PIN y el mesero conectado; solo se agregó la marca del
+    menú y se renovó la licencia;
+  - al abrir la app, la cocina subió su menú a la Central como versión 1 (autor "cocina", 37 productos).
+  - No se cubrieron estaciones: la prueba no creó ninguna.
+- [ ] Subir `taqueria.versionCode` y `versionName` (la rama sigue en 7 / 1.2.2), o la app no avisará de la
+  actualización.
 - [ ] Revisar que el respaldo del taquero esté al día antes de migrarlo.
 - [ ] Contrato actualizado en `CONTRATO-VENTAS.md`: giro, iconos y menú.
 - [ ] Revisión de código de las dos ramas y PR a `main`, cuando tú lo apruebes.
