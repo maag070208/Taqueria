@@ -32,8 +32,7 @@ Consola ──(editar)───┘
 1. **Central, ruta pública sin sesión**: `GET /m/:slug`.
    - Devuelve una página HTML ya armada en el servidor, sin framework, para que cargue rápido en celulares
      baratos y con datos móviles.
-   - Toma la última versión del menú del cliente y deja fuera los productos inactivos o los marca como
-     "Agotado" (decisión 3).
+   - Toma la última versión del menú del cliente y marca los productos inactivos como "Agotado", tachados.
    - Lleva `ETag` y caché corta (30 s), y un límite de peticiones por IP.
 2. **Iconos**: `GET /m/:slug/i/:key.png` sirve el PNG del set del giro, con caché larga porque la llave cambia
    cuando cambia el icono.
@@ -90,11 +89,14 @@ En el cliente, una pestaña **Menú digital**:
 
 **Demo:** el taquero real pega su QR y un comensal ve el menú desde la mesa.
 
-## Decisiones pendientes
+## Decisiones
 
-1. **Dominio:** `menu.axzy.dev/<slug>` (recomendado: corto y para impresión) o `central.axzy.dev/m/<slug>`
-   (sin configurar nada nuevo).
-2. **Precio:** ¿va incluido en todos los planes o es un extra?
-3. **Agotados:** ¿se ocultan o se muestran tachados con "Agotado"? Recomendado: tachados, para que el comensal no
-   pregunte por algo que vio ayer.
-4. **Logo del local:** ¿lo subimos por cliente o basta con el nombre y el color del giro para el MVP?
+Tomadas el 2026-11-25:
+
+1. **Dominio:** `menu.axzy.dev/<slug>`.
+2. **Agotados:** se muestran tachados con "Agotado", no se ocultan.
+3. **Logo:** no entra al MVP; la página lleva el nombre del local y el color del giro.
+
+Pendiente antes del Sprint D3:
+
+4. **Precio:** ¿va incluido en todos los planes o es un extra?
