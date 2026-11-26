@@ -105,9 +105,30 @@ la raíz.
 
 ### Sprint D3 · Producción
 
-- [ ] Dominio `menu.axzy.dev` apuntando a la Central en Railway, **solo con tu OK**.
-- [ ] Cuántas veces se abre cada menú, por día, visible en la consola (sin datos del comensal).
-- [ ] Contrato: agregar el menú digital en `CONTRATO-VENTAS.md`.
+Hecho en código (rama `feat/menu-digital-d3`, 2026-11-26):
+
+- [x] **Dominio propio:** si `PUBLIC_MENU_URL` es la raíz de un dominio (`https://menu.axzy.dev`), ese dominio
+  solo sirve menús en `/<slug>` y sus iconos; ahí no existe el API. Sin la variable sigue en `<API>/m/<slug>`.
+- [x] **Visitas** por día de CDMX en la consola (hoy, 7 y 30 días), en la tabla `menu_visits` (migración
+  `20261126010000_menu_visits`, aditiva). Solo cuenta navegadores: no las vistas previas de WhatsApp o Facebook,
+  ni los bots, ni la vista previa de la consola. No guarda nada del comensal.
+- [x] Contrato: secciones 9 (giro, iconos y menú) y 10 (menú digital) en `AxzyCentral/docs/CONTRATO-VENTAS.md`.
+- [x] Kit de iconos de Tacos (`kit_tacos.zip`, 23 iconos de `design/iconos/png`), probado en la Central local:
+  el menú digital de la taquería sale con sus iconos.
+
+Te toca a ti, en este orden:
+
+1. Fusionar el PR de la Central en main (la imagen del API y la consola se publican solas).
+2. **Railway** → servicio del API → Settings → Networking → *Custom Domain* → `menu.axzy.dev`. Railway te da un
+   destino CNAME.
+3. **DNS de axzy.dev** (Hostinger) → registro `CNAME`, nombre `menu`, destino el que dio Railway. Espera a que
+   Railway marque el dominio con certificado.
+4. **Railway** → Variables → `PUBLIC_MENU_URL=https://menu.axzy.dev` → Redeploy. Con eso se aplica la migración
+   de visitas y los QR nuevos ya apuntan a `menu.axzy.dev`.
+5. **Consola** → Iconos: subir `kit_tacos.zip`, `iconos_makis.zip` y `kit_pizzeria.zip` (en Descargas).
+   Productos → cada giro → su set de iconos; en Sushi y Pizzería, también su *Menú base*.
+6. En el cliente del taquero → Menú digital: dirección, horario y WhatsApp; encender, revisar la vista previa e
+   imprimir los QR.
 
 **Demo:** el taquero real pega su QR y un comensal ve el menú desde la mesa.
 

@@ -221,15 +221,15 @@ con otro tamaño ("Mediana orilla rellena") o subiendo el precio; cobrarla apart
     menú y se renovó la licencia;
   - al abrir la app, la cocina subió su menú a la Central como versión 1 (autor "cocina", 37 productos).
   - No se cubrieron estaciones: la prueba no creó ninguna.
-- [ ] Subir `taqueria.versionCode` y `versionName` (la rama sigue en 7 / 1.2.2), o la app no avisará de la
-  actualización.
+- [x] Versión de la app: 1.3.0 (8). Al publicar el APK, ponerla también en Productos → Taquería → versión
+  publicada, para que la 1.2.2 avise.
 - [ ] Revisar que el respaldo del taquero esté al día antes de migrarlo.
-- [ ] Contrato actualizado en `CONTRATO-VENTAS.md`: giro, iconos y menú.
-- [ ] Revisión de código de las dos ramas y PR a `main`, cuando tú lo apruebes.
+- [x] Contrato actualizado en `CONTRATO-VENTAS.md`: giro, iconos y menú (secciones 9 y 10).
+- [x] PR a `main` de las dos ramas (2026-11-26: AxzyCentral #1, Taqueria #8).
 - [ ] Producción, **solo con tu OK**:
-  1. redeploy de Railway, que aplica la migración;
-  2. subir los kits de Tacos, Makis y Pizzería;
-  3. publicar el APK nuevo.
+  1. [x] redeploy de Railway, que aplica la migración (2026-11-26, verificado);
+  2. [ ] subir los kits de Tacos, Makis y Pizzería (`kit_tacos.zip` ya armado);
+  3. [ ] publicar el APK 1.3.0 después de la demo en los teléfonos.
 
 **Demo:** el taquero real actualiza en el local y sigue vendiendo sin notar nada, salvo que su menú ya se ve en
 la Central.
