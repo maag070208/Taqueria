@@ -87,12 +87,19 @@ la raíz.
 
 **Demo:** abres `localhost:4100/m/don-luigi` en el celular y ves las pizzas con sus tamaños.
 
-### Sprint D2 · Consola y QR
+### Sprint D2 · Consola y QR ✅ (en local, 2026-11-25)
 
-- [ ] Pestaña **Menú digital** en el cliente: encendido, slug, datos del local y vista previa.
-- [ ] PDF de QR para mesas y mostrador.
-- [ ] Probado con la Central local y un emulador: agotas en la cocina y en menos de un minuto la página lo
-  muestra.
+- [x] Página **Menú digital** del cliente (`/clientes/:id/menu-digital`), con una tarjeta en el detalle que
+  dice si está encendido:
+  - encendido, dirección (sugerida del nombre; avisa que cambiarla invalida los QR impresos), horario, WhatsApp
+    y dirección del local;
+  - vista previa en un marco de celular; la página pública solo deja que la muestre la consola
+    (`frame-ancestors` con `WEB_ORIGIN`).
+- [x] QR para imprimir en hoja carta: **Mesas** (6 tarjetas para recortar) y **Mostrador** (1 grande), con
+  corrección de errores alta. Se abre el diálogo de impresión, que también guarda como PDF.
+- [x] La base del QR sale de `GET /config` (`menuUrl`): `PUBLIC_MENU_URL` si está, si no `<API>/m`.
+- [x] Probado con la Central local: guardar horario y WhatsApp los muestra en la página y en la vista previa;
+  al reactivar Cabeza en la cocina del emulador, a los ~6 s deja de salir agotado.
 
 **Demo:** imprimes el QR de "Pizzas Don Luigi", lo escaneas y ves el menú; agotas la Hawaiana y desaparece.
 
