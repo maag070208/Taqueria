@@ -138,7 +138,7 @@ fun KitchenScreen(app: App, notice: String?) {
         listOf(DrawerItem(R.drawable.ic_key, "Entrar como admin") { pinMode = if (app.adminPin.isSet) PinMode.ENTER else PinMode.CREATE }),
     )
 
-    AppDrawer(drawer, staff, "Teléfono de cocina", groups) {
+    AppDrawer(drawer, staff, "Teléfono de ${currentGiro().terms.kitchen.lowercase()}", groups) {
         if (page != KitchenPage.ORDERS) BackHandler(onBack = ::toOrders)
         when (page) {
             KitchenPage.ORDERS -> OrdersBoard(store, server, notice, (zone as? KitchenZone.State.On)?.wifi?.ssid, app.license.update, app.stationView, onMenu = drawer::open)
@@ -182,6 +182,36 @@ fun KitchenScreen(app: App, notice: String?) {
             dismissButton = { TextButton(onClick = { confirmExit = false }) { Text("Cancelar") } },
         )
     }
+    CatalogConflictDialog(app.catalogSync)
+}
+
+/**
+ * El menú cambió en la Central y aquí a la vez. Nada se pierde: la Central guarda cada versión y,
+ * si se usa la suya, el menú de aquí queda apartado en el teléfono.
+ */
+@Composable
+private fun CatalogConflictDialog(sync: com.axzy.taqueria.CatalogSync) {
+    val conflict by sync.conflict.collectAsState()
+    val c = conflict ?: return
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
+    var busy by remember { mutableStateOf(false) }
+    fun choose(useCentral: Boolean) {
+        busy = true
+        scope.launch { sync.resolve(useCentral); busy = false }
+    }
+    val who = c.remote.author.takeIf { it.isNotBlank() }?.let { " ($it)" }.orEmpty()
+    AlertDialog(
+        onDismissRequest = {},
+        title = { Text("La Central cambió el menú") },
+        text = {
+            Text(
+                "En la Central$who cambiaron el menú y aquí también hubo cambios. ¿Cuál se queda? " +
+                    "Las cuentas abiertas no se tocan.",
+            )
+        },
+        confirmButton = { TextButton(enabled = !busy, onClick = { choose(true) }) { Text("Usar el de la Central") } },
+        dismissButton = { TextButton(enabled = !busy, onClick = { choose(false) }) { Text("Quedarme con el de aquí") } },
+    )
 }
 
 /**
@@ -245,9 +275,10 @@ fun OrdersView(
         known = current
     }
 
+    val giro = currentGiro()
     Column(Modifier.fillMaxSize().safeDrawingPadding()) {
         TopBar(
-            title = "${station?.name ?: state.kitchenName.ifBlank { "Cocina" }} · ${pending.size} ${if (pending.size == 1) "orden" else "órdenes"}",
+            title = "${station?.name ?: state.kitchenName.ifBlank { giro.terms.kitchen }} · ${pending.size} ${if (pending.size == 1) "orden" else "órdenes"}",
             subtitle = subtitle,
             subtitleColor = subtitleColor,
             onMenu = onMenu,

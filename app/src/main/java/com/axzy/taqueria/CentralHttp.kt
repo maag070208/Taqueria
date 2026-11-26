@@ -11,7 +11,10 @@ data class CentralResponse(val code: Int, val body: String)
  * Llamada a la Central con el código del dispositivo. Bloqueante: llamarla fuera
  * del hilo principal. Lanza [IOException] si no hay conexión.
  */
-fun centralCall(creds: CentralCredentials, method: String, path: String, body: String? = null, timeoutMs: Int = 15_000): CentralResponse {
+fun centralCall(
+    creds: CentralCredentials, method: String, path: String, body: String? = null, timeoutMs: Int = 15_000,
+    headers: Map<String, String> = emptyMap(),
+): CentralResponse {
     val conn = URL("${creds.apiBase.trimEnd('/')}/${path.trimStart('/')}").openConnection() as HttpURLConnection
     try {
         conn.requestMethod = method
@@ -19,6 +22,7 @@ fun centralCall(creds: CentralCredentials, method: String, path: String, body: S
         conn.readTimeout = timeoutMs
         conn.setRequestProperty("Authorization", "Bearer ${creds.token}")
         conn.setRequestProperty("Accept", "application/json")
+        headers.forEach { (k, v) -> conn.setRequestProperty(k, v) }
         if (body != null) {
             conn.doOutput = true
             conn.setRequestProperty("Content-Type", "application/json; charset=utf-8")

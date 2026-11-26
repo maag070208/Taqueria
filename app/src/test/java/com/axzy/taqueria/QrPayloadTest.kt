@@ -54,9 +54,14 @@ class QrPayloadTest {
     }
 
     @Test
-    fun productoAjenoDaMensajeClaro() {
-        val message = invalid("""{"v":1,"u":"https://central-api.axzy.dev/api/v1","c":"axc_abc123","p":"PANADERIA"}""")
-        assertTrue(message, message.contains("PANADERIA"))
+    fun cualquierGiroSeActivaConLaMismaApp() {
+        // Multi-negocio: un sushi o una pizzería usan el mismo APK; el giro llega en la licencia.
+        assertEquals("SUSHI", valid("""{"v":1,"u":"https://central-api.axzy.dev/api/v1","c":"axc_abc123","p":"SUSHI"}""").product)
+    }
+
+    @Test
+    fun productoInvalidoDaMensajeClaro() {
+        val message = invalid("""{"v":1,"c":"axc_abc123","p":"no vale!"}""")
         assertTrue(message, message.contains("producto", ignoreCase = true))
     }
 

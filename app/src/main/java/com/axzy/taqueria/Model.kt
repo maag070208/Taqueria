@@ -69,6 +69,8 @@ data class Product(
     val variants: List<Variant> = emptyList(),
     /** Mixto: al pedir se eligen las carnes que lleva. */
     val mix: Boolean = false,
+    /** Llave del icono en el set del giro (`rollo_dragon`); null = se busca por nombre, como siempre. */
+    val icon: String? = null,
 ) {
     val defaultVariant get() = variants.firstOrNull()?.name.orEmpty()
     /** Precio de la presentación; nulo si este producto no se vende así. */
@@ -413,15 +415,32 @@ sealed interface ClientMsg {
     /** Fallas de la app de mesera; la cocina las sube a la Central. */
     @Serializable @SerialName("appErrors")
     data class ReportErrors(override val reqId: Long, val errors: List<AppErrorReport>) : ClientMsg
+
+    /** La mesera pide el set de iconos del giro (cuando el de la cocina es otra versión que el suyo). */
+    @Serializable @SerialName("iconSet")
+    data class GetIconSet(override val reqId: Long) : ClientMsg
 }
 
 @Serializable
 sealed interface ServerMsg {
     @Serializable @SerialName("state")
-    data class State(val state: AppState, val serverTime: Long, val latestApp: LatestApp? = null) : ServerMsg
+    data class State(
+        val state: AppState,
+        val serverTime: Long,
+        val latestApp: LatestApp? = null,
+        /** Giro de la licencia de la cocina; una cocina 1.2.x no lo manda y la mesera queda como taquería. */
+        val giro: Giro? = null,
+    ) : ServerMsg
 
     @Serializable @SerialName("reply")
-    data class Reply(val reqId: Long, val error: String? = null, val order: Order? = null, val paymentId: String? = null) : ServerMsg
+    data class Reply(
+        val reqId: Long,
+        val error: String? = null,
+        val order: Order? = null,
+        val paymentId: String? = null,
+        /** Respuesta a [ClientMsg.GetIconSet]; null si la cocina no tiene set. */
+        val iconSet: IconSetDownload? = null,
+    ) : ServerMsg
 
     @Serializable @SerialName("ping")
     data object Ping : ServerMsg

@@ -15,7 +15,9 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
@@ -54,6 +56,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.axzy.taqueria.R
 import com.axzy.taqueria.AppState
+import com.axzy.taqueria.Giro
+import com.axzy.taqueria.app
 import com.axzy.taqueria.MeatColor
 import com.axzy.taqueria.ModifierGroup
 import com.axzy.taqueria.OrderStore
@@ -78,15 +82,17 @@ fun AdminScreen(store: OrderStore, canEdit: Boolean, onMenu: () -> Unit) {
     var editingProduct by remember { mutableStateOf<EditingProduct?>(null) }
     var editingGroup by remember { mutableStateOf<EditingGroup?>(null) }
     var confirmReset by remember { mutableStateOf(false) }
+    val giro = currentGiro()
     val categories = state.menuCategories().map { it.name }
     val grouped = categories.associateWith { c -> state.products.filter { it.category == c } }.filterValues { it.isNotEmpty() }
 
     Column(Modifier.fillMaxSize().safeDrawingPadding()) {
         if (canEdit) {
             TopBar(title = "Menú", subtitle = "${state.products.size} productos · ${state.tableCount} mesas", onMenu = onMenu) {
-                SquareButton(R.drawable.ic_reset, onClick = { confirmReset = true }, description = "Menú predeterminado")
+                // El menú predeterminado es el de taquería; los demás giros reciben el suyo de la Central.
+                if (giro.key == Giro.TAQUERIA) SquareButton(R.drawable.ic_reset, onClick = { confirmReset = true }, description = "Menú predeterminado")
             }
-            Segmented(listOf("Productos", "Preparación", "Ajustes"), tab, { tab = it }, Modifier.padding(horizontal = Ui.pad))
+            Segmented(listOf("Productos", "Opciones", "Ajustes"), tab, { tab = it }, Modifier.padding(horizontal = Ui.pad))
         } else {
             val off = state.products.count { !it.active }
             TopBar(title = "Disponibilidad", subtitle = if (off == 0) "Todo disponible" else if (off == 1) "1 agotado" else "$off agotados", onMenu = onMenu)
@@ -112,8 +118,9 @@ fun AdminScreen(store: OrderStore, canEdit: Boolean, onMenu: () -> Unit) {
                 1 -> {
                     item(key = "hint") {
                         Text(
-                            "Exclusiva: solo una opción. Combinable: varias a la vez. En una exclusiva puedes definir " +
-                                "con qué arranca cada renglón y qué marca cada opción (ej. Puro verde → Sin salsa, Sin cebolla).",
+                            "Lo que le pueden pedir a un producto. Exclusiva: solo una a la vez (ej. orilla normal o rellena). " +
+                                "Combinable: varias (ej. sin cebolla y sin chile). En una exclusiva puedes definir con qué arranca " +
+                                "cada renglón y qué marca cada opción.",
                             color = Palette.muted, fontSize = 13.sp,
                         )
                     }
@@ -159,7 +166,7 @@ fun AdminScreen(store: OrderStore, canEdit: Boolean, onMenu: () -> Unit) {
         if (canEdit && tab != 2) {
             Box(Modifier.fillMaxWidth().background(Palette.card).padding(Ui.pad)) {
                 ActionButton(
-                    if (tab == 0) "+ Agregar producto" else "+ Agregar tipo de preparación",
+                    if (tab == 0) "+ Agregar producto" else "+ Agregar grupo de opciones",
                     Palette.primary, Color.White, Modifier.fillMaxWidth(),
                 ) { if (tab == 0) editingProduct = EditingProduct(null) else editingGroup = EditingGroup(null) }
             }
@@ -183,6 +190,7 @@ fun AdminScreen(store: OrderStore, canEdit: Boolean, onMenu: () -> Unit) {
             product = e.product,
             categories = categories,
             groups = state.modifierGroups,
+            groupsOf = { c -> state.products.firstOrNull { it.category == c }?.modifierGroupIds.orEmpty() },
             onDismiss = { editingProduct = null },
             onSave = { p ->
                 editingProduct = null
@@ -206,26 +214,28 @@ fun AdminScreen(store: OrderStore, canEdit: Boolean, onMenu: () -> Unit) {
 }
 
 private fun priceText(p: Product) =
-    if (p.variants.isEmpty()) money(p.priceCents) else p.variants.joinToString(" · ") { "${it.name} ${money(it.priceCents)}" }
+    // Espacio duro dentro de cada presentación: si no cabe, baja de renglón entre "Chica $119" y "Mediana $169".
+    if (p.variants.isEmpty()) money(p.priceCents) else p.variants.joinToString(" · ") { "${it.name}\u00A0${money(it.priceCents)}".replace(" ", "\u00A0") }
 
 @Composable
 private fun ProductRow(
     p: Product, category: com.axzy.taqueria.Category,
     onClick: (() -> Unit)?, onUp: (() -> Unit)?, onDown: (() -> Unit)?, onToggle: (Boolean) -> Unit,
 ) {
-    val (bg, _, bar) = p.color.colors()
+    val color = p.shownColor()
+    val (bg, _, bar) = color.colors()
     Row(
-        Modifier.fillMaxWidth().height(72.dp).background(Palette.card, Ui.shape)
+        Modifier.fillMaxWidth().height(IntrinsicSize.Min).heightIn(min = 72.dp).background(Palette.card, Ui.shape)
             .border(1.dp, Palette.line, Ui.shape).then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier).padding(end = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(Modifier.width(6.dp).fillMaxHeight().background(if (p.color == MeatColor.NONE) Color.Transparent else bar, RoundedCornerShape(topStart = 16.dp, bottomStart = 16.dp)))
-        Box(Modifier.padding(start = 6.dp).size(44.dp).background(if (p.color == MeatColor.NONE) Palette.soft else bg, RoundedCornerShape(50)), contentAlignment = Alignment.Center) {
+        Box(Modifier.width(6.dp).fillMaxHeight().background(if (color == MeatColor.NONE) Color.Transparent else bar, RoundedCornerShape(topStart = 16.dp, bottomStart = 16.dp)))
+        Box(Modifier.padding(start = 6.dp).size(44.dp).background(if (color == MeatColor.NONE) Palette.soft else bg, RoundedCornerShape(50)), contentAlignment = Alignment.Center) {
             DishIcon(DishIcons.productKeys(p, category), 36.dp)
         }
-        Column(Modifier.weight(1f).padding(start = 12.dp)) {
+        Column(Modifier.weight(1f).padding(start = 12.dp, top = 8.dp, bottom = 8.dp)) {
             Text(
-                p.name + if (p.mix) " · mixto" else "", fontSize = 17.sp, fontWeight = FontWeight.Bold,
+                p.name + if (p.mix && currentGiro().features.mixes) " · mixto" else "", fontSize = 17.sp, fontWeight = FontWeight.Bold,
                 color = if (p.active) Palette.text else Palette.muted, maxLines = 1, overflow = TextOverflow.Ellipsis,
             )
             Text(
@@ -255,22 +265,38 @@ private fun ArrowButton(@DrawableRes icon: Int, onClick: () -> Unit) {
 /** Renglón editable de presentación: nombre y precio como texto mientras se escribe. */
 private data class VariantInput(val name: String, val price: String)
 
+/** Encabezado de cada bloque del editor (los mismos tres que en la Central). */
+@Composable
+private fun BlockTitle(text: String, hint: String? = null) {
+    Column(Modifier.padding(top = 4.dp)) {
+        Text(text, fontSize = 17.sp, fontWeight = FontWeight.Bold, color = Palette.primaryDark)
+        if (hint != null) Text(hint, color = Palette.muted, fontSize = 13.sp)
+    }
+}
+
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ProductDialog(
     product: Product?,
     categories: List<String>,
     groups: List<ModifierGroup>,
+    /** Opciones que ya usa la categoría: un producto nuevo arranca con esas. */
+    groupsOf: (String) -> List<String>,
     onDismiss: () -> Unit,
     onSave: (Product) -> Unit,
     onDelete: (() -> Unit)?,
 ) {
+    val giro = currentGiro()
+    val taqueria = giro.key == Giro.TAQUERIA
     var name by remember { mutableStateOf(product?.name.orEmpty()) }
     var price by remember { mutableStateOf(product?.let { moneyInput(it.priceCents) }.orEmpty()) }
-    var category by remember { mutableStateOf(product?.category ?: categories.firstOrNull() ?: "Tacos") }
-    var groupIds by remember { mutableStateOf(product?.modifierGroupIds ?: groups.map { it.id }) }
+    var category by remember { mutableStateOf(product?.category ?: categories.firstOrNull().orEmpty()) }
+    // Un producto nuevo sigue las opciones de su categoría hasta que el admin las toca.
+    var groupIds by remember { mutableStateOf(product?.modifierGroupIds) }
+    val shownGroups = groupIds ?: groupsOf(category)
     var color by remember { mutableStateOf(product?.color ?: MeatColor.NONE) }
     var mix by remember { mutableStateOf(product?.mix ?: false) }
+    var icon by remember { mutableStateOf(product?.icon) }
     var variants by remember { mutableStateOf(product?.variants.orEmpty().map { VariantInput(it.name, moneyInput(it.priceCents)) }) }
     var confirmDelete by remember { mutableStateOf(false) }
     val cents = parseMoney(price)
@@ -278,13 +304,18 @@ private fun ProductDialog(
     val variantsOk = parsedVariants.all { it != null && it.name.isNotEmpty() } &&
         parsedVariants.mapNotNull { it?.name?.lowercase() }.distinct().size == variants.size
     val valid = name.isNotBlank() && category.isNotBlank() && (if (variants.isEmpty()) cents != null else variantsOk)
+    val examples = if (taqueria) listOf("Maíz", "Harina") else listOf("Chica", "Grande")
 
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(if (product == null) "Nuevo producto" else "Editar producto") },
         text = {
             Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(Ui.gap)) {
-                OutlinedTextField(name, { name = it.take(40) }, label = { Text("Nombre (ej. Asada)") }, singleLine = true, shape = Ui.smallShape, modifier = Modifier.fillMaxWidth())
+                BlockTitle("¿Cómo se vende?")
+                OutlinedTextField(
+                    name, { name = it.take(40) }, label = { Text(if (taqueria) "Nombre (ej. Asada)" else "Nombre") },
+                    singleLine = true, shape = Ui.smallShape, modifier = Modifier.fillMaxWidth(),
+                )
                 Text("Categoría", fontWeight = FontWeight.Bold)
                 OutlinedTextField(category, { category = it.take(30) }, singleLine = true, shape = Ui.smallShape, modifier = Modifier.fillMaxWidth())
                 if (categories.isNotEmpty()) {
@@ -297,12 +328,12 @@ private fun ProductDialog(
                 if (variants.isEmpty()) {
                     MoneyField(price, { price = it }, "Precio", Modifier.fillMaxWidth())
                 } else {
-                    Text("Cada presentación con su precio. La primera es la que se pide por defecto.", color = Palette.muted, fontSize = 13.sp)
+                    Text("Cada tamaño o presentación con su precio. El primero es el que se pide por defecto.", color = Palette.muted, fontSize = 13.sp)
                     variants.forEachIndexed { i, v ->
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                             OutlinedTextField(
                                 v.name, { n -> variants = variants.toMutableList().also { it[i] = v.copy(name = n.take(20)) } },
-                                label = { Text("Ej. Maíz") }, singleLine = true, shape = Ui.smallShape, modifier = Modifier.weight(1.2f),
+                                label = { Text(if (v.name.isEmpty()) "Ej. ${examples[i.coerceAtMost(1)]}" else "Nombre") }, singleLine = true, shape = Ui.smallShape, modifier = Modifier.weight(1.2f),
                             )
                             MoneyField(v.price, { pr -> variants = variants.toMutableList().also { it[i] = v.copy(price = pr) } }, "Precio", Modifier.weight(1f))
                             Box(Modifier.size(40.dp).clickable { variants = variants.toMutableList().also { it.removeAt(i) } }, contentAlignment = Alignment.Center) {
@@ -312,26 +343,51 @@ private fun ProductDialog(
                     }
                 }
                 TextButton(onClick = {
-                    variants = if (variants.isEmpty()) listOf(VariantInput("Maíz", price), VariantInput("Harina", "")) else variants + VariantInput("", "")
-                }) { Text(if (variants.isEmpty()) "+ Precio por presentación (maíz / harina…)" else "+ Otra presentación") }
-
-                Text("Color de la tarjeta", fontWeight = FontWeight.Bold)
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    MeatColor.entries.forEach { c -> Pill(c.label, c == color) { color = c } }
-                }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Column(Modifier.weight(1f)) {
-                        Text("Es mixto", fontWeight = FontWeight.Bold)
-                        Text("Al pedirlo se eligen las carnes (de las de su categoría).", color = Palette.muted, fontSize = 13.sp)
+                    variants = when {
+                        variants.isNotEmpty() -> variants + VariantInput("", "")
+                        taqueria -> listOf(VariantInput("Maíz", price), VariantInput("Harina", ""))
+                        else -> listOf(VariantInput("", price), VariantInput("", ""))
                     }
-                    Switch(mix, { mix = it }, colors = SwitchDefaults.colors(checkedTrackColor = Palette.primary, checkedThumbColor = Color.White))
+                }) {
+                    Text(
+                        when {
+                            variants.isNotEmpty() -> "+ Otro tamaño o presentación"
+                            taqueria -> "+ Precio por presentación (maíz / harina…)"
+                            else -> "+ Precio por tamaño (chica / grande…)"
+                        },
+                    )
                 }
 
-                Text("Preparación permitida", fontWeight = FontWeight.Bold)
-                if (groups.isEmpty()) Text("Crea tipos en la pestaña Preparación.", color = Palette.muted)
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    groups.forEach { g -> Pill(g.name, g.id in groupIds) { groupIds = if (g.id in groupIds) groupIds - g.id else groupIds + g.id } }
+                // Color de carne y mixtos solo en los giros que los usan (la taquería sí).
+                if (giro.features.meatColors) {
+                    Text("Color de la tarjeta", fontWeight = FontWeight.Bold)
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        MeatColor.entries.forEach { c -> Pill(c.label, c == color) { color = c } }
+                    }
                 }
+                if (giro.features.mixes || mix) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Column(Modifier.weight(1f)) {
+                            Text("Es mixto", fontWeight = FontWeight.Bold)
+                            Text("Al pedirlo se eligen las carnes (de las de su categoría).", color = Palette.muted, fontSize = 13.sp)
+                        }
+                        Switch(mix, { mix = it }, colors = SwitchDefaults.colors(checkedTrackColor = Palette.primary, checkedThumbColor = Color.White))
+                    }
+                }
+
+                BlockTitle(
+                    "¿Qué le pueden pedir?",
+                    if (groups.isEmpty()) "Crea grupos en la pestaña Opciones (ej. Orilla, Salsa)." else "Toca los grupos de opciones que aplican.",
+                )
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    groups.forEach { g ->
+                        Pill(g.name, g.id in shownGroups) { groupIds = if (g.id in shownGroups) shownGroups - g.id else shownGroups + g.id }
+                    }
+                }
+
+                BlockTitle("Icono")
+                IconPicker(name, category, icon) { icon = it }
+
                 if (onDelete != null) TextButton(onClick = { confirmDelete = true }) { Text("Eliminar producto", color = Palette.late) }
             }
         },
@@ -340,8 +396,8 @@ private fun ProductDialog(
                 val v = parsedVariants.filterNotNull()
                 onSave(
                     (product ?: Product("", "", 0, "")).copy(
-                        name = name, category = category, emoji = product?.emoji.orEmpty(), modifierGroupIds = groupIds, color = color, mix = mix,
-                        variants = v, priceCents = if (v.isEmpty()) cents ?: 0 else v.first().priceCents,
+                        name = name, category = category, emoji = product?.emoji.orEmpty(), modifierGroupIds = shownGroups, color = color, mix = mix,
+                        variants = v, priceCents = if (v.isEmpty()) cents ?: 0 else v.first().priceCents, icon = icon,
                     ),
                 )
             }) { Text("Guardar") }
@@ -357,6 +413,49 @@ private fun ProductDialog(
             confirmButton = { TextButton(onClick = onDelete) { Text("Eliminar", color = Palette.late) } },
             dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text("Cancelar") } },
         )
+    }
+}
+
+/** Platillos primero; bebidas, extras, servicio e ingredientes al final (igual que en la Central). */
+private fun iconOrder(key: String) = if (listOf("beb_", "extra_", "serv_", "side_", "ing_").any { key.startsWith(it) }) 1 else 0
+
+/**
+ * Icono del producto: "Automático" lo busca por nombre (como siempre) y si el giro tiene set de
+ * iconos se puede elegir uno. Sin set, solo se ve el que la app encontró.
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun IconPicker(name: String, category: String, selected: String?, onSelect: (String?) -> Unit) {
+    val meta by LocalContext.current.app.icons.meta.collectAsState()
+    val keys = remember(meta) { meta?.keys.orEmpty().sortedWith(compareBy(::iconOrder, { it })) }
+    var all by remember { mutableStateOf(false) }
+    val auto = DishIcons.productKeys(Product("", name, 0, category), com.axzy.taqueria.Category(category))
+    if (keys.isEmpty()) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            DishIcon(auto, 44.dp)
+            Text("Se elige solo por el nombre del producto.", color = Palette.muted, fontSize = 13.sp)
+        }
+        return
+    }
+    val shown = if (all) keys else keys.take(11).let { if (selected != null && selected in keys && selected !in it) it + selected else it }
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        IconTile(auto, "Automático", selected == null) { onSelect(null) }
+        shown.forEach { k -> IconTile(listOf(k), k.substringAfter('_').replace('_', ' '), k == selected) { onSelect(k) } }
+    }
+    if (!all && keys.size > shown.size) TextButton(onClick = { all = true }) { Text("Ver los ${keys.size}") }
+}
+
+@Composable
+private fun IconTile(keys: List<String>, label: String, selected: Boolean, onClick: () -> Unit) {
+    Column(
+        Modifier.width(64.dp).background(if (selected) Palette.soft else Color.Transparent, Ui.smallShape)
+            .border(if (selected) 2.dp else 1.dp, if (selected) Palette.primary else Palette.line, Ui.smallShape)
+            .clickable(onClick = onClick).padding(vertical = 6.dp)
+            .semantics { contentDescription = "Icono $label" },
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        DishIcon(keys, 36.dp)
+        Text(label, fontSize = 11.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, color = Palette.muted, modifier = Modifier.padding(horizontal = 2.dp))
     }
 }
 
@@ -389,10 +488,10 @@ private fun GroupDialog(
     val otherOptions = others.flatMap { it.options }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(if (group == null) "Nuevo tipo de preparación" else "Editar ${group.name}") },
+        title = { Text(if (group == null) "Nuevo grupo de opciones" else "Editar ${group.name}") },
         text = {
             Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(Ui.gap)) {
-                OutlinedTextField(name, { name = it.take(30) }, label = { Text("Nombre (ej. Va)") }, singleLine = true, shape = Ui.smallShape, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(name, { name = it.take(30) }, label = { Text("Nombre (ej. Salsa, Orilla)") }, singleLine = true, shape = Ui.smallShape, modifier = Modifier.fillMaxWidth())
                 OutlinedTextField(
                     options, { options = it.take(400) },
                     label = { Text("Opciones, una por renglón") }, shape = Ui.smallShape, minLines = 3,
@@ -423,7 +522,7 @@ private fun GroupDialog(
                         }
                     }
                 }
-                if (onDelete != null) TextButton(onClick = onDelete) { Text("Eliminar tipo", color = Palette.late) }
+                if (onDelete != null) TextButton(onClick = onDelete) { Text("Eliminar grupo", color = Palette.late) }
             }
         },
         confirmButton = {
@@ -452,7 +551,7 @@ private fun SettingsPanel(state: AppState, onTables: (Int) -> Unit, onExtras: (L
                 ActionButton("Guardar", Palette.primary, Color.White, Modifier.width(120.dp), enabled = tables != state.tableCount) { onTables(tables) }
             }
         }
-        Column(
+        if (currentGiro().features.freeExtras) Column(
             Modifier.fillMaxWidth().background(Palette.card, Ui.shape).border(1.dp, Palette.line, Ui.shape).padding(Ui.pad),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {

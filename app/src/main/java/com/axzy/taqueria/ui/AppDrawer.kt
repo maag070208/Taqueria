@@ -74,7 +74,7 @@ fun AppDrawer(control: DrawerControl, staff: Staff, subtitle: String, groups: Li
                     Row(Modifier.padding(horizontal = Ui.pad), verticalAlignment = Alignment.CenterVertically) {
                         Illustration(staff.art, 52.dp)
                         Column(Modifier.padding(start = 12.dp)) {
-                            Text(staff.label, fontSize = 22.sp, fontWeight = FontWeight.Bold)
+                            Text(staff.labelFor(currentGiro()), fontSize = 22.sp, fontWeight = FontWeight.Bold)
                             Text(subtitle, color = Palette.muted, fontSize = 13.sp)
                         }
                     }

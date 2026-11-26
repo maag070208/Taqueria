@@ -56,7 +56,11 @@ class KitchenWaiterE2ETest {
             context, store, isLocked = { locked }, port = port,
             waiterLimit = { waiterLimit }, screenLimit = { screenLimit }, latestApp = { LatestApp(9, "9.0.0", "https://example.com/apk") },
             onWaiterErrors = { synchronized(waiterErrors) { waiterErrors += it } },
+            giro = { kitchenGiro }, iconSet = { kitchenIcons?.download() },
         ).also { it.start() }
+
+    private var kitchenGiro: Giro? = null
+    private var kitchenIcons: IconStore? = null
 
     private fun port(server: KitchenServer = kitchen): Int = runBlocking {
         withTimeout(5_000) { server.localPort.first { it != null }!! }
@@ -138,6 +142,35 @@ class KitchenWaiterE2ETest {
         assertEquals(listOf("IllegalStateException: boom"), synchronized(waiterErrors) { waiterErrors.map { it.message } })
         assertEquals("mesero", waiterErrors.single().source)
         assertEquals("9.0.0", w.latestApp.value?.versionName)
+    }
+
+    @Test fun `la mesera recibe el giro de la cocina y le pide su set de iconos`() {
+        val png = java.util.Base64.getEncoder().encodeToString(byteArrayOf(0x89.toByte(), 0x50, 0x4e, 0x47, 1, 2, 3))
+        val set = IconSetDownload("makis", "Makis", 3, logo = png, icons = listOf(IconDownload("rollo_dragon", "Rollos", "Dragon", png), IconDownload("rollo_generico", "Rollos", "Generico", png)))
+        kitchenIcons = IconStore(tmp.newFolder("iconos-cocina")).also { runBlocking { it.install(set) } }
+        kitchenGiro = Giro("SUSHI", "Sushi", GiroTerms(kitchenRole = "Sushero", item = "Rollo"), GiroFeatures(mixes = false, meatColors = false), IconSetRef("makis", 3))
+        kitchen.announceGiro()
+
+        val waiterIcons = IconStore(tmp.newFolder("iconos-mesera"))
+        var saved: Giro? = null
+        val w = WaiterClient(context, key(), icons = waiterIcons, onGiro = { saved = it }).also { waiters += it }
+        w.start("127.0.0.1:${port()}")
+        runBlocking { withTimeout(5_000) { w.giro.first { it.key == "SUSHI" } } }
+        assertEquals("Sushero", w.giro.value.terms.kitchenRole)
+        assertEquals("SUSHI", saved?.key)
+        // Pide el set a la cocina y lo guarda: mismos iconos, misma versión.
+        val meta = runBlocking { withTimeout(5_000) { waiterIcons.meta.first { it != null } } }!!
+        assertEquals(3, meta.version)
+        assertEquals(setOf("rollo_dragon", "rollo_generico"), meta.keys)
+        assertNotNull(waiterIcons.file("rollo_dragon"))
+        assertEquals(waiterIcons.file("rollo_dragon"), waiterIcons.byName("dragon"))
+        assertNotNull(waiterIcons.logoFile())
+        assertTrue(waiterIcons.has(IconSetRef("makis", 3)))
+    }
+
+    @Test fun `con una cocina 1_2 sin giro la mesera sigue siendo taqueria`() {
+        val w = waiter()
+        assertEquals(Giro(), w.giro.value)
     }
 
     @Test fun `el mesero se conecta y recibe el menu de cocina`() {

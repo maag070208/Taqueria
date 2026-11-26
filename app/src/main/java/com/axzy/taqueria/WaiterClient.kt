@@ -50,6 +50,11 @@ class WaiterClient(
     private val crashes: CrashReporter? = null,
     /** Este teléfono es una pantalla de cocina extra (solo muestra), no una mesera. */
     private val isScreen: () -> Boolean = { false },
+    /** Iconos del giro: se piden a la cocina cuando su set es otra versión. */
+    private val icons: IconStore? = null,
+    /** Último giro que mandó la cocina (guardado), para verse igual aunque no haya conexión. */
+    initialGiro: Giro = Giro(),
+    private val onGiro: (Giro) -> Unit = {},
 ) {
     private val tag = "WaiterClient"
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -66,6 +71,10 @@ class WaiterClient(
     /** Versión nueva que avisó la cocina (la publica el proveedor en la Central). */
     private val _latestApp = MutableStateFlow<LatestApp?>(null)
     val latestApp = _latestApp.asStateFlow()
+    /** Giro de la cocina (palabras, partes y set de iconos). */
+    private val _giro = MutableStateFlow(initialGiro)
+    val giro = _giro.asStateFlow()
+    private val fetchingIcons = java.util.concurrent.atomic.AtomicBoolean(false)
 
     /** Diferencia reloj cocina − reloj mesero, para que los tiempos coincidan en ambos teléfonos. */
     @Volatile var clockOffset = 0L
@@ -136,7 +145,7 @@ class WaiterClient(
     }
 
     /** [direct]: también antes de que cocina acepte a la mesera (solo el saludo y las fallas). */
-    private suspend fun request(direct: Boolean = false, build: (Long) -> ClientMsg): ServerMsg.Reply {
+    private suspend fun request(direct: Boolean = false, timeoutMs: Long = 8_000, build: (Long) -> ClientMsg): ServerMsg.Reply {
         if (!direct && _link.value !is Link.Connected) throw IOException("Sin conexión con cocina")
         val w = writer ?: throw IOException("Sin conexión con cocina")
         val reqId = nextReq.getAndIncrement()
@@ -150,7 +159,7 @@ class WaiterClient(
                     w.flush()
                 }
             }
-            val reply = withTimeout(8_000) { deferred.await() }
+            val reply = withTimeout(timeoutMs) { deferred.await() }
             reply.error?.let { throw ValidationException(it) }
             return reply
         } catch (e: kotlinx.coroutines.TimeoutCancellationException) {
@@ -181,6 +190,7 @@ class WaiterClient(
                         clockOffset = msg.serverTime - System.currentTimeMillis()
                         _state.value = msg.state
                         _latestApp.value = msg.latestApp
+                        msg.giro?.let(::applyGiro)
                     }
                     is ServerMsg.Reply -> pending[msg.reqId]?.complete(msg)
                     ServerMsg.Ping -> Unit
@@ -188,6 +198,32 @@ class WaiterClient(
             }
         } finally {
             closeSocket()
+        }
+    }
+
+    /** Giro que manda la cocina: se guarda y, si su set de iconos es otro, se le pide. */
+    private fun applyGiro(next: Giro) {
+        if (next != _giro.value) {
+            _giro.value = next
+            runCatching { onGiro(next) }
+        }
+        val store = icons ?: return
+        val ref = next.iconSet
+        if (ref == null) {
+            if (store.meta.value != null) scope.launch { store.clear() }
+            return
+        }
+        if (store.has(ref) || !fetchingIcons.compareAndSet(false, true)) return
+        scope.launch {
+            try {
+                // Directo: también una pantalla de cocina o una mesera que todavía no aceptan.
+                val set = request(direct = true, timeoutMs = 30_000) { ClientMsg.GetIconSet(it) }.iconSet
+                if (set != null) store.install(set)
+            } catch (e: Exception) {
+                Log.i(tag, "No se pudieron bajar los iconos de cocina: ${e.message}")
+            } finally {
+                fetchingIcons.set(false)
+            }
         }
     }
 
@@ -274,6 +310,7 @@ class WaiterClient(
     }
 
     companion object {
-        private const val MAX_STATE_CHARS = 4 * 1024 * 1024
+        /** El estado completo o un set de iconos (≈2 MB en base64). */
+        private const val MAX_STATE_CHARS = 8 * 1024 * 1024
     }
 }
