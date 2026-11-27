@@ -45,7 +45,7 @@ object ConnectionQr {
             text.startsWith("{") -> text
             text.startsWith("taqueria://", ignoreCase = true) ->
                 text.substringAfter("://").trim().ifEmpty { return Result.Invalid("El QR no trae una dirección") }
-            else -> return Result.Invalid("Este QR no es de conexión de Tacomanda")
+            else -> return Result.Invalid("Este QR no es de conexión de Komandera")
         }
         if (candidate.startsWith("{")) {
             // Un QR de activación de Axzy Central trae u/c/p: no es de conexión.
@@ -55,7 +55,7 @@ object ConnectionQr {
                 return Result.Invalid("QR de conexión inválido")
             }
             if (obj.containsKey("u") || obj.containsKey("c") || obj.containsKey("p")) {
-                return Result.Invalid("Este QR no es de conexión de Tacomanda")
+                return Result.Invalid("Este QR no es de conexión de Komandera")
             }
             val payload = try {
                 AppJson.decodeFromString<ConnectionQrPayload>(candidate)

@@ -115,7 +115,7 @@ Consola:
 - [x] Probado en emuladores con la Central local: la cocina se activa como Sushi Makis, baja 41 iconos, el mesero
   los recibe de la cocina y una orden de Dragon y California llega a la "Barra".
 - [ ] Demo en los dos teléfonos físicos.
-- [ ] Flujo de Maestro que activa un cliente de Sushi con la Central falsa.
+- [x] Flujo de Maestro que activa un cliente de Sushi con la Central falsa (`e2e/maestro/cocina/09_sushi.yaml`).
 
 Visto en la demo y pendiente para el Sprint 4: el menú semilla sigue siendo de taquería (Tacos, Cebollitas, "Con
 todo"), aunque el giro sea Sushi. Lo resuelven las plantillas por giro.
@@ -220,7 +220,14 @@ con otro tamaño ("Mediana orilla rellena") o subiendo el precio; cobrarla apart
     cuentas, las órdenes, el folio, el historial, el PIN y el mesero conectado; solo se agregó la marca del
     menú y se renovó la licencia;
   - al abrir la app, la cocina subió su menú a la Central como versión 1 (autor "cocina", 37 productos).
-  - No se cubrieron estaciones: la prueba no creó ninguna.
+  - Estaciones (2026-11-27, con la Central falsa): en la 1.2.2 se creó "Barra fria" (Bebidas) y esa pantalla
+    quedó viendo solo esa estación; con la 1.3.0 encima siguen igual la estación (mismo id) y la vista.
+- [x] Suite de Maestro completa con la 1.3.0 (2026-11-27): 18 flujos de cocina y mesero, más
+  `cocina/09_sushi.yaml`, que activa un cliente de Sushi con la Central falsa: la app dice "Barra" y "Sushero" y
+  toma los rollos de la Central. Dos flujos se actualizaron al Sprint 4 ("1 taco" en singular y el espacio duro
+  en los precios del admin).
+- Ojo con un cliente que ya tiene menú en la Central: si la cocina no tiene ventas, adopta el de la Central sin
+  preguntar; si tiene ventas, pregunta con cuál quedarse.
 - [x] Versión de la app: 1.3.0 (8). Al publicar el APK, ponerla también en Productos → Taquería → versión
   publicada, para que la 1.2.2 avise.
 - [ ] Revisar que el respaldo del taquero esté al día antes de migrarlo.
@@ -239,18 +246,16 @@ la Central.
 | Sprint | Estado |
 |---|---|
 | 0 · Arranque | ✅ Hecho |
-| 1 · La Central conoce los giros | ✅ Hecho en local; espera tu demo |
-| 2 · La app se viste del giro | 🟡 Hecho en emuladores; falta la demo en teléfonos y el flujo de Maestro |
+| 1 · La Central conoce los giros | ✅ En producción (2026-11-26) |
+| 2 · La app se viste del giro | 🟡 Hecho en emuladores y con flujo de Maestro de Sushi; falta la demo en teléfonos |
 | 3 · Menú desde la Central | 🟡 Hecho en emuladores; falta la demo en teléfonos |
-| 4 · Menú claro y plantillas | 🟡 Hecho en emuladores; falta la demo en teléfonos |
-| 5 · Migración y entrega | ⏳ Pendiente |
+| 4 · Menú claro y plantillas | 🟡 En producción la Central (giros Sushi y Pizzería, kits y menús base); falta la demo en teléfonos |
+| 5 · Migración y entrega | 🟡 Central en producción; falta la demo en teléfonos y publicar el APK 1.3.0 |
 
-## Decisiones pendientes
+## Decisiones
 
-Hay que resolverlas antes del sprint que se indica:
-
-1. **Antes del Sprint 2: marca de la app.** ¿Sigue "Tacomanda" o un nombre general, como "Comanda" con el nombre
-   del cliente arriba?
-2. ~~**Antes del Sprint 3: quién manda en el menú.**~~ Resuelto: el admin del local también lo edita y se
-   sincroniza con la Central.
-3. **Antes del Sprint 5: precio.** ¿El giro cambia el precio del plan o los planes siguen por cantidad de teléfonos?
+1. **Marca de la app:** **Komandera** (komandera.pro), decidido el 2026-11-27. Cambia el nombre que se ve (ícono,
+   pantalla de inicio, versión y el APK `KOMANDERA_<versión>.apk`); el `applicationId` `com.axzy.taqueria` y la
+   llave de firma no cambian, para que se instale encima sin borrar datos.
+2. **Quién manda en el menú:** el admin del local también lo edita y se sincroniza con la Central.
+3. **Precio:** el giro no cambia el precio del plan; los planes siguen por cantidad de teléfonos (2026-11-27).

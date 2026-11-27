@@ -1,0 +1,31 @@
+# Cocina nueva de un cliente de Sushi: la licencia trae el giro y la Central ya tiene su menú.
+# La app se viste del giro ("Barra", "Sushero") y adopta los rollos al sincronizar.
+# run_maestro.sh reinstala la app antes de este flujo (empieza sin datos).
+appId: com.axzy.taqueria
+name: Cocina · activar Sushi
+tags: [cocina, giro]
+---
+- launchApp:
+    permissions:
+      all: allow
+- runFlow: ../comun/cerrar_avisos.yaml
+- tapOn: "Cocina"
+- assertVisible: "Activa esta cocina"
+- tapOn: "Código de activación"
+- inputText: "sushi-e2e"
+- hideKeyboard
+- tapOn: "Activar"
+# "Preparando la app" puede salir mientras busca iconos; el giro no trae set, sigue sola.
+- extendedWaitUntil:
+    visible: "Barra · 0 órdenes"
+    timeout: 30000
+- runFlow: ../comun/cerrar_avisos.yaml
+- tapOn: "Abrir menú"
+- assertVisible: "Sushero"
+- tapOn: "Disponibilidad"
+# La cocina adopta el menú de la Central en la primera sincronización.
+- extendedWaitUntil:
+    visible: "Disponible Rollos California"
+    timeout: 45000
+- assertVisible: "Disponible Rollos Dragón"
+- assertNotVisible: ".*Tacos.*"

@@ -27,7 +27,7 @@ tags: [mesero, orden]
     direction: LEFT
     duration: 600
 - assertVisible: "Se quitó 2 Suadero"
-- assertVisible: "1 tacos"
+- assertVisible: "1 taco"
 # …y Deshacer lo regresa.
 - tapOn: "Deshacer"
 - assertVisible: "3 tacos"
