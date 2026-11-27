@@ -8,7 +8,7 @@ tags: [cocina, admin]
 - tapOn: "Abrir menú"
 - assertVisible: "Taquero"
 # La versión instalada se ve al pie del menú.
-- assertVisible: "Tacomanda v\\d+\\.\\d+\\.\\d+ \\(\\d+\\)"
+- assertVisible: "Komandera v\\d+\\.\\d+\\.\\d+ \\(\\d+\\)"
 - assertNotVisible: "Ventas"
 - assertNotVisible: "Cambiar rol del teléfono"
 - tapOn: "Entrar como admin"

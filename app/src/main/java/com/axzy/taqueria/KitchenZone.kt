@@ -86,8 +86,8 @@ class KitchenZone(context: Context) {
         } catch (e: SecurityException) {
             Log.w(tag, "Sin permiso para la zona", e)
             _state.value = State.Failed(
-                if (Build.VERSION.SDK_INT < 33) "Activa la ubicación del teléfono y da permiso a Tacomanda para abrir la zona."
-                else "Da permiso a Tacomanda de dispositivos cercanos para abrir la zona.",
+                if (Build.VERSION.SDK_INT < 33) "Activa la ubicación del teléfono y da permiso a Komandera para abrir la zona."
+                else "Da permiso a Komandera de dispositivos cercanos para abrir la zona.",
             )
         } catch (e: IllegalStateException) {
             // Android ya tiene una zona de esta app (p. ej. tras girar la pantalla).

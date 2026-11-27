@@ -94,4 +94,11 @@ done
 echo "  $SALES"
 python3 -c "import json,sys; s=json.loads(sys.argv[1]); sys.exit(0 if s['tickets']>=1 and s['appVersion']==sys.argv[2] and s.get('backupAt') else 1)" "$SALES" "$EXPECTED" \
   || { echo "✘ La cocina no reportó las ventas o el respaldo (se esperaba al menos 1 cuenta con v$EXPECTED y backupAt)"; exit 1; }
+# Otro cliente, del giro Sushi: cocina recién instalada que se viste del giro y toma su menú.
+echo "▸ Cocina de Sushi (reinstalada)"
+adb -s "$COCINA" uninstall com.axzy.taqueria > /dev/null 2>&1 || true
+adb -s "$COCINA" install -g "$APK" > /dev/null
+adb -s "$COCINA" reverse tcp:$CENTRAL_PORT tcp:$CENTRAL_PORT > /dev/null
+run "$COCINA" cocina/09_sushi.yaml
+
 echo "✔ Todos los flujos pasaron"

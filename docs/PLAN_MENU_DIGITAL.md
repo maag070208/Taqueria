@@ -55,7 +55,6 @@ En el cliente, una pestaña **Menú digital**:
 
 - Pedir desde la mesa. Necesita que la Central le mande órdenes a la cocina, y hoy solo la cocina habla con la
   Central. Es otro proyecto: pagos, abuso y confirmación del mesero.
-- Fotos por producto: subirlas, recortarlas y pesarlas. Los iconos del giro bastan para el MVP.
 - Varios idiomas, promociones y programa de lealtad.
 - Que el cliente edite su menú digital desde la web: lo edita la cocina o nosotros en la consola, como hoy.
 
@@ -116,30 +115,34 @@ Hecho en código (rama `feat/menu-digital-d3`, 2026-11-26):
 - [x] Kit de iconos de Tacos (`kit_tacos.zip`, 23 iconos de `design/iconos/png`), probado en la Central local:
   el menú digital de la taquería sale con sus iconos.
 
-Te toca a ti, en este orden:
+En producción (2026-11-26 y 27):
 
-1. Fusionar el PR de la Central en main (la imagen del API y la consola se publican solas).
-2. **Railway** → servicio del API → Settings → Networking → *Custom Domain* → `menu.axzy.dev`. Railway te da un
-   destino CNAME.
-3. **DNS de axzy.dev** (Hostinger) → registro `CNAME`, nombre `menu`, destino el que dio Railway. Espera a que
-   Railway marque el dominio con certificado.
-4. **Railway** → Variables → `PUBLIC_MENU_URL=https://menu.axzy.dev` → Redeploy. Con eso se aplica la migración
-   de visitas y los QR nuevos ya apuntan a `menu.axzy.dev`.
-5. **Consola** → Iconos: subir `kit_tacos.zip`, `iconos_makis.zip` y `kit_pizzeria.zip` (en Descargas).
-   Productos → cada giro → su set de iconos; en Sushi y Pizzería, también su *Menú base*.
-6. En el cliente del taquero → Menú digital: dirección, horario y WhatsApp; encender, revisar la vista previa e
-   imprimir los QR.
+- [x] `menu.axzy.dev`: CNAME `menu` → Railway en el DNS de axzy.dev, certificado de Let's Encrypt y
+  `PUBLIC_MENU_URL=https://menu.axzy.dev`; ese dominio solo sirve menús.
+- [x] Kits de iconos Tacos (23), Makis (41) y Pizzería (49) subidos; giros Sushi y Pizzería creados con su set y su
+  menú base; Taquería usa el set Tacos.
+- [x] Clientes de demostración con su menú encendido: `menu.axzy.dev/demo-taqueria`, `/demo-sushi` y
+  `/demo-pizzeria`, con 5 fotos libres de Pexels cada uno.
 
-**Demo:** el taquero real pega su QR y un comensal ve el menú desde la mesa.
+### Después del D3 · Diseño y fotos reales ✅ (en producción, 2026-11-27)
+
+- [x] Carta con diseño por giro: portada de color con el nombre en letra de cartel e ilustraciones (o tres fotos
+  del menú), secciones con remate, precios con puntos guía y dos columnas en pantallas anchas. Paletas: Taquería
+  (verde, crema, chile), Sushi (carbón, crema, rojo), Pizzería (tomate, crema, albahaca); los demás giros usan la de
+  la app. Solo fuentes del sistema: no se manda la IP del comensal a terceros.
+- [x] Fotos reales por producto (`product_photos`): en la consola, Menú digital → Fotos de productos; el navegador
+  las reduce a 1000 px en JPEG. El menú enseña la foto en lugar del icono. No viajan a la cocina.
+
+Falta para el taquero real:
+
+1. Revisar que su menú en la Central sea el suyo: se guardó desde la consola, no salió de su tableta. Al
+   actualizar a la 1.3.0, su app pregunta con cuál quedarse.
+2. Publicar el APK 1.3.0 después de la demo en teléfonos.
+3. En su cliente → Menú digital: dirección, horario y WhatsApp; encender, subir sus fotos e imprimir los QR.
 
 ## Decisiones
-
-Tomadas el 2026-11-25:
 
 1. **Dominio:** `menu.axzy.dev/<slug>`.
 2. **Agotados:** se muestran tachados con "Agotado", no se ocultan.
 3. **Logo:** no entra al MVP; la página lleva el nombre del local y el color del giro.
-
-Pendiente antes del Sprint D3:
-
-4. **Precio:** ¿va incluido en todos los planes o es un extra?
+4. **Precio:** el menú digital va incluido en todos los planes (2026-11-27).

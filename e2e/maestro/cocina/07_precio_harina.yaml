@@ -10,8 +10,8 @@ tags: [cocina, admin, menu]
 - tapOn: "Menú y precios"
 - assertVisible: "Menú"
 - assertVisible: "Asada"
-# El primero con este precio es Asada (es la primera carne de Tacos).
-- tapOn: "Maíz \\$35.00 · Harina \\$100.00"
+# El primero con este precio es Asada (es la primera carne de Tacos). Entre nombre y precio va un espacio duro.
+- tapOn: "Maíz.\\$35.00 · Harina.\\$100.00"
 # En pantallas chicas el precio queda abajo del diálogo.
 - scrollUntilVisible:
     element:
@@ -25,6 +25,6 @@ tags: [cocina, admin, menu]
 - inputText: "90"
 - hideKeyboard
 - tapOn: "Guardar"
-- assertVisible: "Maíz \\$35.00 · Harina \\$90.00"
+- assertVisible: "Maíz.\\$35.00 · Harina.\\$90.00"
 - tapOn: "Abrir menú"
 - tapOn: "Salir de admin"

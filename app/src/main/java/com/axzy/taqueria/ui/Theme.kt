@@ -216,7 +216,7 @@ fun RoleScreen(onPick: (Role) -> Unit) {
         verticalArrangement = Arrangement.Center,
     ) {
         Image(painterResource(R.drawable.ico_taco_generico), contentDescription = null, modifier = Modifier.size(72.dp))
-        Text("Tacomanda", fontSize = 34.sp, fontWeight = FontWeight.Black, modifier = Modifier.padding(top = 8.dp))
+        Text("Komandera", fontSize = 34.sp, fontWeight = FontWeight.Black, modifier = Modifier.padding(top = 8.dp))
         Text("¿Qué hará este teléfono?", color = Palette.muted, fontSize = 17.sp, modifier = Modifier.padding(top = 4.dp, bottom = 24.dp))
         // Una tarjeta por renglón: con tres roles, la cuadrícula cortaba el texto en teléfonos.
         Column(verticalArrangement = Arrangement.spacedBy(Ui.gap)) {
@@ -248,9 +248,9 @@ fun RoleScreen(onPick: (Role) -> Unit) {
     }
 }
 
-/** "Tacomanda v1.1.0 (4)", para saber qué versión tiene cada teléfono. */
+/** "Komandera v1.3.0 (8)", para saber qué versión tiene cada teléfono. */
 @Composable
 fun VersionText(modifier: Modifier = Modifier, align: TextAlign? = null) {
     val app = LocalContext.current.applicationContext as? App ?: return
-    Text("Tacomanda v${app.versionLabel}", color = Palette.muted, fontSize = 12.sp, textAlign = align, modifier = modifier)
+    Text("Komandera v${app.versionLabel}", color = Palette.muted, fontSize = 12.sp, textAlign = align, modifier = modifier)
 }

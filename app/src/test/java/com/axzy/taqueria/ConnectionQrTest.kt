@@ -71,8 +71,8 @@ class ConnectionQrTest {
     }
 
     @Test fun rechazaBasuraYFaltaDeDireccion() {
-        assertTrue(invalid("hola mundo").contains("Tacomanda"))
-        assertTrue(invalid("axc_abc123").contains("Tacomanda"))
+        assertTrue(invalid("hola mundo").contains("Komandera"))
+        assertTrue(invalid("axc_abc123").contains("Komandera"))
         assertTrue(invalid("taqueria://").contains("dirección"))
         assertTrue(invalid("").contains("vacío"))
     }

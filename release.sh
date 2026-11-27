@@ -11,8 +11,8 @@ set -euo pipefail
 # La versión SIEMPRE se incrementa sola (versionCode 1 -> 2, versionName 1.0.0 -> 1.0.1)
 # y se guarda en gradle.properties solo si el build salió bien.
 #
-# Salida local:  app/build/outputs/apk/release/TACOMANDA_<versión>.apk
-# Destino Drive: <carpeta compartida>/<cliente>/TACOMANDA_<versión>.apk
+# Salida local:  app/build/outputs/apk/release/KOMANDERA_<versión>.apk
+# Destino Drive: <carpeta compartida>/<cliente>/KOMANDERA_<versión>.apk
 #
 # Requisitos: Java 17, Android SDK y rclone con el remote "gdrive" configurado.
 # Nota: se firma con la llave debug de esta Mac (instalable directo, no para Play Store).
@@ -64,7 +64,7 @@ APK="$OUT_DIR/app-release.apk"
 
 perl -pi -e "s/^taqueria\.versionCode=.*/taqueria.versionCode=$NEW_CODE/; s/^taqueria\.versionName=.*/taqueria.versionName=$VERSION/" "$PROPS"
 
-NAME="TACOMANDA_${VERSION}.apk"
+NAME="KOMANDERA_${VERSION}.apk"
 LOCAL_FILE="$OUT_DIR/$NAME"
 mv -f "$APK" "$LOCAL_FILE"
 echo "APK: $LOCAL_FILE"
